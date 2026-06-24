@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AppScreen, Tab, UserData, Msg, Task, Phase, SurveyStep, HwState, DeviceState, LEVEL_PARAMS, LEVELS, getLevelName, formatTime, LEVEL_DESCS } from "./types";
 import { FloatBall, BtnRow, Pill, FormCard, FormGroup, StyledInput, SubmitBtn, ResultCard, InfoBox, ThinkingDots, Stars, BottomNav } from "./components/shared";
 import { Onboarding } from "./components/Onboarding";
@@ -311,7 +311,7 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
   onSubmitDuration,onSubmitStiffness,onGoToNextDay,onSubmitDailyFeel,onReset,
   day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode,
-  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep}:{
+  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep,setTaskIdx}:{
   msgs:Msg[];phase:Phase;tasks:Task[];taskIdx:number;currentDay:number;ud:UserData;
   thinking:boolean;messagesRef:React.RefObject<HTMLDivElement|null>;
   onSubmitDuration:(d:string)=>void;onSubmitStiffness:(l:number)=>void;
@@ -324,6 +324,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   setPhase:(p:Phase)=>void;
   setUserData:React.Dispatch<React.SetStateAction<UserData>>;
   setSurveyStep:React.Dispatch<React.SetStateAction<SurveyStep|null>>;
+  setTaskIdx:React.Dispatch<React.SetStateAction<number>>;
 }) {
   const lv=ud.finalLevel;
   const prm=LEVEL_PARAMS[lv-1]||LEVEL_PARAMS[1];
@@ -419,7 +420,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                   if(t==="无"){
                     addMsg("bot", "明白了，你目前没有明显的触发动作。");
                     setUserData(p=>({...p,triggers:[t],mainTrigger:t}));
-                    setTimeout(()=>setSurveyStep("pain"),800);
+                    setTimeout(()=>setPhase("day1_pain"),800);
                   }else{
                     addMsg("bot", `收到「${t}」。你还有其他会让膝盖不舒服的动作吗？如果没有了，点击「完成选择」`);
                     setUserData(p=>({...p,triggers:[...(p.triggers||[]),t]}));
@@ -437,13 +438,36 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 setUserData(p=>({...p,mainTrigger:main}));
                 simulateThinking(()=>{
                   addMsg("bot",`好的，我会重点关注「${main}」这个动作。接下来，请告诉我这个动作时的不适程度。`);
-                  setTimeout(()=>setSurveyStep("pain"),800);
+                  setTimeout(()=>setPhase("day1_pain"),800);
                 });
               }}
                 className="bg-[#2ECC71] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#27AE60] transition-colors mt-2">
                 ✅ 完成选择
               </button>
             )}
+          </div>
+        )}
+        {phase==="day1_pain"&&(
+          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
+            <p className="text-xs text-[#718096] mb-1">触发动作：{ud.mainTrigger||"未知"}，不适程度是？</p>
+            {["0 — 无不适","1 — 轻微不适（不影响完成）","2 — 中等不适（明显不舒服）","3 — 较重不适（需减慢速度）","4 — 非常不适（难以完成）"].map((label,i)=>(
+              <button key={i} onClick={()=>{
+                addMsg("user", label);
+                setUserData(p=>({...p,painLevel:i}));
+                day1PainRef.current=i;
+                simulateThinking(()=>{
+                  addMsg("bot", "收到！我会根据你的情况生成初始方案。");
+                  setTimeout(()=>{
+                    setTaskIdx(1);
+                    setPhase("day1_recommend");
+                    addMsg("bot", `根据你的评估，我为你推荐<strong>${LEVELS[Math.max(0,2-Math.floor(i/2))]}</strong>模式开始训练。`);
+                  },800);
+                });
+              }}
+                className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer active:bg-[#f7fafc] transition-colors text-left">
+                {label}
+              </button>
+            ))}
           </div>
         )}
         {phase==="day1_recommend"&&(
@@ -566,6 +590,31 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           </div>
         )}
       </div>
+
+      {/* Text input area */}
+      <div className="px-3 py-2.5 bg-white border-t border-[#e8ecf0] flex-shrink-0">
+        <form onSubmit={(e: React.FormEvent<HTMLFormElement>)=>{
+          e.preventDefault();
+          const input=e.currentTarget.elements.namedItem("chatInput") as HTMLInputElement;
+          const text=input.value.trim();
+          if(!text)return;
+          addMsg("user",text);
+          input.value="";
+          simulateThinking(()=>{
+            addMsg("bot","我理解了，让我为你记录下来。如果有其他问题随时告诉我！");
+          });
+        }} className="flex gap-2 items-center">
+          <input
+            type="text"
+            name="chatInput"
+            placeholder="输入消息..."
+            className="flex-1 px-3 py-2 text-sm border border-[#e2e8f0] rounded-full bg-[#f7fafc] focus:outline-none focus:border-[#2ECC71] transition-colors"
+          />
+          <button type="submit" className="w-9 h-9 rounded-full bg-[#2ECC71] text-white flex items-center justify-center border-0 cursor-pointer active:bg-[#27AE60] transition-colors flex-shrink-0">
+            <span className="text-base">↑</span>
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
@@ -593,6 +642,9 @@ export default function App() {
     dailyRecords: {},
     pressure: 0, workSec: 0, restSec: 0, cycles: 0,
     dailyFeel: "",
+    earlyStopReason: "",
+    postTrainingPain: 0,
+    postTrainingStrength: 0,
     day7Trigger: "", day7Pain: 0, day7Feel: "",
   });
 
@@ -832,6 +884,7 @@ export default function App() {
               onStartTraining={() => setScreen("quick-training")}
               setUserData={setUserData}
               setSurveyStep={setSurveyStep}
+              setTaskIdx={setTaskIdx}
             />
           )}
           {tab === "discover" && <DiscoverPage />}

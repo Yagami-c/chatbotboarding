@@ -18,6 +18,9 @@ export interface UserData {
   dailyRecords: Record<number, Record<string, unknown>>;
   pressure: number; workSec: number; restSec: number; cycles: number;
   dailyFeel: string;
+  earlyStopReason: string;
+  postTrainingPain: number;
+  postTrainingStrength: number;
   day7Trigger: string; day7Pain: number; day7Feel: string;
 }
 
@@ -28,9 +31,9 @@ export type Phase =
   | "smart_intro" | "smart_confirm_assessment"
   | "day1_survey" | "day1_duration" | "day1_safety" | "day1_stiffness"
   | "day1_triggers" | "day1_pain" | "day1_recommend"
-  | "day1_therapy" | "day1_optimize"
-  | "daily_feel" | "daily_recommend" | "daily_therapy" | "daily_optimize"
-  | "day7_check" | "day7_pain" | "day7_feel" | "day7_summary"
+  | "day1_therapy" | "day1_early_stop_reason" | "day1_post_training" | "day1_post_strength" | "day1_optimize"
+  | "daily_feel" | "daily_recommend" | "daily_therapy" | "daily_early_stop_reason" | "daily_optimize"
+  | "day7_check" | "day7_trigger" | "day7_pain" | "day7_feel" | "day7_summary"
   | "done";
 
 export type SurveyStep = null
