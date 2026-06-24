@@ -766,7 +766,7 @@ export default function App() {
   };
 
   const handleStop = () => {
-    if (screen === "assistant" && hwState === "running" && (phase === "day1_therapy" || phase === "daily_therapy")) {
+    if (tab === "assistant" && hwState === "running" && (phase === "day1_therapy" || phase === "daily_therapy")) {
       setShowStopModal(true);
     }
     setHwState("stopped");
@@ -972,10 +972,15 @@ export default function App() {
                   finalLevel: level
                 }));
                 const total = (params.work + params.rest) * params.cycles;
+                setHwLevel(level);
                 setHwTotal(total);
                 setHwRemaining(total);
-                setDeviceState("idle");
-                setHwState("idle");
+                setHwCycle(1);
+                setHwTotalCycles(params.cycles);
+                // 确保设备已连接
+                if (deviceState === "disconnected") {
+                  setDeviceState("idle");
+                }
                 // 延迟启动设备
                 setTimeout(() => {
                   setHwState("running");
