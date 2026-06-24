@@ -332,6 +332,19 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   const total=prm.cycles*(prm.work+prm.rest);
   const day1Pain=day1PainRef.current||0;
 
+  // 自动启动设备：当进入 day1_recommend 阶段时
+  useEffect(() => {
+    if (phase === "day1_recommend") {
+      const timer = setTimeout(() => {
+        onStartDevice(lv);
+        setTimeout(() => {
+          setPhase("day1_therapy");
+        }, 1000);
+      }, 2000); // 显示推荐方案2秒后自动启动
+      return () => clearTimeout(timer);
+    }
+  }, [phase, lv, onStartDevice, setPhase]);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{minHeight:0}}>
       <div className="px-4 pt-3 pb-1.5 bg-[#fafcff] border-b border-[#e9ecf0] flex-shrink-0">
@@ -516,9 +529,9 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         {phase==="daily_feel"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease]">
             <BtnRow>
-              <Pill label="😊 比之前舒服" primary onClick={()=>onSubmitDailyFeel("better")}/>
-              <Pill label="😐 没什么变化" onClick={()=>onSubmitDailyFeel("same")}/>
-              <Pill label="😣 比之前更不舒服" onClick={()=>onSubmitDailyFeel("worse")}/>
+              <Pill label="😊 好多了" primary onClick={()=>onSubmitDailyFeel("better")}/>
+              <Pill label="😐 还行" onClick={()=>onSubmitDailyFeel("same")}/>
+              <Pill label="😣 还是不舒服" onClick={()=>onSubmitDailyFeel("worse")}/>
             </BtnRow>
           </div>
         )}
@@ -711,7 +724,7 @@ export default function App() {
   };
 
   const handleStop = () => {
-    if (screen === "assistant" && hwState === "running" && phase === "day1_therapy") {
+    if (screen === "assistant" && hwState === "running" && (phase === "day1_therapy" || phase === "daily_therapy")) {
       setShowStopModal(true);
     }
     setHwState("stopped");
@@ -850,15 +863,29 @@ export default function App() {
               onGoToNextDay={() => {
                 setCurrentDay((prev: number) => prev + 1);
                 setTaskIdx(0);
-                setPhase("daily_feel");
                 setMsgs([]);
-                simulateThinking(() => {
-                  addMsg("bot", `👋 ${userData.name}，第${currentDay + 1}天开始啦！今天感觉如何？`);
-                }, 500);
+
+                // 检查是否进入Day 7复评
+                if (currentDay === 6) {
+                  // 进入Day 7复评流程
+                  setPhase("day7_check");
+                  simulateThinking(() => {
+                    addMsg("bot", `🎊 恭喜完成第一阶段！现在让我们做一个7天复评，看看你的恢复情况。`);
+                    setTimeout(() => {
+                      setSurveyStep("day7_trigger");
+                    }, 800);
+                  }, 500);
+                } else {
+                  // 正常日常流程
+                  setPhase("daily_feel");
+                  simulateThinking(() => {
+                    addMsg("bot", `👋 ${userData.name}，第${currentDay + 1}天开始啦！今天膝盖感觉如何？`);
+                  }, 500);
+                }
               }}
               onSubmitDailyFeel={(f) => {
                 setUserData((prev: UserData) => ({ ...prev, dailyFeel: f }));
-                addMsg("user", f === "better" ? "😊 比之前舒服" : f === "same" ? "😐 没什么变化" : "😣 比之前更不舒服");
+                addMsg("user", f === "better" ? "😊 好多了" : f === "same" ? "😐 还行" : "😣 还是不舒服");
                 simulateThinking(() => {
                   setTaskIdx(1);
                   setPhase("daily_recommend");
@@ -953,6 +980,33 @@ export default function App() {
         onSubmit={(data) => {
           setUserData((prev: UserData) => ({ ...prev, ...data }));
           setSurveyStep(null);
+
+          // Day 7复评流程链式触发
+          if (surveyStep === "day7_trigger") {
+            if (data.day7Trigger === "") {
+              // 用户选择"换了"，需要重新选择触发动作
+              setTimeout(() => setSurveyStep("day7_new_trigger"), 300);
+            } else {
+              // 用户选择"还是这个"，直接评估疼痛程度
+              setTimeout(() => setSurveyStep("day7_pain"), 300);
+            }
+          } else if (surveyStep === "day7_new_trigger") {
+            // 新触发动作选择完成，评估疼痛程度
+            setTimeout(() => setSurveyStep("day7_pain"), 300);
+          } else if (surveyStep === "day7_pain") {
+            // 疼痛评估完成，询问整体感受
+            setTimeout(() => setSurveyStep("day7_feel"), 300);
+          } else if (surveyStep === "day7_feel") {
+            // 整体感受完成，询问皮肤状况
+            setTimeout(() => setSurveyStep("day7_skin"), 300);
+          } else if (surveyStep === "day7_skin") {
+            // 所有问卷完成，显示总结
+            simulateThinking(() => {
+              setTaskIdx(1);
+              setPhase("day7_summary");
+              addMsg("bot", "感谢你完成复评！让我为你生成7天总结报告。");
+            }, 500);
+          }
         }}
       />
       <StopReasonModal
@@ -960,8 +1014,18 @@ export default function App() {
         onClose={(reasons) => {
           setShowStopModal(false);
           addMsg("user", reasons.join("、"));
+          const hasEncouragementReasons = reasons.some(r => ["忘记了", "没时间", "效果不明显"].includes(r));
           simulateThinking(() => {
-            addMsg("bot", "我已记录。持之以恒很重要，明天继续加油！💪");
+            if (hasEncouragementReasons) {
+              addMsg("bot", "我已记录。💪 建议尝试持续使用2周以上，这样更有助于康复效果的体现。明天记得继续哦～");
+            } else {
+              addMsg("bot", "我已记录。持之以恒很重要，明天继续加油！💪");
+            }
+            if (phase === "day1_therapy") {
+              setTimeout(() => setPhase("day1_optimize"), 800);
+            } else if (phase === "daily_therapy") {
+              setTimeout(() => setPhase("daily_optimize"), 800);
+            }
           });
         }}
       />
