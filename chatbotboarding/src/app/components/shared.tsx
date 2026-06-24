@@ -85,8 +85,8 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
   const elapsed=hwTotal-hwRemaining;
   const prm=LEVEL_PARAMS[hwLevel-1]||LEVEL_PARAMS[1];
 
-  const ballBg={disconnected:"rgba(200,200,200,0.2)",idle:"rgba(46,204,113,0.25)",running:"rgba(46,204,113,0.35)",paused:"rgba(243,156,18,0.25)"}[deviceState];
-  const badgeColor={disconnected:"#BDC3C7",idle:"#2ECC71",running:"#2ECC71",paused:"#F39C12"}[deviceState];
+  const ballBg={disconnected:"rgba(150,150,150,0.5)",idle:"rgba(46,204,113,0.65)",running:"rgba(46,204,113,0.75)",paused:"rgba(243,156,18,0.65)"}[deviceState];
+  const badgeColor={disconnected:"#95A5A6",idle:"#27AE60",running:"#27AE60",paused:"#E67E22"}[deviceState];
   const statusDot={disconnected:"#BDC3C7",idle:"#2ECC71",running:"#2ECC71",paused:"#F39C12"}[deviceState];
   const statusLabel={disconnected:"未连接",idle:"已连接",running:"运行中",paused:"已暂停"}[deviceState];
   const hint={disconnected:"点击「连接」开始使用",idle:"已连接，点击「开始」启动",running:"设备运行中...",paused:"已暂停"}[deviceState];
