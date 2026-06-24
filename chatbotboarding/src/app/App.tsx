@@ -684,6 +684,48 @@ export default function App() {
     }
   }, [msgs, thinking]);
 
+  // 监听设备训练完成
+  useEffect(() => {
+    if (hwRemaining === 0 && hwTotal > 0 && hwState === "running" && tab === "assistant") {
+      // 设备训练完成
+      setHwState("idle");
+      setDeviceState("idle");
+
+      if (phase === "day1_therapy") {
+        // Day 1 训练完成，显示使用后问卷
+        simulateThinking(() => {
+          addMsg("bot", "✅ 第一次训练完成！请告诉我你的感受。");
+          setTimeout(() => {
+            setSurveyStep("day1_post_use");
+          }, 600);
+        }, 500);
+      } else if (phase === "daily_therapy") {
+        // 日常训练完成，进入优化阶段
+        simulateThinking(() => {
+          addMsg("bot", "✅ 今日训练完成！");
+          setTimeout(() => {
+            setPhase("daily_optimize");
+          }, 600);
+        }, 500);
+      }
+    }
+  }, [hwRemaining, hwTotal, hwState, phase, tab]);
+
+  // 设备倒计时逻辑
+  useEffect(() => {
+    if (hwState === "running" && hwRemaining > 0) {
+      const timer = setInterval(() => {
+        setHwRemaining(prev => {
+          if (prev <= 1) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [hwState, hwRemaining]);
+
   const addMsg = (role: "bot" | "user", html: string) => {
     setMsgs(prev => [...prev, { id: msgId.current++, role, html }]);
   };
@@ -981,8 +1023,23 @@ export default function App() {
           setUserData((prev: UserData) => ({ ...prev, ...data }));
           setSurveyStep(null);
 
+          // Day 1训练完成后问卷链式触发
+          if (surveyStep === "day1_post_use") {
+            // 使用感受完成，询问强度感受
+            setTimeout(() => setSurveyStep("day1_strength"), 300);
+          } else if (surveyStep === "day1_strength") {
+            // 强度感受完成，进入优化阶段
+            simulateThinking(() => {
+              setTaskIdx(3);
+              addMsg("bot", "我已记录你的反馈，现在为你优化下次训练方案。");
+              setTimeout(() => {
+                setPhase("day1_optimize");
+                addMsg("bot", "优化完成！明天继续使用时会采用调整后的方案。");
+              }, 800);
+            }, 500);
+          }
           // Day 7复评流程链式触发
-          if (surveyStep === "day7_trigger") {
+          else if (surveyStep === "day7_trigger") {
             if (data.day7Trigger === "") {
               // 用户选择"换了"，需要重新选择触发动作
               setTimeout(() => setSurveyStep("day7_new_trigger"), 300);
