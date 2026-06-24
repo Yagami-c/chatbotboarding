@@ -62,7 +62,15 @@ export function Onboarding({ onDone }: OnboardingProps) {
       <p className="text-xs text-[#a0aec0] text-center mb-6">
         💡 你也可以在「我的 - 设置」中随时调整
       </p>
-      <button onClick={goNext}
+      <button onClick={()=>{
+        if(smartMode){
+          // 智能模式：直接进入小瑞AI对话页面
+          onDone(true,"home");
+        }else{
+          // 手动模式：继续到第3步选择页面
+          goNext();
+        }
+      }}
         className="w-full py-3.5 rounded-full bg-[#2ECC71] text-white font-bold text-base border-0 cursor-pointer active:bg-[#27AE60] transition-all">
         确认
       </button>

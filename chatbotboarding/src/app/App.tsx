@@ -310,7 +310,8 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
 
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
   onSubmitDuration,onSubmitStiffness,onGoToNextDay,onSubmitDailyFeel,onReset,
-  day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode}:{
+  day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode,
+  addMsg,simulateThinking,setPhase,userData,setUserData,setSurveyStep}:{
   msgs:Msg[];phase:Phase;tasks:Task[];taskIdx:number;currentDay:number;ud:UserData;
   thinking:boolean;messagesRef:React.RefObject<HTMLDivElement|null>;
   onSubmitDuration:(d:string)=>void;onSubmitStiffness:(l:number)=>void;
@@ -318,6 +319,12 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   day1PainRef:React.RefObject<number>;
   onStartAssessment:()=>void;onStartTraining:()=>void;
   smartMode:boolean;onToggleSmartMode:()=>void;
+  addMsg:(role:"bot"|"user",html:string)=>void;
+  simulateThinking:(cb:()=>void)=>void;
+  setPhase:(p:Phase)=>void;
+  userData:UserData;
+  setUserData:React.Dispatch<React.SetStateAction<UserData>>;
+  setSurveyStep:React.Dispatch<React.SetStateAction<SurveyStep|null>>;
 }) {
   const lv=ud.finalLevel;
   const prm=LEVEL_PARAMS[lv-1]||LEVEL_PARAMS[1];
@@ -362,11 +369,23 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
 
         {phase==="smart_confirm_assessment"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-            <button onClick={onStartAssessment}
+            <button onClick={() => {
+              addMsg("user", "开始评估");
+              simulateThinking(() => {
+                addMsg("bot", "好的！让我们开始评估。首先，你的膝盖不适持续多久了？");
+                setPhase("day1_duration");
+              });
+            }}
               className="bg-[#2ECC71] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#27AE60] transition-colors">
               📋 开始评估
             </button>
-            <button onClick={onStartTraining}
+            <button onClick={() => {
+              addMsg("user", "跳过评估，直接训练");
+              simulateThinking(() => {
+                addMsg("bot", "明白了，我们直接开始训练。请确保你的PAD设备已准备好。");
+                setPhase("day1_therapy");
+              });
+            }}
               className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-3 rounded-xl text-sm font-semibold cursor-pointer active:bg-[#f7fafc] transition-colors">
               ⚡ 跳过评估，直接训练
             </button>
@@ -389,6 +408,43 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               <Pill label="有点紧" onClick={()=>onSubmitStiffness(1)}/>
               <Pill label="很紧" onClick={()=>onSubmitStiffness(2)}/>
             </BtnRow>
+          </div>
+        )}
+        {phase==="day1_triggers"&&(
+          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
+            <p className="text-xs text-[#718096] mb-1">可多选</p>
+            {["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"].map(t=>(
+              <button key={t} onClick={()=>{
+                addMsg("user", t);
+                simulateThinking(() => {
+                  if(t==="无"){
+                    addMsg("bot", "明白了，你目前没有明显的触发动作。");
+                    setUserData(p=>({...p,triggers:[t],mainTrigger:t}));
+                    setTimeout(()=>setSurveyStep("pain"),800);
+                  }else{
+                    addMsg("bot", `收到「${t}」。你还有其他会让膝盖不舒服的动作吗？如果没有了，点击「完成选择」`);
+                    setUserData(p=>({...p,triggers:[...(p.triggers||[]),t]}));
+                  }
+                });
+              }}
+                className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer active:bg-[#f7fafc] transition-colors text-left">
+                {t}
+              </button>
+            ))}
+            {userData.triggers&&userData.triggers.length>0&&!userData.triggers.includes("无")&&(
+              <button onClick={()=>{
+                addMsg("user", `完成选择（已选：${userData.triggers.join("、")}）`);
+                const main=userData.triggers[0];
+                setUserData(p=>({...p,mainTrigger:main}));
+                simulateThinking(()=>{
+                  addMsg("bot",`好的，我会重点关注「${main}」这个动作。接下来，请告诉我这个动作时的不适程度。`);
+                  setTimeout(()=>setSurveyStep("pain"),800);
+                });
+              }}
+                className="bg-[#2ECC71] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#27AE60] transition-colors mt-2">
+                ✅ 完成选择
+              </button>
+            )}
           </div>
         )}
         {phase==="day1_recommend"&&(
@@ -659,9 +715,24 @@ export default function App() {
           overflow: "hidden"
         }}>
       {screen === "onboarding" && <Onboarding onDone={(smartMode, next) => {
-        if (next === "assessment") setScreen("manual-assessment");
-        else if (next === "quick-training") setScreen("quick-training");
-        else setScreen("home");
+        setSmartMode(smartMode);
+        if (smartMode) {
+          // 智能模式：直接进入助手页面，由AI引导
+          setScreen("home");
+          setTab("assistant");
+          setPhase("smart_intro");
+          setTimeout(() => {
+            addMsg("bot", "👋 你好！我是小瑞，你的康复助手。我注意到你还没有开始评估，建议先做个评估，我会根据你的情况推荐最合适的方案。");
+            setTimeout(() => {
+              setPhase("smart_confirm_assessment");
+            }, 1000);
+          }, 500);
+        } else {
+          // 手动模式：根据选择跳转
+          if (next === "assessment") setScreen("manual-assessment");
+          else if (next === "quick-training") setScreen("quick-training");
+          else setScreen("home");
+        }
       }} />}
 
       {screen === "home" && (
@@ -688,6 +759,9 @@ export default function App() {
               thinking={thinking}
               messagesRef={messagesRef}
               smartMode={smartMode}
+              addMsg={addMsg}
+              simulateThinking={simulateThinking}
+              setPhase={setPhase}
               onToggleSmartMode={() => {
                 const newMode = !smartMode;
                 setSmartMode(newMode);
@@ -714,7 +788,7 @@ export default function App() {
                 addMsg("user", l === 0 ? "没有特别感觉" : l === 1 ? "有点紧" : "很紧");
                 simulateThinking(() => {
                   addMsg("bot", "好的，我会记录下来。现在让我们来看看<strong>哪些动作</strong>最容易让你的膝盖不舒服。（可多选）");
-                  setSurveyStep("triggers");
+                  setPhase("day1_triggers");
                 }, 600);
               }}
               onGoToNextDay={() => {
@@ -757,6 +831,9 @@ export default function App() {
               day1PainRef={day1PainRef}
               onStartAssessment={() => setScreen("manual-assessment")}
               onStartTraining={() => setScreen("quick-training")}
+              userData={userData}
+              setUserData={setUserData}
+              setSurveyStep={setSurveyStep}
             />
           )}
           {tab === "discover" && <DiscoverPage />}
