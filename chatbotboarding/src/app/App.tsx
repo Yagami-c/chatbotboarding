@@ -311,7 +311,7 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
   onSubmitDuration,onSubmitStiffness,onGoToNextDay,onSubmitDailyFeel,onReset,
   day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode,
-  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep,setTaskIdx}:{
+  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep,setTaskIdx,onStartDevice}:{
   msgs:Msg[];phase:Phase;tasks:Task[];taskIdx:number;currentDay:number;ud:UserData;
   thinking:boolean;messagesRef:React.RefObject<HTMLDivElement|null>;
   onSubmitDuration:(d:string)=>void;onSubmitStiffness:(l:number)=>void;
@@ -325,6 +325,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   setUserData:React.Dispatch<React.SetStateAction<UserData>>;
   setSurveyStep:React.Dispatch<React.SetStateAction<SurveyStep|null>>;
   setTaskIdx:React.Dispatch<React.SetStateAction<number>>;
+  onStartDevice:(level:number)=>void;
 }) {
   const lv=ud.finalLevel;
   const prm=LEVEL_PARAMS[lv-1]||LEVEL_PARAMS[1];
@@ -383,7 +384,11 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               addMsg("user", "跳过评估，直接训练");
               simulateThinking(() => {
                 addMsg("bot", "明白了，我们直接开始训练。请确保你的PAD设备已准备好。");
-                setPhase("day1_therapy");
+                setTimeout(() => {
+                  setPhase("day1_therapy");
+                  // 使用默认 L2 温和模式启动设备
+                  onStartDevice(2);
+                }, 800);
               });
             }}
               className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-3 rounded-xl text-sm font-semibold cursor-pointer active:bg-[#f7fafc] transition-colors">
@@ -885,6 +890,29 @@ export default function App() {
               setUserData={setUserData}
               setSurveyStep={setSurveyStep}
               setTaskIdx={setTaskIdx}
+              onStartDevice={(level: number) => {
+                // 根据等级设置设备参数并启动
+                const params = LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
+                setUserData(prev => ({
+                  ...prev,
+                  pressure: params.pressure,
+                  workSec: params.work,
+                  restSec: params.rest,
+                  cycles: params.cycles,
+                  baseLevel: level,
+                  finalLevel: level
+                }));
+                const total = (params.work + params.rest) * params.cycles;
+                setHwTotal(total);
+                setHwRemaining(total);
+                setDeviceState("idle");
+                setHwState("idle");
+                // 延迟启动设备
+                setTimeout(() => {
+                  setHwState("running");
+                  setDeviceState("running");
+                }, 500);
+              }}
             />
           )}
           {tab === "discover" && <DiscoverPage />}
