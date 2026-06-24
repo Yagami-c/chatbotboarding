@@ -311,7 +311,7 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
   onSubmitDuration,onSubmitStiffness,onGoToNextDay,onSubmitDailyFeel,onReset,
   day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode,
-  addMsg,simulateThinking,setPhase,userData,setUserData,setSurveyStep}:{
+  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep}:{
   msgs:Msg[];phase:Phase;tasks:Task[];taskIdx:number;currentDay:number;ud:UserData;
   thinking:boolean;messagesRef:React.RefObject<HTMLDivElement|null>;
   onSubmitDuration:(d:string)=>void;onSubmitStiffness:(l:number)=>void;
@@ -322,7 +322,6 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   addMsg:(role:"bot"|"user",html:string)=>void;
   simulateThinking:(cb:()=>void)=>void;
   setPhase:(p:Phase)=>void;
-  userData:UserData;
   setUserData:React.Dispatch<React.SetStateAction<UserData>>;
   setSurveyStep:React.Dispatch<React.SetStateAction<SurveyStep|null>>;
 }) {
@@ -431,10 +430,10 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 {t}
               </button>
             ))}
-            {userData.triggers&&userData.triggers.length>0&&!userData.triggers.includes("无")&&(
+            {ud.triggers&&ud.triggers.length>0&&!ud.triggers.includes("无")&&(
               <button onClick={()=>{
-                addMsg("user", `完成选择（已选：${userData.triggers.join("、")}）`);
-                const main=userData.triggers[0];
+                addMsg("user", `完成选择（已选：${ud.triggers.join("、")}）`);
+                const main=ud.triggers[0];
                 setUserData(p=>({...p,mainTrigger:main}));
                 simulateThinking(()=>{
                   addMsg("bot",`好的，我会重点关注「${main}」这个动作。接下来，请告诉我这个动作时的不适程度。`);
@@ -831,7 +830,6 @@ export default function App() {
               day1PainRef={day1PainRef}
               onStartAssessment={() => setScreen("manual-assessment")}
               onStartTraining={() => setScreen("quick-training")}
-              userData={userData}
               setUserData={setUserData}
               setSurveyStep={setSurveyStep}
             />
