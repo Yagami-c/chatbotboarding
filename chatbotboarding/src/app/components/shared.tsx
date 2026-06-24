@@ -143,7 +143,8 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
           zIndex:650,display:"flex",alignItems:"center",justifyContent:"center",
           cursor:dragging?"grabbing":"grab",touchAction:"none",userSelect:"none",
           transform:dragging?"scale(1.05)":"scale(1)",
-          transition:dragging?"box-shadow 0.2s":"transform 0.2s ease,box-shadow 0.2s ease,background 0.3s ease"}}>
+          willChange:dragging?"top":"auto",
+          transition:dragging?"transform 0.15s ease,box-shadow 0.2s":"transform 0.2s ease,box-shadow 0.2s ease,background 0.3s ease,top 0.15s ease"}}>
         {deviceState==="running"&&(
           <span style={{position:"absolute",inset:-8,borderRadius:"50%",border:"2px solid rgba(46,204,113,0.45)",
             animation:"ballPulse 2s ease-in-out infinite",pointerEvents:"none"}}/>

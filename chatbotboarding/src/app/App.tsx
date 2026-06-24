@@ -335,15 +335,18 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   // 自动启动设备：当进入 day1_recommend 阶段时
   useEffect(() => {
     if (phase === "day1_recommend") {
+      console.log("[Auto-start] Entering day1_recommend, will start device with level:", lv);
       const timer = setTimeout(() => {
+        console.log("[Auto-start] Starting device now...");
         onStartDevice(lv);
         setTimeout(() => {
+          console.log("[Auto-start] Transitioning to day1_therapy phase");
           setPhase("day1_therapy");
         }, 1000);
       }, 2000); // 显示推荐方案2秒后自动启动
       return () => clearTimeout(timer);
     }
-  }, [phase, lv, onStartDevice, setPhase]);
+  }, [phase, lv]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{minHeight:0}}>
@@ -686,13 +689,16 @@ export default function App() {
 
   // 监听设备训练完成
   useEffect(() => {
+    console.log("[Completion Monitor] State check - hwRemaining:", hwRemaining, "hwTotal:", hwTotal, "hwState:", hwState, "tab:", tab, "phase:", phase);
     if (hwRemaining === 0 && hwTotal > 0 && hwState === "running" && tab === "assistant") {
       // 设备训练完成
+      console.log("[Completion Monitor] Device training completed!");
       setHwState("idle");
       setDeviceState("idle");
 
       if (phase === "day1_therapy") {
         // Day 1 训练完成，显示使用后问卷
+        console.log("[Completion Monitor] Day 1 therapy complete, showing post-use survey");
         simulateThinking(() => {
           addMsg("bot", "✅ 第一次训练完成！请告诉我你的感受。");
           setTimeout(() => {
@@ -701,6 +707,7 @@ export default function App() {
         }, 500);
       } else if (phase === "daily_therapy") {
         // 日常训练完成，进入优化阶段
+        console.log("[Completion Monitor] Daily therapy complete, entering optimize phase");
         simulateThinking(() => {
           addMsg("bot", "✅ 今日训练完成！");
           setTimeout(() => {
@@ -714,12 +721,14 @@ export default function App() {
   // 设备倒计时逻辑
   useEffect(() => {
     if (hwState === "running" && hwRemaining > 0) {
+      console.log("[Countdown] Starting countdown timer, remaining:", hwRemaining);
       const timer = setInterval(() => {
         setHwRemaining(prev => {
-          if (prev <= 1) {
-            return 0;
+          const newVal = prev <= 1 ? 0 : prev - 1;
+          if (newVal === 0) {
+            console.log("[Countdown] Timer reached 0!");
           }
-          return prev - 1;
+          return newVal;
         });
       }, 1000);
       return () => clearInterval(timer);
@@ -960,8 +969,10 @@ export default function App() {
               setSurveyStep={setSurveyStep}
               setTaskIdx={setTaskIdx}
               onStartDevice={(level: number) => {
+                console.log("[onStartDevice] Called with level:", level);
                 // 根据等级设置设备参数并启动
                 const params = LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
+                console.log("[onStartDevice] Device params:", params);
                 setUserData(prev => ({
                   ...prev,
                   pressure: params.pressure,
@@ -972,6 +983,7 @@ export default function App() {
                   finalLevel: level
                 }));
                 const total = (params.work + params.rest) * params.cycles;
+                console.log("[onStartDevice] Total time:", total, "seconds");
                 setHwLevel(level);
                 setHwTotal(total);
                 setHwRemaining(total);
@@ -979,10 +991,13 @@ export default function App() {
                 setHwTotalCycles(params.cycles);
                 // 确保设备已连接
                 if (deviceState === "disconnected") {
+                  console.log("[onStartDevice] Device was disconnected, connecting first");
                   setDeviceState("idle");
                 }
+                console.log("[onStartDevice] Current deviceState:", deviceState);
                 // 延迟启动设备
                 setTimeout(() => {
+                  console.log("[onStartDevice] Starting device now - setting states to running");
                   setHwState("running");
                   setDeviceState("running");
                 }, 500);
