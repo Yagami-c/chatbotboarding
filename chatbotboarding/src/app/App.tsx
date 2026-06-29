@@ -103,7 +103,7 @@ function SafetySurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
     <div>
       <p className="text-sm text-[#4a5568] mb-3">请问目前是否有以下情况？（可多选）</p>
       <FormCard>
-        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生建议避免使用类似设备"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
+        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
           <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
             <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))}/>{l}
           </label>
@@ -399,7 +399,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <div className="flex items-center gap-2.5">
             <span className="text-3xl">🤖</span>
             <div>
-              <div className="font-bold text-base text-[#1a202c]">小瑞 · <span className="text-[#07C160]">AI 护膝助手</span></div>
+              <div className="font-bold text-base text-[#1a202c]">小瑞 · <span className="text-[#07C160]">AI 训练助手</span></div>
               <div className="text-[11px] text-[#48bb78] flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#07C160] inline-block"/>
                 在线 · 7天计划
@@ -564,13 +564,13 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-3 text-sm text-[#92400e]">
               <div className="font-semibold mb-2">⚠️ 使用须知</div>
               <div className="space-y-1.5 text-xs leading-relaxed text-[#78350f]">
-                <div>• 带上设备前，请保持治疗部位清爽。</div>
+                <div>• 带上设备前，请保持使用部位清爽干燥。</div>
                 <div>• 设备开始工作后，请保持静止放松，暂时不要移动。</div>
                 <div>• 你可能会出现吸附感，或皮肤刺激紧的感觉</div>
                 <div>• 使用后皮肤轻微发红属正常现象，不用担心。根据个人差异，可能会在4-48逐渐消退。</div>
               </div>
               <div className="mt-2 pt-2 border-t border-[#fde68a] text-xs text-[#92400e] leading-relaxed">
-                ⚠️ 如出现严重不适、持续疼痛或皮肤异常反应，请立即停止使用并咨询医生。
+                ⚠️ 如出现严重不适、持续疼痛或皮肤异常反应，请立即停止使用并及时就诊。
               </div>
             </div>
 
@@ -644,7 +644,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               targetTherapyPhase.current="daily_therapy";
               setShowDeviceConfirm(true);
             }} className="w-full mt-3 py-3 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all">
-              ✅ 开始今日养护
+              ✅ 开始今日训练
             </button>
           </div>
         )}
@@ -851,7 +851,7 @@ export default function App() {
               setPhase("daily_optimize");
               // Daily优化完成后，推荐训练和发现tab
               setTimeout(() => {
-                addMsg("bot", "💡 记得查看下方「训练」tab 跟练运动，或者到「发现」tab 学习更多护膝方法！");
+                addMsg("bot", "💡 记得查看下方「训练」tab 跟练运动，或者到「发现」tab 了解更多膝盖训练技巧！");
               }, 800);
             }, 800);
           }, 600);
@@ -1016,8 +1016,8 @@ export default function App() {
             onAssessmentDone={(result) => {
               setUserData((prev: UserData) => ({ ...prev, ...result, stiffness: null }));
             }}
-            onDeviceStart={(level: number) => {
-              const params = LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
+            onDeviceStart={(level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => {
+              const params = custom ?? (LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1]);
               setUserData(prev => ({
                 ...prev,
                 pressure: params.pressure, workSec: params.work, restSec: params.rest,
@@ -1056,7 +1056,7 @@ export default function App() {
                 if (newMode && msgs.length === 0) {
                   setPhase("smart_intro");
                   setTimeout(() => {
-                    addMsg("bot", "👋 你好！我是小瑞，你的护膝助手。先了解一下你的情况，帮你找到最合适的方案。");
+                    addMsg("bot", "👋 你好！我是小瑞，你的膝盖训练搭档。先了解一下你的情况，帮你找到最合适的方案。");
                     setTimeout(() => {
                       setPhase("smart_confirm_assessment");
                     }, 1000);
@@ -1221,7 +1221,7 @@ export default function App() {
               }, 500);
             } else {
               simulateThinking(() => {
-                addMsg("bot", "根据你的情况，建议先休息 1-2 天，或咨询专业人士后再使用。好转后可以重新开始～");
+                addMsg("bot", "根据你的情况，建议先休息 1-2 天，好转后随时回来继续～");
               }, 500);
             }
           } else if (surveyStep === "day1_post_use") {
@@ -1252,7 +1252,7 @@ export default function App() {
                 setPhase("day1_optimize");
                 // Day 1优化完成后，推荐训练和发现tab
                 setTimeout(() => {
-                  addMsg("bot", "💪 完成今天的使用后，可以去下方「训练」tab 查看完整的运动教程，或者到「发现」tab 了解更多护膝知识！");
+                  addMsg("bot", "💪 用完之后可以去下方「训练」tab 跟练运动，到「发现」tab 学更多膝盖训练知识！");
                 }, 1000);
               }, 800);
             }, 500);
@@ -1300,7 +1300,7 @@ export default function App() {
             if (phase === "day1_therapy") {
               setTaskIdx(3);
               setTimeout(() => {
-                addMsg("bot", "养护结束了，请告诉我你的感受。");
+                addMsg("bot", "用完啦，说说感受吧。");
                 setTimeout(() => setSurveyStep("day1_post_use"), 600);
               }, 800);
             } else if (phase === "daily_therapy") {
@@ -1312,7 +1312,7 @@ export default function App() {
                   setTimeout(() => {
                     setPhase("daily_optimize");
                     setTimeout(() => {
-                      addMsg("bot", "💡 记得查看下方「训练」tab 跟练运动，或者到「发现」tab 学习更多护膝方法！");
+                      addMsg("bot", "💡 记得查看下方「训练」tab 跟练运动，或者到「发现」tab 了解更多膝盖训练技巧！");
                     }, 800);
                   }, 800);
                 }, 600);

@@ -54,16 +54,16 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
         }}>🦵</div>
         <div style={{ color: "white", fontWeight: 700, fontSize: 22, letterSpacing: 0.5 }}>哎哟爱膝之家</div>
         <div style={{ color: "rgba(255,255,255,0.82)", fontSize: 13, marginTop: 6, textAlign: "center" }}>
-          AI 护膝助手 · 智能陪你恢复
+          AI 膝盖训练助手 · 每天陪你动起来
         </div>
       </div>
 
       <div className="flex-1 flex flex-col px-6 pt-8 pb-6">
         <div className="space-y-3 mb-8">
           {[
-            { icon: "🤖", text: "AI 智能评估，个性化护膝方案" },
-            { icon: "📱", text: "每日陪伴，实时追踪恢复进度" },
-            { icon: "🏥", text: "专业团队背书，安全有效" },
+            { icon: "🤖", text: "AI 智能分析，个性化膝盖训练方案" },
+            { icon: "📱", text: "每日打卡，实时追踪训练进度" },
+            { icon: "🏅", text: "专家团队研发，安全又有效" },
           ].map(({ icon, text }) => (
             <div key={text} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 14, border: "1px solid #edf2f7" }}>
               <span style={{ fontSize: 20 }}>{icon}</span>

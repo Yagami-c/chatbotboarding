@@ -10,7 +10,7 @@ interface HomePageProps {
   userName: string; streak: number; weekDone: number; weekTotal: number;
   showOnboardingBanner: boolean; onShowOnboarding: () => void;
   onAssessmentDone: (r: AssessmentResult) => void;
-  onDeviceStart: (level: number) => void;
+  onDeviceStart: (level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => void;
   onDeviceMinimize: () => void;
   deviceState: DeviceState;
   hwLevel: number; hwRemaining: number; hwTotal: number;
@@ -27,7 +27,7 @@ const SAFETY_LIST = [
   { v: "受伤", l: "最近2周内有明显膝盖受伤" },
   { v: "肿胀", l: "膝盖明显肿胀/发烫" },
   { v: "伤口", l: "膝盖周围有伤口或皮肤问题" },
-  { v: "医生建议", l: "医生建议避免使用类似设备" },
+  { v: "医生建议", l: "医生叮嘱暂不适合使用此类设备" },
   { v: "无", l: "以上都没有" },
 ];
 const TRIGGERS_LIST = ["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"];
@@ -74,7 +74,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
   const handleBack = () => { if (step === 0) onCancel(); else setStep(s => s - 1); };
   const handleSubmit = () => {
     const hasRisk = ["受伤","肿胀","伤口","医生建议"].some(r => safetyVals.includes(r));
-    if (hasRisk && !window.confirm("检测到存在安全风险，建议咨询医生后再使用。是否仍要继续？")) return;
+    if (hasRisk && !window.confirm("有些情况需要先确认安全，建议找专业人员聊聊后再使用。要继续吗？")) return;
     onDone({ name: name.trim(), gender, ageRange, duration, safety: safetyVals, stiffness, triggers: triggerVals, painLevel: painLevel! });
   };
 
@@ -192,14 +192,21 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
 // ── Device Flow ────────────────────────────────────────────────────────────────
 
 function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles, onTogglePause, onStop, onReset }: {
-  onStart: (level: number) => void; onMinimize: () => void; onCancel: () => void;
+  onStart: (level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => void; onMinimize: () => void; onCancel: () => void;
   deviceState: DeviceState; hwLevel: number; hwRemaining: number; hwTotal: number;
   hwCycle: number; hwTotalCycles: number;
   onTogglePause: () => void; onStop: () => void; onReset: () => void;
 }) {
   const [step, setStep] = useState(0);
   const [level, setLevel] = useState(2);
-  const prm = LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
+  const [customMode, setCustomMode] = useState(false);
+  const [customPressure, setCustomPressure] = useState(125);
+  const [customWork, setCustomWork] = useState(30);
+  const [customRest, setCustomRest] = useState(10);
+  const [customCycles, setCustomCycles] = useState(5);
+  const prm = customMode
+    ? { pressure: customPressure, work: customWork, rest: customRest, cycles: customCycles }
+    : LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
   const totalTime = prm.cycles * (prm.work + prm.rest);
   const runningPrm = LEVEL_PARAMS[hwLevel - 1] || LEVEL_PARAMS[1];
   const runTotal = hwTotal || (runningPrm.cycles * (runningPrm.work + runningPrm.rest));
@@ -222,24 +229,66 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
         {step === 0 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="text-sm font-semibold text-[#1a202c] mb-3">选择强度模式</div>
-            <div className="flex gap-1.5 mb-3">
-              {[1,2,3,4,5,6].map(l=>(
-                <button key={l} onClick={()=>setLevel(l)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
-                    ${level===l?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                  L{l}
-                </button>
-              ))}
+            <div className="flex gap-2 mb-3">
+              <button onClick={()=>setCustomMode(false)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                  ${!customMode?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                📋 设定模式
+              </button>
+              <button onClick={()=>setCustomMode(true)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                  ${customMode?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                ⚙️ 自定义模式
+              </button>
             </div>
-            <div className="bg-[#f0fdf4] rounded-xl p-3 text-sm">
-              <div className="font-semibold text-[#065f46]">{getLevelName(level)} · {LEVELS[level-1]}</div>
-              <div className="text-xs mt-1 text-[#4a8a6a]">{LEVEL_DESCS[level]}</div>
-              <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
-                <span>💨 {prm.pressure} mmHg</span><span>⏱ {prm.work}s 工作</span>
-                <span>🔄 {prm.rest}s 休息</span><span>🔁 {prm.cycles} 轮</span>
-                <span>⏳ 约 {Math.floor(totalTime/60)}分{totalTime%60}秒</span>
+
+            {!customMode ? (
+              <>
+                <div className="flex gap-1.5 mb-3">
+                  {[1,2,3,4,5,6].map(l=>(
+                    <button key={l} onClick={()=>setLevel(l)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
+                        ${level===l?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                      L{l}
+                    </button>
+                  ))}
+                </div>
+                <div className="bg-[#f0fdf4] rounded-xl p-3 text-sm">
+                  <div className="font-semibold text-[#065f46]">{getLevelName(level)} · {LEVELS[level-1]}</div>
+                  <div className="text-xs mt-1 text-[#4a8a6a]">{LEVEL_DESCS[level]}</div>
+                  <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
+                    <span>💨 {prm.pressure} mmHg</span><span>⏱ {prm.work}s 工作</span>
+                    <span>🔄 {prm.rest}s 休息</span><span>🔁 {prm.cycles} 轮</span>
+                    <span>⏳ 约 {Math.floor(totalTime/60)}分{totalTime%60}秒</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-[#fef3c7] rounded-xl p-3 space-y-3">
+                <div className="font-semibold text-sm text-[#92400e]">⚙️ 自定义参数</div>
+                {[
+                  {label:"💨 负压强度 (mmHg)",min:80,max:220,step:5,val:customPressure,set:setCustomPressure},
+                  {label:"⏱ 作用时间 (秒)",min:10,max:60,step:5,val:customWork,set:setCustomWork,unit:"s"},
+                  {label:"🔄 休息间隔 (秒)",min:5,max:30,step:5,val:customRest,set:setCustomRest,unit:"s"},
+                  {label:"🔁 循环轮数",min:3,max:10,step:1,val:customCycles,set:setCustomCycles,unit:" 轮"},
+                ].map(({label,min,max,step:s,val,set,unit})=>(
+                  <div key={label}>
+                    <label className="flex justify-between text-xs text-[#4a5568] mb-1">
+                      <span>{label}</span>
+                      <span className="font-semibold text-[#1a202c]">{val}{unit||""}</span>
+                    </label>
+                    <input type="range" min={min} max={max} step={s} value={val}
+                      onChange={e=>set(Number(e.target.value))}
+                      className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#07C160] [&::-webkit-slider-thumb]:cursor-pointer"/>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-[#fde68a] text-xs text-[#92400e]">
+                  预计总时长：<span className="font-semibold ml-1">{Math.floor(totalTime/60)}分{totalTime%60}秒</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <button onClick={()=>setStep(1)}
             className="w-full py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">
@@ -262,7 +311,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           ))}
           <div className="flex gap-3 pb-4">
             <button onClick={()=>setStep(0)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
-            <button onClick={()=>{ onStart(level); setStep(2); }}
+            <button onClick={()=>{ onStart(customMode ? -1 : level, customMode ? {pressure:customPressure,work:customWork,rest:customRest,cycles:customCycles} : undefined); setStep(2); }}
               className="flex-[2] py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">
               已准备好，开始使用 →
             </button>
@@ -343,7 +392,7 @@ export function HomePage({
   }
   if (subView === "device") {
     return <DeviceFlow
-      onStart={onDeviceStart}
+      onStart={(level, custom) => onDeviceStart(level, custom)}
       onMinimize={() => { onDeviceMinimize(); setSubView("main"); }}
       onCancel={() => setSubView("main")}
       deviceState={deviceState} hwLevel={hwLevel} hwRemaining={hwRemaining}
@@ -357,7 +406,7 @@ export function HomePage({
       <div className="flex items-center justify-between px-5 pt-4 pb-2">
         <div>
           <div className="text-2xl font-bold text-[#1a202c]">{getGreeting()}，{userName||"朋友"} 👋</div>
-          <div className="text-sm text-[#718096] mt-0.5">膝关节养护 · 开启你的运动锻炼之旅</div>
+          <div className="text-sm text-[#718096] mt-0.5">膝盖训练 · 开启你的运动锻炼之旅</div>
         </div>
         <div className="relative">
           <span className="text-2xl">🔔</span>

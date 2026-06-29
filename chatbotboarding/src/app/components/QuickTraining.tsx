@@ -333,7 +333,7 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
               </label>
             ))}
             <div className="bg-[#ecfdf5] border border-[#6ee7b7] rounded-xl p-3 my-3 text-sm text-[#065f46]">
-              💪 持之以恒，有助康复！明天记得继续哦～
+              💪 坚持就是赢！明天继续，你可以的～
             </div>
             <button onClick={handleStopSubmit}
               className="w-full py-3 rounded-full bg-[#2ECC71] text-white font-bold text-sm border-0 cursor-pointer">

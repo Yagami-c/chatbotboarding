@@ -38,7 +38,7 @@ export function DiscoverPage() {
             <div>
               <div className="font-semibold text-[#065f46] text-sm">香港理工大学武汉研究院</div>
               <div className="text-xs text-[#047857] mt-1 leading-relaxed">
-                智慧康复与创新老龄健康转化研究中心副主任符少娥教授团队，深耕肌骨关节疼痛的科研与临床，特此分享膝关节保养要点，与您共筑健康。
+                深耕肌骨关节健康的科研团队，特此分享膝关节训练要点，和大家一起动起来更健康。
               </div>
               <div className="text-xs text-[#16a34a] mt-2 font-semibold">主动练，坚持养，拥抱「膝」悦人生！</div>
               <div className="text-[10px] text-[#6b7280] mt-2 leading-relaxed">
@@ -50,7 +50,7 @@ export function DiscoverPage() {
 
         {/* 温馨提示 */}
         <div className="bg-[#fffbeb] border border-[#fde68a] rounded-xl p-3 text-[11px] text-[#92400e] leading-relaxed">
-          💡 <strong>温馨提示：</strong>内容仅用于产品体验与科普参考，不构成医疗建议或诊断依据；请根据自身情况选择合适方式，如有持续不适请咨询专业人士。
+          💡 <strong>小提示：</strong>内容仅供参考，不构成任何建议；如有持续不适请及时就诊。
         </div>
 
         {/* 五维体系 */}
@@ -159,7 +159,7 @@ export function DiscoverPage() {
 
         {/* 底部免责声明 */}
         <div className="bg-[#fffbeb] border border-[#fde68a] rounded-xl p-3 text-[11px] text-[#78350f] leading-relaxed mb-2">
-          🔔 内容仅用于产品体验与科普参考，不构成医疗建议或诊断依据；如有持续不适请咨询专业人士。
+          🔔 内容仅供参考；如有持续不适请及时就诊。
         </div>
       </div>
     </div>

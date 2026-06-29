@@ -16,7 +16,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
       <div className="mb-6" style={{width:96,height:96,borderRadius:"50%",background:"linear-gradient(135deg,#a8f5d0 0%,#07C160 50%,#1a9e52 100%)",boxShadow:"0 8px 32px rgba(7,193,96,0.45),0 2px 8px rgba(0,0,0,0.12),inset 0 1px 2px rgba(255,255,255,0.6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:52}}>🧓</div>
       <h1 className="text-2xl font-bold text-[#1a202c] mb-3">欢迎来到<br/>「哎哟爱膝之家」</h1>
       <p className="text-[#4a5568] text-base leading-relaxed mb-10">
-        我是带你一起护膝的私人助理「小瑞」<br/>
+        我是带你一起动起来的训练伙伴「小瑞」<br/>
         陪你开启<br/>运动锻炼之旅
       </p>
       <button onClick={goNext}
@@ -41,7 +41,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
         开启「智能模式」后，小瑞将全程主动引导你：
       </p>
       <div className="bg-[#f0fdf4] border border-[#6ee7b7] rounded-2xl p-4 mb-5 text-sm text-[#065f46] space-y-2">
-        {["每日评估与方案推荐","设备使用提醒与陪伴","实时反馈与强度优化","科普与运动建议推送"].map(t=>(
+        {["每日打卡 & 方案推荐","设备使用提醒与陪伴","实时反馈与强度优化","运动科普与训练建议"].map(t=>(
           <div key={t} className="flex items-center gap-2"><span className="text-[#07C160]">•</span>{t}</div>
         ))}
       </div>
@@ -92,7 +92,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
       <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-4 mb-6 w-full text-sm text-[#92400e]">
         <div className="font-semibold mb-2">💡 提示</div>
         <p className="leading-relaxed">
-          使用之前可以先填表分析，获取个性化 PAD 方案，让养护更有效。<br/><br/>
+          使用之前可以先填个小问卷，拿到你专属的 PAD 训练方案，效果更棒！<br/><br/>
           你也可以跳过分析，直接开启设备。
         </p>
       </div>

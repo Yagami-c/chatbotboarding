@@ -22,7 +22,7 @@ const SAFETY_LIST = [
   {v:"受伤",l:"最近2周内有明显膝盖受伤"},
   {v:"肿胀",l:"膝盖明显肿胀/发烫"},
   {v:"伤口",l:"膝盖周围有伤口或皮肤问题"},
-  {v:"医生建议",l:"医生建议避免使用类似设备"},
+  { v: "医生建议", l: "医生叮嘱暂不适合使用此类设备" },
   {v:"无",l:"以上都没有"},
 ];
 const STEPS = [
@@ -252,7 +252,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
             <div className="bg-[#fff7ed] border border-[#fed7aa] rounded-xl p-3 mb-4 text-sm text-[#c2410c] space-y-1">
               {safetyVals.filter(v=>v!=="无").map(v=><div key={v}>• {SAFETY_LIST.find(s=>s.v===v)?.l||v}</div>)}
             </div>
-            <p className="text-sm text-[#4a5568] text-center mb-4">建议先休息 1-2 天，或咨询专业医务人员后再继续。</p>
+            <p className="text-sm text-[#4a5568] text-center mb-4">建议先休息 1-2 天，或找专业人员确认后再继续。</p>
             <div className="flex gap-3">
               <button onClick={()=>setShowSafetyWarning(false)}
                 className="flex-1 py-2.5 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
