@@ -50,8 +50,18 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
           width: 80, height: 80, borderRadius: "50%",
           background: "rgba(255,255,255,0.22)", border: "2px solid rgba(255,255,255,0.5)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 42, marginBottom: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-        }}>🦵</div>
+          marginBottom: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+        }}>
+          {/* 关爱之家 icon — house with a heart */}
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+            {/* roof */}
+            <path d="M23 7L5 22h5v14a2 2 0 002 2h22a2 2 0 002-2V22h5L23 7z" fill="white" opacity="0.95"/>
+            {/* heart inside house */}
+            <path d="M23 32c0 0-7-4.5-7-9a4 4 0 018 0 4 4 0 018 0c0 4.5-7 9-7 9z" fill="#07C160"/>
+            {/* door */}
+            <rect x="19.5" y="27" width="7" height="9" rx="3.5" fill="rgba(7,193,96,0.35)"/>
+          </svg>
+        </div>
         <div style={{ color: "white", fontWeight: 700, fontSize: 22, letterSpacing: 0.5 }}>哎哟爱膝之家</div>
         <div style={{ color: "rgba(255,255,255,0.82)", fontSize: 13, marginTop: 6, textAlign: "center" }}>
           AI 膝盖训练助手 · 每天陪你动起来
