@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AppScreen, Tab, UserData, Msg, Task, Phase, SurveyStep, HwState, DeviceState, LEVEL_PARAMS, LEVELS, getLevelName, formatTime, LEVEL_DESCS } from "./types";
 import { FloatBall, BtnRow, Pill, FormCard, FormGroup, StyledInput, SubmitBtn, ResultCard, InfoBox, ThinkingDots, Stars, BottomNav } from "./components/shared";
+import { WeChatLogin } from "./components/WeChatLogin";
 import { Onboarding } from "./components/Onboarding";
 import { HomePage } from "./components/HomePage";
 import { ManualAssessment } from "./components/ManualAssessment";
@@ -672,16 +673,22 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               {summaryTab === "today" ? (
                 <div className={`rounded-2xl p-4 border-l-4 ${worse?"bg-[#fff7ed] border-[#f97316]":better?"bg-[#f0fdf4] border-[#22c55e]":"bg-[#f0fdf4] border-[#07C160]"}`}>
                   <div className="text-base font-bold mb-1">{emoji} {title}</div>
-                  <div className="text-sm text-[#374151] mb-2">{body}</div>
-                  <div className="text-xs text-[#718096] mt-1">差不多：</div>
-                  <div className="text-sm text-[#374151] mt-1">👍 状态稳定。</div>
-                  <div className="text-sm text-[#374151]">建议继续完成本阶段计划</div>
+                  <div className="text-sm text-[#374151]">{body}</div>
                 </div>
               ) : (
-                <div className="rounded-2xl p-4 bg-[#f7fafc] border border-[#e2e8f0]">
-                  <div className="text-sm text-[#374151] mb-2">更差了：</div>
-                  <div className="text-sm text-[#374151]">⚠️ 最近状态有所波动。</div>
-                  <div className="text-sm text-[#374151] mb-3">请留意活动量变化，如持续不适请及时反馈。</div>
+                <div className="rounded-2xl p-4 bg-[#f7fafc] border border-[#e2e8f0] space-y-3">
+                  <div>
+                    <div className="text-xs font-semibold text-[#22c55e] mb-0.5">好多了：</div>
+                    <div className="text-sm text-[#374151]">🎉 看到进步了！建议继续保持当前方案。</div>
+                  </div>
+                  <div className="border-t border-[#e2e8f0] pt-3">
+                    <div className="text-xs font-semibold text-[#718096] mb-0.5">差不多：</div>
+                    <div className="text-sm text-[#374151]">👍 状态稳定。建议继续完成本阶段计划。</div>
+                  </div>
+                  <div className="border-t border-[#e2e8f0] pt-3">
+                    <div className="text-xs font-semibold text-[#f97316] mb-0.5">还是不舒服：</div>
+                    <div className="text-sm text-[#374151]">⚠️ 最近状态有所波动。请留意活动量变化，如持续不适请及时反馈。</div>
+                  </div>
                 </div>
               )}
 
@@ -776,7 +783,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
 // ── Main App ──────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [screen, setScreen] = useState<AppScreen>("onboarding");
+  const [screen, setScreen] = useState<AppScreen>("wechat-login");
   const [tab, setTab] = useState<Tab>("home");
   const [currentDay, setCurrentDay] = useState(1);
   const [phase, setPhase] = useState<Phase>("smart_intro");
@@ -969,6 +976,15 @@ export default function App() {
         overflow: "hidden",
         boxShadow: "0 8px 32px rgba(0,0,0,0.18)"
       }}>
+      {screen === "wechat-login" && (
+        <WeChatLogin
+          onLogin={(name) => {
+            setUserData(prev => ({ ...prev, name }));
+            setScreen("onboarding");
+          }}
+          onSkip={() => setScreen("onboarding")}
+        />
+      )}
       {screen === "onboarding" && <Onboarding onDone={(smartModeParam, next) => {
         setSmartMode(smartModeParam);
         if (next === "assessment") { setScreen("manual-assessment"); return; }
