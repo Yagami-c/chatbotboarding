@@ -1011,10 +1011,29 @@ export default function App() {
             streak={0}
             weekDone={currentDay - 1}
             weekTotal={7}
-            onStartAssessment={() => setScreen("manual-assessment")}
-            onStartTraining={() => setScreen("quick-training")}
             showOnboardingBanner={false}
             onShowOnboarding={() => setScreen("onboarding")}
+            onAssessmentDone={(result) => {
+              setUserData((prev: UserData) => ({ ...prev, ...result, stiffness: null }));
+            }}
+            onDeviceStart={(level: number) => {
+              const params = LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
+              setUserData(prev => ({
+                ...prev,
+                pressure: params.pressure, workSec: params.work, restSec: params.rest,
+                cycles: params.cycles, baseLevel: level, finalLevel: level,
+              }));
+              const total = (params.work + params.rest) * params.cycles;
+              setHwLevel(level); setHwTotal(total); setHwRemaining(total);
+              setHwCycle(1); setHwTotalCycles(params.cycles);
+              if (deviceState === "disconnected") setDeviceState("idle");
+              setTimeout(() => { setHwState("running"); setDeviceState("running"); }, 500);
+            }}
+            onDeviceMinimize={() => { /* device keeps running via FloatBall */ }}
+            deviceState={deviceState}
+            hwLevel={hwLevel} hwRemaining={hwRemaining} hwTotal={hwTotal}
+            hwCycle={hwCycle} hwTotalCycles={hwTotalCycles}
+            onTogglePause={handleTogglePause} onStop={handleStop} onReset={handleReset}
           />}
           {tab === "training" && <TrainingPage />}
           {tab === "assistant" && (
