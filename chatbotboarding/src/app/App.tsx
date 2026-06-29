@@ -15,54 +15,74 @@ import { ProfilePage } from "./components/ProfilePage";
 const LEVEL_NAMES: Record<number,string> = {1:"L1（低）",2:"L2（中低）",3:"L3（中）",4:"L4（中高）",5:"L5（高）",6:"L6（最高）"};
 
 const DAY1_TASKS: Task[] = [
-  {title:"小瑞了解你",desc:"基本信息 & 评估"},{title:"推荐方案",desc:"生成初始强度"},
-  {title:"陪伴治疗",desc:"设备控制"},{title:"记录变化",desc:"使用反馈"},{title:"持续优化",desc:"调整下次强度"},
+  {title:"小瑞了解你",desc:"基本信息"},{title:"推荐方案",desc:"生成初始强度"},
+  {title:"陪你用",desc:"设备控制"},{title:"记录变化",desc:"使用反馈"},{title:"持续优化",desc:"调整下次强度"},
 ];
 const DAILY_TASKS: Task[] = [
   {title:"小瑞了解你",desc:"今日感觉"},{title:"推荐方案",desc:"基于反馈调整"},
-  {title:"陪伴治疗",desc:"设备控制"},{title:"记录变化",desc:"完成情况"},{title:"持续优化",desc:"调整下次"},
+  {title:"陪你用",desc:"设备控制"},{title:"记录变化",desc:"完成情况"},{title:"持续优化",desc:"调整下次"},
 ];
 const DAY7_TASKS: Task[] = [
-  {title:"阶段复评",desc:"触发动作 & 不适程度"},{title:"7天总结",desc:"与开始时对比"},
+  {title:"阶段回顾",desc:"动作 & 不适"},{title:"阶段总结",desc:"与开始时对比"},
   {title:"下阶段方案",desc:"优化推荐"},
 ];
 
 // ── Task breakdown ─────────────────────────────────────────────────────────────
 
-function TaskBreakdown({tasks,current}: {tasks:Task[];current:number}) {
+function TaskBreakdown({tasks,current,deviceRunning}: {tasks:Task[];current:number;deviceRunning?:boolean}) {
   if(!tasks.length) return null;
+  const cur=tasks[current];
+  const next=tasks[current+1];
   return (
-    <div className="bg-[#f8fafc] px-4 py-3 border-b border-[#edf2f7] max-h-40 overflow-y-auto flex-shrink-0">
-      {tasks.map((t,i)=>{
-        const done=i<current, active=i===current;
-        return (
-          <div key={i} className="relative flex items-start gap-3 py-1.5">
-            {i<tasks.length-1&&<span className={`absolute left-[10px] top-7 bottom-0 w-0.5 ${done?"bg-[#48bb78]":"bg-[#e2e8f0]"}`}/>}
-            <span className={`relative z-10 w-[22px] h-[22px] rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold
-              ${done?"bg-[#48bb78] text-white":active?"bg-[#2ECC71] text-white shadow-[0_0_0_4px_rgba(46,204,113,0.2)]":"bg-[#e2e8f0] text-[#a0aec0]"}`}>
-              {done?"✅":active?"⏳":"⏸"}
-            </span>
-            <div className="flex-1 text-sm text-[#4a5568] pt-0.5">
-              <strong className="text-[#1a202c] font-semibold">{t.title}</strong>
-              <span className="block text-xs text-[#a0aec0] mt-0.5">{t.desc}</span>
-            </div>
+    <div className="bg-[#f8fafc] px-4 py-2.5 border-b border-[#edf2f7] flex-shrink-0 flex items-center gap-3">
+      {/* progress dots */}
+      <div className="flex gap-1 flex-shrink-0">
+        {tasks.map((_,i)=>(
+          <span key={i} className={`rounded-full transition-all duration-300 ${i<current?"w-1.5 h-1.5 bg-[#48bb78]":i===current?"w-2.5 h-2.5 bg-[#07C160]":"w-1.5 h-1.5 bg-[#e2e8f0]"}`}/>
+        ))}
+      </div>
+      {/* current */}
+      <div className="flex items-center gap-2 min-w-0">
+        <span className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold bg-[#07C160] text-white
+          ${deviceRunning?"shadow-[0_0_0_3px_rgba(7,193,96,0.3)] animate-[taskPulse_1.5s_ease-in-out_infinite]":""}`}>
+          {deviceRunning?(
+            <svg width="12" height="12" viewBox="0 0 13 13" fill="none" style={{animation:"spin 1.4s linear infinite",display:"block"}}>
+              <circle cx="6.5" cy="6.5" r="2" stroke="white" strokeWidth="1.2"/>
+              <path d="M6.5 1.5V3M6.5 10V11.5M1.5 6.5H3M10 6.5H11.5M3.2 3.2l1 1M8.8 8.8l1 1M3.2 9.8l1-1M8.8 4.2l1-1" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          ):"⏳"}
+        </span>
+        <div className="min-w-0">
+          <div className="text-xs font-semibold text-[#1a202c] truncate">{cur?.title}</div>
+          <div className="text-[10px] text-[#a0aec0] truncate">{cur?.desc}</div>
+        </div>
+      </div>
+      {/* next */}
+      {next&&<>
+        <span className="text-[#cbd5e1] text-sm flex-shrink-0">→</span>
+        <div className="flex items-center gap-1.5 min-w-0 opacity-50">
+          <span className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] bg-[#e2e8f0] text-[#a0aec0]">⏸</span>
+          <div className="min-w-0">
+            <div className="text-[11px] font-medium text-[#4a5568] truncate">{next.title}</div>
+            <div className="text-[10px] text-[#a0aec0] truncate">{next.desc}</div>
           </div>
-        );
-      })}
+        </div>
+      </>}
     </div>
   );
 }
 
 // ── Survey forms ───────────────────────────────────────────────────────────────
 
-function NewUserSurvey({onDone}:{onDone:(n:string,g:string,a:string)=>void}) {
-  const [name,setName]=useState("");const [g,setG]=useState("");const [a,setA]=useState("");
+function NewUserSurvey({onDone}:{onDone:(n:string,g:string,a:string,d:string)=>void}) {
+  const [name,setName]=useState("");const [g,setG]=useState("");const [a,setA]=useState("");const [d,setD]=useState("");
   return (
     <div>
-      <FormGroup label="你希望我怎么称呼你呢？"><StyledInput value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"/></FormGroup>
-      <FormGroup label="性别"><BtnRow><Pill label="👨 男" primary={g==="男"} onClick={()=>setG("男")}/><Pill label="👩 女" primary={g==="女"} onClick={()=>setG("女")}/><Pill label="其他" primary={g==="其他"} onClick={()=>setG("其他")}/></BtnRow></FormGroup>
-      <FormGroup label="年龄范围"><BtnRow>{["20岁以下","20-40岁","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
-      <SubmitBtn label="确定" onClick={()=>{if(!name.trim()){alert("请先输入昵称");return;}if(!g){alert("请选择性别");return;}if(!a){alert("请选择年龄范围");return;}onDone(name.trim(),g,a);}}/>
+      <FormGroup label="叫你什么好？"><StyledInput value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"/></FormGroup>
+      <FormGroup label="性别"><BtnRow><Pill label="👨 男" primary={g==="男"} onClick={()=>setG("男")}/><Pill label="👩 女" primary={g==="女"} onClick={()=>setG("女")}/></BtnRow></FormGroup>
+      <FormGroup label="年龄"><BtnRow>{["40岁以下","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
+      <FormGroup label="膝盖不舒服多久了？"><BtnRow>{["不到3个月","3个月以上","没有特别不适"].map(v=><Pill key={v} label={v} primary={d===v} onClick={()=>setD(v)}/>)}</BtnRow></FormGroup>
+      <SubmitBtn label="确定" onClick={()=>{if(!name.trim()){alert("请先输入昵称");return;}if(!g){alert("请选择性别");return;}if(!a){alert("请选择年龄");return;}if(!d){alert("请选择不适时长");return;}onDone(name.trim(),g,a,d);}}/>
     </div>
   );
 }
@@ -70,8 +90,8 @@ function ReturnerSurvey({onDone}:{onDone:(g:string,a:string)=>void}) {
   const [g,setG]=useState("");const [a,setA]=useState("");
   return (
     <div>
-      <FormGroup label="性别"><BtnRow><Pill label="👨 男" primary={g==="男"} onClick={()=>setG("男")}/><Pill label="👩 女" primary={g==="女"} onClick={()=>setG("女")}/><Pill label="其他" primary={g==="其他"} onClick={()=>setG("其他")}/></BtnRow></FormGroup>
-      <FormGroup label="年龄范围"><BtnRow>{["20岁以下","20-40岁","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
+      <FormGroup label="性别"><BtnRow><Pill label="👨 男" primary={g==="男"} onClick={()=>setG("男")}/><Pill label="👩 女" primary={g==="女"} onClick={()=>setG("女")}/></BtnRow></FormGroup>
+      <FormGroup label="年龄"><BtnRow>{["40岁以下","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
       <SubmitBtn label="确定" onClick={()=>{if(!g||!a){alert("请完整填写");return;}onDone(g,a);}}/>
     </div>
   );
@@ -93,19 +113,19 @@ function SafetySurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
   );
 }
 function TriggerSurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
-  const [local,setLocal]=useState<Record<string,boolean>>({});
-  const items=["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"];
+  const [local,setLocal]=useState("");
+  const items=["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","没有"];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-2">可多选</p>
+      <p className="text-sm text-[#4a5568] mb-2">选一个最困扰你的</p>
       <FormCard>
         {items.map(v=>(
           <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))}/>{v}
+            <input type="radio" name="trigger_q" checked={local===v} onChange={()=>setLocal(v)}/>{v}
           </label>
         ))}
       </FormCard>
-      <SubmitBtn label="确定" onClick={()=>{const vals=Object.entries(local).filter(([,v])=>v).map(([k])=>k);if(!vals.length){alert("请至少选择一项");return;}onSubmit(vals);}}/>
+      <SubmitBtn label="确定" onClick={()=>{if(!local){alert("请选择一项");return;}onSubmit([local]);}}/>
     </div>
   );
 }
@@ -243,19 +263,19 @@ function StopReasonModal({open,onClose}:{open:boolean;onClose:(reasons:string[])
   return (
     <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
       <div className="bg-white w-full rounded-t-3xl p-6">
-        <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 训练已结束</div>
-        <p className="text-sm text-[#4a5568] mb-4">今天没有完成预定治疗，主要原因是什么？（可多选）</p>
+        <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 使用已结束</div>
+        <p className="text-sm text-[#4a5568] mb-4">今天没完成，啥原因？（可多选）</p>
         {OPTS.map(r=>(
           <label key={r} className="flex items-center gap-2 py-2 cursor-pointer text-sm text-[#2d3748]">
-            <input type="checkbox" checked={!!local[r]} onChange={e=>setLocal(p=>({...p,[r]:e.target.checked}))} className="accent-[#2ECC71]"/>
+            <input type="checkbox" checked={!!local[r]} onChange={e=>setLocal(p=>({...p,[r]:e.target.checked}))} className="accent-[#07C160]"/>
             {r}
           </label>
         ))}
         <div className="bg-[#ecfdf5] border border-[#6ee7b7] rounded-xl p-3 my-3 text-sm text-[#065f46]">
-          💪 持之以恒，有助康复！明天记得继续哦～
+          💪 坚持才有效果，明天继续哦～
         </div>
         <button onClick={()=>{onClose(Object.entries(local).filter(([,v])=>v).map(([k])=>k));setLocal({});}}
-          className="w-full py-3 rounded-full bg-[#2ECC71] text-white font-bold text-sm border-0 cursor-pointer">
+          className="w-full py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">
           确定
         </button>
       </div>
@@ -273,27 +293,27 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
     <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
       <div className="bg-white w-full rounded-t-3xl p-5 max-h-[85%] overflow-y-auto">
         <div className="text-lg font-bold text-[#1a202c] mb-4">
-          {step==="new_user"?"👋 初次见面"
+        {step==="new_user"?"👋 初次见面"
           :step==="returner"?"👋 欢迎回来"
-          :step==="safety"?"⚠️ 安全评估"
-          :step==="triggers"?"🤔 触发动作"
-          :step==="pain"?"📊 不适程度"
-          :step==="day1_post_use"?"💭 使用感受"
-          :step==="day1_strength"?"💪 强度感受"
-          :step==="daily_reason"?"📝 未完成原因"
-          :step==="day7_trigger"?"🔄 触发动作复评"
-          :step==="day7_new_trigger"?"🔄 新触发动作"
-          :step==="day7_pain"?"📊 不适程度"
-          :step==="day7_feel"?"💭 整体感受"
-          :step==="day7_skin"?"🩹 皮肤状况"
+          :step==="safety"?"⚠️ 使用前确认"
+          :step==="triggers"?"🤔 最近哪个动作不舒服"
+          :step==="pain"?"📊 有多不舒服"
+          :step==="day1_post_use"?"💭 今天感觉咋样"
+          :step==="day1_strength"?"💪 强度合适吗"
+          :step==="daily_reason"?"📝 今天没完成"
+          :step==="day7_trigger"?"🔄 动作有变化吗"
+          :step==="day7_new_trigger"?"🔄 换了哪个动作"
+          :step==="day7_pain"?"📊 有多不舒服"
+          :step==="day7_feel"?"💭 这7天感觉怎样"
+          :step==="day7_skin"?"🩹 皮肤还好吗"
           :"问卷"}
         </div>
-        {step==="new_user"&&<NewUserSurvey onDone={(n,g,a)=>{onSubmit({name:n,gender:g,ageRange:a,firstTime:true});onClose();}}/>}
+        {step==="new_user"&&<NewUserSurvey onDone={(n,g,a,d)=>{onSubmit({name:n,gender:g,ageRange:a,duration:d,firstTime:true});onClose();}}/>}
         {step==="returner"&&<ReturnerSurvey onDone={(g,a)=>{onSubmit({gender:g,ageRange:a,firstTime:false});onClose();}}/>}
         {step==="safety"&&<SafetySurvey onSubmit={v=>{onSubmit({safety:v});onClose();}}/>}
         {step==="triggers"&&<TriggerSurvey onSubmit={v=>{onSubmit({triggers:v});onClose();}}/>}
         {step==="pain"&&<PainSurvey trigger={userData.mainTrigger||"触发动作"} onSubmit={v=>{onSubmit({painLevel:v});onClose();}}/>}
-        {step==="day1_post_use"&&<PostUseSurvey onDone={f=>{onSubmit({dailyFeel:f});onClose();}}/>}
+        {step==="day1_post_use"&&<PostUseSurvey onDone={f=>{onSubmit({postUseFeel:f});onClose();}}/>}
         {step==="day1_strength"&&<StrengthSurvey onDone={s=>{onSubmit({dailyFeel:s});onClose();}}/>}
         {step==="daily_reason"&&<DailyReasonSurvey onDone={r=>{onSubmit({dailyFeel:r});onClose();}}/>}
         {step==="day7_trigger"&&<Day7TriggerSurvey mainTrigger={userData.mainTrigger} onDone={same=>{onSubmit({day7Trigger:same?userData.mainTrigger:""});onClose();}}/>}
@@ -311,7 +331,7 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
   onSubmitDuration,onSubmitStiffness,onGoToNextDay,onSubmitDailyFeel,onReset,
   day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode,
-  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep,setTaskIdx,onStartDevice}:{
+  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep,setTaskIdx,setMsgs,setTab,onStartDevice,deviceState}:{
   msgs:Msg[];phase:Phase;tasks:Task[];taskIdx:number;currentDay:number;ud:UserData;
   thinking:boolean;messagesRef:React.RefObject<HTMLDivElement|null>;
   onSubmitDuration:(d:string)=>void;onSubmitStiffness:(l:number)=>void;
@@ -319,96 +339,122 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   day1PainRef:React.RefObject<number>;
   onStartAssessment:()=>void;onStartTraining:()=>void;
   smartMode:boolean;onToggleSmartMode:()=>void;
-  addMsg:(role:"bot"|"user",html:string)=>void;
+  addMsg:(role:"bot"|"user",html:string,editPhase?:Phase)=>void;
   simulateThinking:(cb:()=>void)=>void;
   setPhase:(p:Phase)=>void;
   setUserData:React.Dispatch<React.SetStateAction<UserData>>;
   setSurveyStep:React.Dispatch<React.SetStateAction<SurveyStep|null>>;
   setTaskIdx:React.Dispatch<React.SetStateAction<number>>;
+  setMsgs:React.Dispatch<React.SetStateAction<Msg[]>>;
+  setTab:(t:Tab)=>void;
   onStartDevice:(level:number)=>void;
+  deviceState:DeviceState;
 }) {
   const lv=ud.finalLevel;
   const prm=LEVEL_PARAMS[lv-1]||LEVEL_PARAMS[1];
   const total=prm.cycles*(prm.work+prm.rest);
   const day1Pain=day1PainRef.current||0;
 
-  // 自动启动设备：当进入 day1_recommend 阶段时
+  const [showDeviceConfirm, setShowDeviceConfirm] = useState(false);
+  const targetTherapyPhase = useRef<Phase>("day1_therapy");
+
+  // 进入 day1_recommend 时记录目标 phase
+  const lvRef = useRef(lv);
+  lvRef.current = lv;
   useEffect(() => {
     if (phase === "day1_recommend") {
-      console.log("[Auto-start] Entering day1_recommend, will start device with level:", lv);
-      const timer = setTimeout(() => {
-        console.log("[Auto-start] Starting device now...");
-        onStartDevice(lv);
-        setTimeout(() => {
-          console.log("[Auto-start] Transitioning to day1_therapy phase");
-          setPhase("day1_therapy");
-        }, 1000);
-      }, 2000); // 显示推荐方案2秒后自动启动
-      return () => clearTimeout(timer);
+      targetTherapyPhase.current = "day1_therapy";
     }
-  }, [phase, lv]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{minHeight:0}}>
+      {/* Device start confirm overlay */}
+      {showDeviceConfirm&&(
+        <div style={{position:"absolute",inset:0,zIndex:820,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
+          <div style={{background:"white",width:"100%",borderRadius:"24px 24px 0 0",padding:"24px 20px 32px",boxShadow:"0 -8px 32px rgba(0,0,0,0.12)"}}>
+            <div style={{width:40,height:4,background:"#e2e8f0",borderRadius:4,margin:"0 auto 16px"}}/>
+            <div style={{fontSize:32,textAlign:"center",marginBottom:8}}>🦵</div>
+            <div style={{fontWeight:700,fontSize:16,color:"#1a202c",textAlign:"center",marginBottom:6}}>准备好开始了吗？</div>
+            <div style={{fontSize:13,color:"#4a5568",textAlign:"center",marginBottom:20,lineHeight:1.6}}>
+              请确保设备已穿戴好，<br/>点击「开始」后设备将自动启动。
+            </div>
+            <button onClick={()=>{
+              setShowDeviceConfirm(false);
+              onStartDevice(lvRef.current);
+              setTimeout(()=>setPhase(targetTherapyPhase.current),1000);
+            }} style={{width:"100%",padding:"13px 0",borderRadius:32,background:"#07C160",color:"white",fontWeight:700,fontSize:15,border:"none",cursor:"pointer",marginBottom:10}}>
+              ✅ 开始使用
+            </button>
+            <button onClick={()=>setShowDeviceConfirm(false)} style={{width:"100%",padding:"12px 0",borderRadius:32,background:"#f7fafc",color:"#4a5568",fontWeight:600,fontSize:14,border:"1px solid #e2e8f0",cursor:"pointer"}}>
+              稍后再用
+            </button>
+          </div>
+        </div>
+      )}
       <div className="px-4 pt-3 pb-1.5 bg-[#fafcff] border-b border-[#e9ecf0] flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="text-3xl">🧑‍⚕️</span>
+            <span className="text-3xl">🤖</span>
             <div>
-              <div className="font-bold text-base text-[#1a202c]">小瑞 · <span className="text-[#2ECC71]">AI 康复助手</span></div>
+              <div className="font-bold text-base text-[#1a202c]">小瑞 · <span className="text-[#07C160]">AI 护膝助手</span></div>
               <div className="text-[11px] text-[#48bb78] flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#2ECC71] inline-block"/>
-                在线 · 7天疗程
-                <span className="bg-[#2ECC71] text-white px-3 py-0.5 rounded-full ml-2 text-[11px] font-medium">第{currentDay}天</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#07C160] inline-block"/>
+                在线 · 7天计划
+                <span className="bg-[#07C160] text-white px-3 py-0.5 rounded-full ml-2 text-[11px] font-medium">第{currentDay}天</span>
               </div>
             </div>
           </div>
           {/* Smart mode toggle - top right */}
           <button onClick={onToggleSmartMode}
             className={`relative w-11 h-6 rounded-full transition-colors duration-200 border-0 cursor-pointer flex-shrink-0
-              ${smartMode?"bg-[#2ECC71]":"bg-[#cbd5e0]"}`}>
+              ${smartMode?"bg-[#07C160]":"bg-[#cbd5e0]"}`}>
             <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200
               ${smartMode?"translate-x-5":"translate-x-0.5"}`}/>
           </button>
         </div>
       </div>
-      <TaskBreakdown tasks={tasks} current={taskIdx}/>
+      <TaskBreakdown tasks={tasks} current={taskIdx} deviceRunning={deviceState==="running"}/>
       <div ref={messagesRef} className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col gap-2.5 bg-[#fafcff]
         [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-[#cbd5e0] [&::-webkit-scrollbar-thumb]:rounded-full">
 
-        {msgs.map(m=>(
-          <div key={m.id}
-            className={`max-w-[92%] px-3.5 py-2.5 text-sm leading-relaxed rounded-2xl animate-[fadeUp_0.3s_ease]
-              ${m.role==="bot"?"self-start bg-white border border-[#e8ecf0] rounded-bl-[3px] text-[#1a202c]":"self-end bg-[#2ECC71] text-white rounded-br-[3px]"}`}
-            dangerouslySetInnerHTML={{__html:m.html}}/>
+        {msgs.map((m,idx)=>(
+          <div key={m.id} className={`flex flex-col ${m.role==="bot"?"items-start":"items-end"}`}>
+            <div
+              className={`max-w-[92%] px-3.5 py-2.5 text-sm leading-relaxed rounded-2xl animate-[fadeUp_0.3s_ease]
+                ${m.role==="bot"?"self-start bg-white border border-[#e8ecf0] rounded-bl-[3px] text-[#1a202c]":"self-end bg-[#07C160] text-white rounded-br-[3px]"}`}
+              dangerouslySetInnerHTML={{__html:m.html}}/>
+            {m.role==="user"&&m.editPhase&&(
+              <button onClick={()=>{
+                setMsgs(prev=>prev.slice(0,idx));
+                setPhase(m.editPhase!);
+              }} className="mt-1 text-[11px] text-[#a0aec0] bg-transparent border border-[#e2e8f0] rounded-full px-2.5 py-0.5 cursor-pointer hover:text-[#07C160] hover:border-[#07C160] transition-colors">
+                ✏️ 修改
+              </button>
+            )}
+          </div>
         ))}
         {thinking&&<div className="self-start bg-white border border-[#e8ecf0] rounded-2xl rounded-bl-[3px] px-3.5 py-2.5"><ThinkingDots/></div>}
 
         {phase==="smart_confirm_assessment"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
             <button onClick={() => {
-              addMsg("user", "开始评估");
-              simulateThinking(() => {
-                addMsg("bot", "好的！让我们开始评估。首先，你的膝盖不适持续多久了？");
-                setPhase("day1_duration");
-              });
+              addMsg("user", "开始了解");
+              setSurveyStep("new_user");
             }}
-              className="bg-[#2ECC71] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#27AE60] transition-colors">
-              📋 开始评估
+              className="bg-[#07C160] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#06AE56] transition-colors">
+              📋 开始
             </button>
             <button onClick={() => {
-              addMsg("user", "跳过评估，直接训练");
+              addMsg("user", "直接开始用");
               simulateThinking(() => {
-                addMsg("bot", "明白了，我们直接开始训练。请确保你的PAD设备已准备好。");
-                setTimeout(() => {
-                  setPhase("day1_therapy");
-                  // 使用默认 L2 温和模式启动设备
-                  onStartDevice(2);
-                }, 800);
+                addMsg("bot", "好的！请先选择一个强度模式，或者自定义参数。");
+                setTimeout(() => setPhase("day1_manual_level"), 600);
               });
             }}
               className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-3 rounded-xl text-sm font-semibold cursor-pointer active:bg-[#f7fafc] transition-colors">
-              ⚡ 跳过评估，直接训练
+              ⚡ 直接开始用
             </button>
           </div>
         )}
@@ -416,7 +462,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         {phase==="day1_duration"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease]">
             <BtnRow>
-              {["不到1个月","1-3个月","3-6个月","6个月-1年","1年以上","无特别不适"].map(d=>(
+              {["不到3个月","3个月以上","没有特别不适"].map(d=>(
                 <Pill key={d} label={d} onClick={()=>onSubmitDuration(d)}/>
               ))}
             </BtnRow>
@@ -433,18 +479,18 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         )}
         {phase==="day1_triggers"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-            <p className="text-xs text-[#718096] mb-1">可多选</p>
             {["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"].map(t=>(
               <button key={t} onClick={()=>{
-                addMsg("user", t);
+                const ep: Phase = "day1_triggers";
+                addMsg("user", t, ep);
+                setUserData(p=>({...p,triggers:[t],mainTrigger:t==="无"?"":t}));
                 simulateThinking(() => {
                   if(t==="无"){
-                    addMsg("bot", "明白了，你目前没有明显的触发动作。");
-                    setUserData(p=>({...p,triggers:[t],mainTrigger:t}));
+                    addMsg("bot", "明白了，没有特别困扰的动作。");
                     setTimeout(()=>setPhase("day1_pain"),800);
                   }else{
-                    addMsg("bot", `收到「${t}」。你还有其他会让膝盖不舒服的动作吗？如果没有了，点击「完成选择」`);
-                    setUserData(p=>({...p,triggers:[...(p.triggers||[]),t]}));
+                    addMsg("bot", `收到，我会关注「${t}」这个动作。这个动作时，不适程度是？`);
+                    setTimeout(()=>setPhase("day1_pain"),800);
                   }
                 });
               }}
@@ -452,20 +498,6 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 {t}
               </button>
             ))}
-            {ud.triggers&&ud.triggers.length>0&&!ud.triggers.includes("无")&&(
-              <button onClick={()=>{
-                addMsg("user", `完成选择（已选：${ud.triggers.join("、")}）`);
-                const main=ud.triggers[0];
-                setUserData(p=>({...p,mainTrigger:main}));
-                simulateThinking(()=>{
-                  addMsg("bot",`好的，我会重点关注「${main}」这个动作。接下来，请告诉我这个动作时的不适程度。`);
-                  setTimeout(()=>setPhase("day1_pain"),800);
-                });
-              }}
-                className="bg-[#2ECC71] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#27AE60] transition-colors mt-2">
-                ✅ 完成选择
-              </button>
-            )}
           </div>
         )}
         {phase==="day1_pain"&&(
@@ -473,7 +505,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             <p className="text-xs text-[#718096] mb-1">触发动作：{ud.mainTrigger||"未知"}，不适程度是？</p>
             {["0 — 无不适","1 — 轻微不适（不影响完成）","2 — 中等不适（明显不舒服）","3 — 较重不适（需减慢速度）","4 — 非常不适（难以完成）"].map((label,i)=>(
               <button key={i} onClick={()=>{
-                addMsg("user", label);
+                addMsg("user", label, "day1_pain");
                 setUserData(p=>({...p,painLevel:i}));
                 day1PainRef.current=i;
                 simulateThinking(()=>{
@@ -481,7 +513,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                   setTimeout(()=>{
                     setTaskIdx(1);
                     setPhase("day1_recommend");
-                    addMsg("bot", `根据你的评估，我为你推荐<strong>${LEVELS[Math.max(0,2-Math.floor(i/2))]}</strong>模式开始训练。`);
+                    addMsg("bot", `根据你的情况，我为你推荐<strong>${LEVELS[Math.max(0,2-Math.floor(i/2))]}</strong>模式开始。`);
                   },800);
                 });
               }}
@@ -491,10 +523,33 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             ))}
           </div>
         )}
+        {phase==="day1_manual_level"&&(
+          <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
+            <p className="text-xs text-[#718096] mb-1">选择强度模式，或自定义参数：</p>
+            {LEVELS.map((name,i)=>{
+              const lv=i+1;
+              const p=LEVEL_PARAMS[i];
+              return (
+                <button key={lv} onClick={()=>{
+                  addMsg("user", `${getLevelName(lv)} · ${name}`, "day1_manual_level");
+                  setUserData(prev=>({...prev,finalLevel:lv,baseLevel:lv}));
+                  simulateThinking(()=>{
+                    addMsg("bot",`好的，已选择 <strong>${getLevelName(lv)} ${name}</strong> 模式。`);
+                    setTimeout(()=>setPhase("day1_recommend"),600);
+                  });
+                }}
+                  className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer active:bg-[#f7fafc] transition-colors text-left">
+                  <span className="font-semibold">{getLevelName(lv)} · {name}</span>
+                  <span className="ml-2 text-xs text-[#718096]">{p.pressure}mmHg · {p.work}s/{p.rest}s · {p.cycles}轮</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         {phase==="day1_recommend"&&(
           <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
             <ResultCard>
-              <div className="text-[19px] font-bold text-[#2ECC71]">🌸 推荐：{LEVELS[lv-1]||"温和"}模式</div>
+              <div className="text-[19px] font-bold text-[#07C160]">🌸 推荐：{LEVELS[lv-1]||"温和"}模式</div>
               <div className="text-sm text-[#2d3748] mt-1">强度 <strong>{getLevelName(lv)}</strong></div>
               <div className="flex gap-2 flex-wrap mt-2 text-[13px] text-[#4a5568]">
                 {[`💨 ${prm.pressure} mmHg`,`⏱ 工作${prm.work}s`,`🔄 休息${prm.rest}s`,`🔁 ${prm.cycles}轮`].map(t=>(
@@ -503,32 +558,71 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               </div>
               <div className="mt-1.5 text-[13px] text-[#4a5568]">📅 每天1-2次，约{Math.floor(total/60)}分{total%60}秒</div>
             </ResultCard>
+
+            {/* Device usage instructions */}
+            <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-3 text-sm text-[#92400e]">
+              <div className="font-semibold mb-2">⚠️ 使用须知</div>
+              <div className="space-y-1.5 text-xs leading-relaxed text-[#78350f]">
+                <div>• 带上设备前，请保持治疗部位清爽。</div>
+                <div>• 设备开始工作后，请保持静止放松，暂时不要移动。</div>
+                <div>• 你可能会出现吸附感，或皮肤刺激紧的感觉</div>
+                <div>• 使用后皮肤轻微发红属正常现象，不用担心。根据个人差异，可能会在4-48逐渐消退。</div>
+              </div>
+              <div className="mt-2 pt-2 border-t border-[#fde68a] text-xs text-[#92400e] leading-relaxed">
+                ⚠️ 如出现严重不适、持续疼痛或皮肤异常反应，请立即停止使用并咨询医生。
+              </div>
+            </div>
+
             <div className="bg-[#f0f9ff] border border-[#bae6fd] rounded-2xl p-3 text-sm text-[#075985]">
               <div className="font-semibold mb-2">⚙️ 穿戴须知</div>
               <div className="space-y-1 text-xs leading-relaxed text-[#0c4a6e]">
-                <div>• 使用前请保持治疗部位清爽干燥</div>
+                <div>• 使用前请保持使用部位清爽干燥</div>
                 <div>• 设备运行时请保持静止放松</div>
                 <div>• 可能出现吸附感或皮肤紧绷感，属正常现象</div>
                 <div>• 使用后皮肤轻微发红属正常，4-48小时消退</div>
               </div>
             </div>
-            <div className="bg-[#ecfdf5] border border-[#6ee7b7] rounded-2xl px-3 py-2.5 flex items-center gap-2 text-sm text-[#065f46]">
-              <span className="text-lg">⚙️</span>
-              <span>请点击屏幕右侧<strong>遥控器</strong>，先连接设备，再点击「开始」启动养护。</span>
-            </div>
-          </div>
-        )}
-        {phase==="day1_optimize"&&(
-          <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease]">
-            <ResultCard>
-              <div className="font-bold">🌸 持续优化完成</div>
-              <div className="text-sm mt-1">下一次强度：<strong>{getLevelName(ud.finalLevel)}</strong></div>
-            </ResultCard>
-            <button onClick={onGoToNextDay} className="mt-2.5 w-full py-3 rounded-full bg-[#2ECC71] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#27AE60] transition-all">
-              📅 进入第2天
+            <button onClick={()=>{
+              targetTherapyPhase.current="day1_therapy";
+              setShowDeviceConfirm(true);
+            }} className="w-full mt-1 py-3 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all shadow-[0_4px_16px_rgba(7,193,96,0.35)]">
+              ✅ 开始首次使用
             </button>
           </div>
         )}
+        {phase==="day1_optimize"&&(()=>{
+          const feel=ud.postUseFeel;
+          const strength=ud.dailyFeel;
+          const isSkin=feel==="skin";
+          const levelUp=strength==="weak";
+          const levelDown=isSkin||strength==="strong";
+          const emoji=levelDown?"⚠️":levelUp?"👍":"👍";
+          const title=levelDown?"当前强度偏强":levelUp?"当前强度偏轻":"当前方案适合你";
+          const body=levelDown
+            ?"为了提高舒适度，下次我会为你降低一级强度。"
+            :levelUp
+            ?"为了获得更好的效果，我会为你提高一级强度。"
+            :"整体感觉良好，未出现明显不适。";
+          return (
+            <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
+              <div className={`rounded-2xl p-4 border-l-4 ${levelDown?"bg-[#fff7ed] border-[#f97316]":levelUp?"bg-[#f0fdf4] border-[#22c55e]":"bg-[#f0fdf4] border-[#07C160]"}`}>
+                <div className="text-base font-bold mb-1">{emoji} {title}</div>
+                <div className="text-sm text-[#374151]">{body}</div>
+                <div className="text-sm text-[#374151] mt-1">下次再见！</div>
+                <div className="mt-2.5 flex items-center gap-2 text-xs text-[#6b7280]">
+                  <span>下次强度：</span>
+                  <span className="font-semibold text-[#1a202c]">{getLevelName(ud.finalLevel)}</span>
+                </div>
+              </div>
+              <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#07C160] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#06AE56] transition-all">
+                📅 进入第2天
+              </button>
+              <button onClick={()=>setTab("training")} className="w-full py-3 rounded-full bg-[#ebf8f0] text-[#07C160] font-semibold text-base border border-[#07C160] cursor-pointer active:bg-[#d4f5e3] transition-all">
+                🏃 去训练页面
+              </button>
+            </div>
+          );
+        })()}
         {phase==="daily_feel"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease]">
             <BtnRow>
@@ -541,23 +635,62 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         {phase==="daily_recommend"&&(
           <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease]">
             <ResultCard>
-              <div className="text-lg font-bold text-[#2ECC71]">📌 今日推荐</div>
+              <div className="text-lg font-bold text-[#07C160]">📌 今日推荐</div>
               <div className="text-sm mt-1">强度 <strong>{getLevelName(ud.finalLevel)}</strong></div>
               <div className="text-xs text-[#718096] mt-1">{ud.dailyFeel==="worse"?"感觉变差，已降低一级":"保持当前强度"}</div>
             </ResultCard>
-            <div className="bg-[#ecfdf5] border border-[#6ee7b7] rounded-2xl px-3 py-2.5 flex items-center gap-2 text-sm text-[#065f46] mt-2">
-              <span className="text-lg">⚙️</span>
-              <span>请使用右侧<strong>遥控器</strong>连接设备并开始今日养护。</span>
-            </div>
-          </div>
-        )}
-        {phase==="daily_optimize"&&(
-          <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease]">
-            <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#2ECC71] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#27AE60] transition-all">
-              📅 {currentDay<6?`进入第${currentDay+1}天`:currentDay===6?"进入第7天复评":"完成"}
+            <button onClick={()=>{
+              targetTherapyPhase.current="daily_therapy";
+              setShowDeviceConfirm(true);
+            }} className="w-full mt-3 py-3 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all">
+              ✅ 开始今日养护
             </button>
           </div>
         )}
+        {phase==="daily_optimize"&&(()=>{
+          const feel=ud.dailyFeel;
+          const better=feel==="better";
+          const worse=feel==="worse";
+          const emoji=better?"🎉":worse?"⚠️":"👍";
+          const title=better?"看到进步了！":worse?"最近状态有所波动。":"状态稳定。";
+          const body=better?"建议继续保持当前方案。":worse?"请留意活动量变化，如持续不适请及时反馈。":"建议继续完成本阶段计划。";
+          const [summaryTab, setSummaryTab] = React.useState<"today"|"example">("today");
+          return (
+            <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
+              {/* Tab switcher */}
+              <div className="flex gap-2 mb-1">
+                <button onClick={()=>setSummaryTab("today")}
+                  className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-all ${summaryTab==="today"?"border-[#07C160] text-[#07C160]":"border-transparent text-[#8e98a3]"}`}>
+                  今日总结
+                </button>
+                <button onClick={()=>setSummaryTab("example")}
+                  className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-all ${summaryTab==="example"?"border-[#07C160] text-[#07C160]":"border-transparent text-[#8e98a3]"}`}>
+                  举例
+                </button>
+              </div>
+
+              {summaryTab === "today" ? (
+                <div className={`rounded-2xl p-4 border-l-4 ${worse?"bg-[#fff7ed] border-[#f97316]":better?"bg-[#f0fdf4] border-[#22c55e]":"bg-[#f0fdf4] border-[#07C160]"}`}>
+                  <div className="text-base font-bold mb-1">{emoji} {title}</div>
+                  <div className="text-sm text-[#374151] mb-2">{body}</div>
+                  <div className="text-xs text-[#718096] mt-1">差不多：</div>
+                  <div className="text-sm text-[#374151] mt-1">👍 状态稳定。</div>
+                  <div className="text-sm text-[#374151]">建议继续完成本阶段计划</div>
+                </div>
+              ) : (
+                <div className="rounded-2xl p-4 bg-[#f7fafc] border border-[#e2e8f0]">
+                  <div className="text-sm text-[#374151] mb-2">更差了：</div>
+                  <div className="text-sm text-[#374151]">⚠️ 最近状态有所波动。</div>
+                  <div className="text-sm text-[#374151] mb-3">请留意活动量变化，如持续不适请及时反馈。</div>
+                </div>
+              )}
+
+              <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#07C160] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#06AE56] transition-all">
+                📅 {currentDay<6?`进入第${currentDay+1}天`:currentDay===6?"进入阶段回顾":"完成"}
+              </button>
+            </div>
+          );
+        })()}
         {phase==="day7_summary"&&(()=>{
           const d7pain=ud.day7Pain;
           const d1pain=day1Pain;
@@ -596,7 +729,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 <div className="font-semibold text-[#1a202c] mb-1">📋 下一阶段</div>
                 <div className="text-sm text-[#4a5568]">我们已根据你的最新反馈优化下一阶段方案。</div>
                 <div className="flex gap-2 mt-3">
-                  <button onClick={onGoToNextDay} className="flex-1 py-2.5 rounded-full bg-[#2ECC71] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#27AE60] transition-all">查看下一阶段</button>
+                  <button onClick={onGoToNextDay} className="flex-1 py-2.5 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all">查看下一阶段</button>
                   <button onClick={onReset} className="flex-1 py-2.5 rounded-full bg-[#edf2f7] text-[#4a5568] font-medium text-sm border-0 cursor-pointer active:bg-[#e2e8f0] transition-all">重新开始</button>
                 </div>
               </div>
@@ -629,9 +762,9 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             type="text"
             name="chatInput"
             placeholder="输入消息..."
-            className="flex-1 px-3 py-2 text-sm border border-[#e2e8f0] rounded-full bg-[#f7fafc] focus:outline-none focus:border-[#2ECC71] transition-colors"
+            className="flex-1 px-3 py-2 text-sm border border-[#e2e8f0] rounded-full bg-[#f7fafc] focus:outline-none focus:border-[#07C160] transition-colors"
           />
-          <button type="submit" className="w-9 h-9 rounded-full bg-[#2ECC71] text-white flex items-center justify-center border-0 cursor-pointer active:bg-[#27AE60] transition-colors flex-shrink-0">
+          <button type="submit" className="w-9 h-9 rounded-full bg-[#07C160] text-white flex items-center justify-center border-0 cursor-pointer active:bg-[#06AE56] transition-colors flex-shrink-0">
             <span className="text-base">↑</span>
           </button>
         </form>
@@ -663,6 +796,7 @@ export default function App() {
     dailyRecords: {},
     pressure: 0, workSec: 0, restSec: 0, cycles: 0,
     dailyFeel: "",
+    postUseFeel: "",
     earlyStopReason: "",
     postTrainingPain: 0,
     postTrainingStrength: 0,
@@ -689,54 +823,75 @@ export default function App() {
 
   // 监听设备训练完成
   useEffect(() => {
-    console.log("[Completion Monitor] State check - hwRemaining:", hwRemaining, "hwTotal:", hwTotal, "hwState:", hwState, "tab:", tab, "phase:", phase);
     if (hwRemaining === 0 && hwTotal > 0 && hwState === "running" && tab === "assistant") {
-      // 设备训练完成
-      console.log("[Completion Monitor] Device training completed!");
       setHwState("idle");
       setDeviceState("idle");
 
       if (phase === "day1_therapy") {
-        // Day 1 训练完成，显示使用后问卷
-        console.log("[Completion Monitor] Day 1 therapy complete, showing post-use survey");
+        setTaskIdx(3);
         simulateThinking(() => {
-          addMsg("bot", "✅ 第一次训练完成！请告诉我你的感受。");
-          setTimeout(() => {
-            setSurveyStep("day1_post_use");
-          }, 600);
+          addMsg("bot", "✅ 第一次使用完成！请告诉我你的感受。");
+          setTimeout(() => { setSurveyStep("day1_post_use"); }, 600);
         }, 500);
       } else if (phase === "daily_therapy") {
-        // 日常训练完成，进入优化阶段
-        console.log("[Completion Monitor] Daily therapy complete, entering optimize phase");
+        setTaskIdx(3);
         simulateThinking(() => {
-          addMsg("bot", "✅ 今日训练完成！");
+          addMsg("bot", "✅ 今日使用完成！");
           setTimeout(() => {
-            setPhase("daily_optimize");
+            // 显示今日总结
+            addMsg("bot", "让我为你生成今日总结。");
+            setTimeout(() => {
+              setPhase("daily_optimize");
+              // Daily优化完成后，推荐训练和发现tab
+              setTimeout(() => {
+                addMsg("bot", "💡 记得查看下方「训练」tab 跟练运动，或者到「发现」tab 学习更多护膝方法！");
+              }, 800);
+            }, 800);
           }, 600);
         }, 500);
       }
     }
   }, [hwRemaining, hwTotal, hwState, phase, tab]);
 
+  // 设备开始运行时，推进到治疗阶段并更新节点
+  useEffect(() => {
+    if (deviceState === "running" && tab === "assistant") {
+      if (phase === "day1_recommend" || phase === "day1_therapy") {
+        setPhase("day1_therapy");
+        setTaskIdx(2);
+      } else if (phase === "daily_recommend" || phase === "daily_therapy") {
+        setPhase("daily_therapy");
+        setTaskIdx(2);
+      }
+    }
+  }, [deviceState, tab, phase]);
+
+  // phase 变化时同步 taskIdx
+  useEffect(() => {
+    if (phase === "day1_optimize" || phase === "daily_optimize") {
+      setTaskIdx(4);
+    }
+  }, [phase]);
+
   // 设备倒计时逻辑
   useEffect(() => {
     if (hwState === "running" && hwRemaining > 0) {
-      console.log("[Countdown] Starting countdown timer, remaining:", hwRemaining);
       const timer = setInterval(() => {
-        setHwRemaining(prev => {
-          const newVal = prev <= 1 ? 0 : prev - 1;
-          if (newVal === 0) {
-            console.log("[Countdown] Timer reached 0!");
-          }
-          return newVal;
-        });
+        setHwRemaining(prev => prev <= 1 ? 0 : prev - 1);
       }, 1000);
       return () => clearInterval(timer);
     }
   }, [hwState, hwRemaining]);
 
-  const addMsg = (role: "bot" | "user", html: string) => {
-    setMsgs(prev => [...prev, { id: msgId.current++, role, html }]);
+  const addMsg = (role: "bot" | "user", html: string, editPhase?: Phase) => {
+    let finalHtml = html;
+    if (role === "bot" && userData.name) {
+      const hasGreeting = /^[👋🎉✅💡📌⚡⚠️👍📊💭🩹]/.test(html.trim());
+      if (!hasGreeting && !html.includes(userData.name)) {
+        finalHtml = `${userData.name}，${html}`;
+      }
+    }
+    setMsgs(prev => [...prev, { id: msgId.current++, role, html: finalHtml, editPhase }]);
   };
 
   const simulateThinking = (cb: () => void, delay = 800) => {
@@ -779,7 +934,7 @@ export default function App() {
       setShowStopModal(true);
     }
     setHwState("stopped");
-    setDeviceState("idle");
+    setDeviceState("stopped");
     setHwRemaining(0);
   };
 
@@ -799,59 +954,37 @@ export default function App() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      background: "#EDEDED"
     }}>
-      {/* iPhone 16 Pro Max device frame */}
+      {/* WeChat Mini Program container — 375px standard */}
       <div style={{
-        width: "430px",
-        height: "932px",
-        background: "#1a1a1a",
-        borderRadius: "60px",
-        padding: "12px",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-        position: "relative"
+        width: "375px",
+        height: "812px",
+        maxHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        background: "#F7F8FA",
+        borderRadius: "20px",
+        overflow: "hidden",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.18)"
       }}>
-        {/* Dynamic Island */}
-        <div style={{
-          position: "absolute",
-          top: "25px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "126px",
-          height: "37px",
-          background: "#000",
-          borderRadius: "30px",
-          zIndex: 9999
-        }}/>
-
-        {/* Screen content */}
-        <div style={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          background: "#fafcff",
-          borderRadius: "48px",
-          overflow: "hidden"
-        }}>
-      {screen === "onboarding" && <Onboarding onDone={(smartMode, next) => {
-        setSmartMode(smartMode);
-        if (smartMode) {
-          // 智能模式：直接进入助手页面，由AI引导
-          setScreen("home");
+      {screen === "onboarding" && <Onboarding onDone={(smartModeParam, next) => {
+        setSmartMode(smartModeParam);
+        if (next === "assessment") { setScreen("manual-assessment"); return; }
+        if (next === "quick-training") { setScreen("quick-training"); return; }
+        setScreen("home");
+        if (smartModeParam) {
+          // step2 smart confirm → start AI chat
           setTab("assistant");
           setPhase("smart_intro");
           setTimeout(() => {
-            addMsg("bot", "👋 你好！我是小瑞，你的康复助手。我注意到你还没有开始评估，建议先做个评估，我会根据你的情况推荐最合适的方案。");
-            setTimeout(() => {
-              setPhase("smart_confirm_assessment");
-            }, 1000);
+            addMsg("bot", "👋 你好！我是小瑞，你的护膝助手。先了解一下你的情况，帮你找到最合适的方案。");
+            setTimeout(() => { setPhase("smart_confirm_assessment"); }, 1000);
           }, 500);
         } else {
-          // 手动模式：根据选择跳转
-          if (next === "assessment") setScreen("manual-assessment");
-          else if (next === "quick-training") setScreen("quick-training");
-          else setScreen("home");
+          // skip → 首页 tab
+          setTab("home");
         }
       }} />}
 
@@ -888,7 +1021,7 @@ export default function App() {
                 if (newMode && msgs.length === 0) {
                   setPhase("smart_intro");
                   setTimeout(() => {
-                    addMsg("bot", "👋 你好！我是小瑞，你的康复助手。我注意到你还没有开始评估，建议先做个评估，我会根据你的情况推荐最合适的方案。");
+                    addMsg("bot", "👋 你好！我是小瑞，你的护膝助手。先了解一下你的情况，帮你找到最合适的方案。");
                     setTimeout(() => {
                       setPhase("smart_confirm_assessment");
                     }, 1000);
@@ -897,7 +1030,7 @@ export default function App() {
               }}
               onSubmitDuration={(d) => {
                 setUserData((prev: UserData) => ({ ...prev, duration: d }));
-                addMsg("user", d);
+                addMsg("user", d, "day1_duration");
                 simulateThinking(() => {
                   addMsg("bot", "明白了。接下来问一下，早上起床或久坐后，膝盖会不会有僵硬、不灵活的感觉？");
                   setPhase("day1_stiffness");
@@ -905,9 +1038,9 @@ export default function App() {
               }}
               onSubmitStiffness={(l) => {
                 setUserData((prev: UserData) => ({ ...prev, stiffness: l }));
-                addMsg("user", l === 0 ? "没有特别感觉" : l === 1 ? "有点紧" : "很紧");
+                addMsg("user", l === 0 ? "没有特别感觉" : l === 1 ? "有点紧" : "很紧", "day1_stiffness");
                 simulateThinking(() => {
-                  addMsg("bot", "好的，我会记录下来。现在让我们来看看<strong>哪些动作</strong>最容易让你的膝盖不舒服。（可多选）");
+                  addMsg("bot", "好的，记下来了。现在告诉我，哪个动作最容易让你的膝盖不舒服？");
                   setPhase("day1_triggers");
                 }, 600);
               }}
@@ -921,7 +1054,7 @@ export default function App() {
                   // 进入Day 7复评流程
                   setPhase("day7_check");
                   simulateThinking(() => {
-                    addMsg("bot", `🎊 恭喜完成第一阶段！现在让我们做一个7天复评，看看你的恢复情况。`);
+                    addMsg("bot", `🎊 恭喜完成第一阶段！现在让我们做一个阶段回顾，看看你的进展情况。`);
                     setTimeout(() => {
                       setSurveyStep("day7_trigger");
                     }, 800);
@@ -959,6 +1092,10 @@ export default function App() {
                   dailyRecords: {},
                   pressure: 0, workSec: 0, restSec: 0, cycles: 0,
                   dailyFeel: "",
+                  postUseFeel: "",
+                  earlyStopReason: "",
+                  postTrainingPain: 0,
+                  postTrainingStrength: 0,
                   day7Trigger: "", day7Pain: 0, day7Feel: "",
                 });
               }}
@@ -968,11 +1105,10 @@ export default function App() {
               setUserData={setUserData}
               setSurveyStep={setSurveyStep}
               setTaskIdx={setTaskIdx}
+              setMsgs={setMsgs}
+              setTab={setTab}
               onStartDevice={(level: number) => {
-                console.log("[onStartDevice] Called with level:", level);
-                // 根据等级设置设备参数并启动
                 const params = LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
-                console.log("[onStartDevice] Device params:", params);
                 setUserData(prev => ({
                   ...prev,
                   pressure: params.pressure,
@@ -983,25 +1119,20 @@ export default function App() {
                   finalLevel: level
                 }));
                 const total = (params.work + params.rest) * params.cycles;
-                console.log("[onStartDevice] Total time:", total, "seconds");
                 setHwLevel(level);
                 setHwTotal(total);
                 setHwRemaining(total);
                 setHwCycle(1);
                 setHwTotalCycles(params.cycles);
-                // 确保设备已连接
                 if (deviceState === "disconnected") {
-                  console.log("[onStartDevice] Device was disconnected, connecting first");
                   setDeviceState("idle");
                 }
-                console.log("[onStartDevice] Current deviceState:", deviceState);
-                // 延迟启动设备
                 setTimeout(() => {
-                  console.log("[onStartDevice] Starting device now - setting states to running");
                   setHwState("running");
                   setDeviceState("running");
                 }, 500);
               }}
+              deviceState={deviceState}
             />
           )}
           {tab === "discover" && <DiscoverPage />}
@@ -1028,7 +1159,7 @@ export default function App() {
       {screen === "manual-assessment" && <ManualAssessment
         onBack={() => setScreen("home")}
         onDone={(result) => {
-          setUserData((prev: UserData) => ({...prev, ...result}));
+          setUserData((prev: UserData) => ({...prev, ...result, stiffness: null}));
           setScreen("home");
         }}
       />}
@@ -1044,17 +1175,50 @@ export default function App() {
           setSurveyStep(null);
 
           // Day 1训练完成后问卷链式触发
-          if (surveyStep === "day1_post_use") {
-            // 使用感受完成，询问强度感受
-            setTimeout(() => setSurveyStep("day1_strength"), 300);
+          if (surveyStep === "new_user") {
+            setTimeout(() => setSurveyStep("safety"), 300);
+          } else if (surveyStep === "safety") {
+            const safe = data.safety?.includes("无");
+            if (safe) {
+              simulateThinking(() => {
+                addMsg("bot", "好的！接下来问一下，早上起床或久坐后，膝盖会不会有僵硬的感觉？");
+                setPhase("day1_stiffness");
+              }, 500);
+            } else {
+              simulateThinking(() => {
+                addMsg("bot", "根据你的情况，建议先休息 1-2 天，或咨询专业人士后再使用。好转后可以重新开始～");
+              }, 500);
+            }
+          } else if (surveyStep === "day1_post_use") {
+            if (data.postUseFeel === "skin") {
+              // Q5=4（皮肤明显不适）→ 跳过Q8，直接降级
+              setUserData((prev: UserData) => ({
+                ...prev,
+                finalLevel: Math.max(1, prev.finalLevel - 1),
+              }));
+              simulateThinking(() => {
+                addMsg("bot", "我已记录你的反馈，已为你降低下次训练强度。");
+                setTimeout(() => setPhase("day1_optimize"), 800);
+              }, 500);
+            } else {
+              // Q5=1-3 → 继续问Q8强度感受
+              setTimeout(() => setSurveyStep("day1_strength"), 300);
+            }
           } else if (surveyStep === "day1_strength") {
-            // 强度感受完成，进入优化阶段
+            // Q8强度感受 → 根据结果调整等级
+            const levelDelta = data.dailyFeel === "weak" ? 1 : data.dailyFeel === "strong" ? -1 : 0;
+            setUserData((prev: UserData) => ({
+              ...prev,
+              finalLevel: Math.max(1, Math.min(6, prev.finalLevel + levelDelta)),
+            }));
             simulateThinking(() => {
-              setTaskIdx(3);
-              addMsg("bot", "我已记录你的反馈，现在为你优化下次训练方案。");
+              addMsg("bot", "我已记录你的反馈，现在为你优化下次方案。");
               setTimeout(() => {
                 setPhase("day1_optimize");
-                addMsg("bot", "优化完成！明天继续使用时会采用调整后的方案。");
+                // Day 1优化完成后，推荐训练和发现tab
+                setTimeout(() => {
+                  addMsg("bot", "💪 完成今天的使用后，可以去下方「训练」tab 查看完整的运动教程，或者到「发现」tab 了解更多护膝知识！");
+                }, 1000);
               }, 800);
             }, 500);
           }
@@ -1081,7 +1245,7 @@ export default function App() {
             simulateThinking(() => {
               setTaskIdx(1);
               setPhase("day7_summary");
-              addMsg("bot", "感谢你完成复评！让我为你生成7天总结报告。");
+              addMsg("bot", "感谢你完成回顾！让我为你生成阶段总结报告。");
             }, 500);
           }
         }}
@@ -1094,19 +1258,34 @@ export default function App() {
           const hasEncouragementReasons = reasons.some(r => ["忘记了", "没时间", "效果不明显"].includes(r));
           simulateThinking(() => {
             if (hasEncouragementReasons) {
-              addMsg("bot", "我已记录。💪 建议尝试持续使用2周以上，这样更有助于康复效果的体现。明天记得继续哦～");
+              addMsg("bot", "我已记录。💪 建议持续使用2周以上，效果会更明显。");
             } else {
-              addMsg("bot", "我已记录。持之以恒很重要，明天继续加油！💪");
+              addMsg("bot", "我已记录。");
             }
             if (phase === "day1_therapy") {
-              setTimeout(() => setPhase("day1_optimize"), 800);
+              setTaskIdx(3);
+              setTimeout(() => {
+                addMsg("bot", "养护结束了，请告诉我你的感受。");
+                setTimeout(() => setSurveyStep("day1_post_use"), 600);
+              }, 800);
             } else if (phase === "daily_therapy") {
-              setTimeout(() => setPhase("daily_optimize"), 800);
+              setTaskIdx(3);
+              simulateThinking(() => {
+                addMsg("bot", "✅ 今日使用完成！");
+                setTimeout(() => {
+                  addMsg("bot", "让我为你生成今日总结。");
+                  setTimeout(() => {
+                    setPhase("daily_optimize");
+                    setTimeout(() => {
+                      addMsg("bot", "💡 记得查看下方「训练」tab 跟练运动，或者到「发现」tab 学习更多护膝方法！");
+                    }, 800);
+                  }, 800);
+                }, 600);
+              }, 500);
             }
           });
         }}
       />
-        </div>
       </div>
     </div>
   );

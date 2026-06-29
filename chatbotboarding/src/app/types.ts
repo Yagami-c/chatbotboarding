@@ -1,12 +1,13 @@
 export type Tab = "home" | "training" | "assistant" | "discover" | "profile";
 export type AppScreen =
+  | "wechat-login"
   | "onboarding"
   | "home"
   | "manual-assessment"
   | "quick-training";
 
 export type Role = "bot" | "user";
-export interface Msg { id: number; role: Role; html: string }
+export interface Msg { id: number; role: Role; html: string; editPhase?: Phase }
 export interface Task { title: string; desc: string }
 
 export interface UserData {
@@ -18,6 +19,7 @@ export interface UserData {
   dailyRecords: Record<number, Record<string, unknown>>;
   pressure: number; workSec: number; restSec: number; cycles: number;
   dailyFeel: string;
+  postUseFeel: string;
   earlyStopReason: string;
   postTrainingPain: number;
   postTrainingStrength: number;
@@ -25,12 +27,12 @@ export interface UserData {
 }
 
 export type HwState = "idle" | "running" | "paused" | "stopped";
-export type DeviceState = "disconnected" | "idle" | "running" | "paused";
+export type DeviceState = "disconnected" | "idle" | "running" | "paused" | "stopped";
 
 export type Phase =
   | "smart_intro" | "smart_confirm_assessment"
   | "day1_survey" | "day1_duration" | "day1_safety" | "day1_stiffness"
-  | "day1_triggers" | "day1_pain" | "day1_recommend"
+  | "day1_triggers" | "day1_pain" | "day1_recommend" | "day1_manual_level"
   | "day1_therapy" | "day1_early_stop_reason" | "day1_post_training" | "day1_post_strength" | "day1_optimize"
   | "daily_feel" | "daily_recommend" | "daily_therapy" | "daily_early_stop_reason" | "daily_optimize"
   | "day7_check" | "day7_trigger" | "day7_pain" | "day7_feel" | "day7_summary"
@@ -52,8 +54,8 @@ export const LEVEL_PARAMS = [
   {pressure:220,work:40,rest:8,cycles:7},
 ];
 export const LEVEL_DESCS: Record<number,string> = {
-  1:"适合初次体验，轻柔舒缓",2:"温和调理，轻松舒适",3:"平衡有效，标准康复",
-  4:"适度增强，加速恢复",5:"高效提升，强化训练",6:"深度康复，高阶专业",
+  1:"初次体验，轻柔舒缓",2:"温和调理，轻松舒适",3:"均衡有效，循序渐进",
+  4:"适度增强，进阶提升",5:"高效提升，强化巩固",6:"深度强化，高阶进阶",
 };
 
 export function getLevelName(lv: number) {

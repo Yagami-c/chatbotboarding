@@ -10,7 +10,12 @@ type StopReason = string[];
 
 export function QuickTraining({ onBack }: QuickTrainingProps) {
   const [level, setLevel] = useState(2);
-  const [deviceState, setDeviceState] = useState<DeviceState>("disconnected");
+  const [customMode, setCustomMode] = useState(false);
+  const [customPressure, setCustomPressure] = useState(125);
+  const [customWork, setCustomWork] = useState(30);
+  const [customRest, setCustomRest] = useState(10);
+  const [customCycles, setCustomCycles] = useState(5);
+  const [deviceState, setDeviceState] = useState<DeviceState>("idle");
   const [remaining, setRemaining] = useState(0);
   const [total, setTotal] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -19,7 +24,9 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
   const timerRef = useRef<ReturnType<typeof setInterval>|null>(null);
   const completedRef = useRef(false);
 
-  const prm = LEVEL_PARAMS[level-1] || LEVEL_PARAMS[1];
+  const prm = customMode
+    ? { pressure: customPressure, work: customWork, rest: customRest, cycles: customCycles }
+    : LEVEL_PARAMS[level-1] || LEVEL_PARAMS[1];
   const totalTime = prm.cycles * (prm.work + prm.rest);
   const progress = total > 0 ? Math.round(((total - remaining) / total) * 100) : 0;
 
@@ -56,7 +63,7 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
   }, [deviceState]);
 
   const handleStop = () => {
-    if(window.confirm("确定要结束本次训练吗？")) {
+    if(window.confirm("确定要结束本次使用吗？")) {
       stopTimer(); setDeviceState("stopped");
     }
   };
@@ -77,8 +84,8 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-2xl bg-transparent border-0 cursor-pointer text-[#4a5568]">←</button>
           <div>
-            <div className="font-bold text-[#1a202c]">⚡ 快速训练</div>
-            <div className="text-xs text-[#718096]">跳过评估，直接控制设备进行训练</div>
+            <div className="font-bold text-[#1a202c]">⚡ 快速设备</div>
+            <div className="text-xs text-[#718096]">跳过评估，直接控制设备进行使用</div>
           </div>
         </div>
       </div>
@@ -87,53 +94,136 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
         {/* Device card */}
         <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
           <div className="font-semibold text-[#1a202c] text-sm mb-3">设备状态</div>
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">🦵</span>
             <div>
               <div className="text-sm font-medium text-[#1a202c]">智能膝关节康养仪 PAD</div>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`w-2 h-2 rounded-full ${deviceState==="disconnected"?"bg-[#cbd5e0]":"bg-[#2ECC71]"}`}/>
+                <span className={`w-2 h-2 rounded-full ${deviceState==="idle"?"bg-[#2ECC71]":"bg-[#F39C12]"}`}/>
                 <span className="text-xs text-[#718096]">
-                  {{disconnected:"未连接",idle:"已连接",running:"运行中",paused:"已暂停"}[deviceState]}
+                  {{idle:"就绪",running:"运行中",paused:"已暂停"}[deviceState]}
                 </span>
               </div>
             </div>
-            {deviceState === "disconnected" && (
-              <button onClick={handleConnect}
-                className="ml-auto px-4 py-2 rounded-full bg-[#2ECC71] text-white text-sm font-semibold border-0 cursor-pointer">
-                🔗 连接设备
-              </button>
-            )}
           </div>
         </div>
 
         {/* Level selector */}
         <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
           <div className="font-semibold text-[#1a202c] text-sm mb-3">手动参数设置</div>
-          <div className="flex gap-1.5 mb-3">
-            {[1,2,3,4,5,6].map(l=>(
-              <button key={l} onClick={()=>{ if(deviceState==="idle"||deviceState==="disconnected") setLevel(l); }}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
-                  ${level===l?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                L{l}
-              </button>
-            ))}
+
+          {/* Mode toggle */}
+          <div className="flex gap-2 mb-3">
+            <button onClick={() => { if(deviceState==="idle") setCustomMode(false); }}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                ${!customMode?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+              📋 设定模式
+            </button>
+            <button onClick={() => { if(deviceState==="idle") setCustomMode(true); }}
+              className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                ${customMode?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+              ⚙️ 自定义模式
+            </button>
           </div>
-          <div className="bg-[#f0fdf4] rounded-xl p-3 text-sm text-[#065f46]">
-            <div className="font-semibold">{getLevelName(level)} · {LEVELS[level-1]}</div>
-            <div className="text-xs mt-1 text-[#4a8a6a]">{LEVEL_DESCS[level]}</div>
-            <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
-              <span>💨 {prm.pressure} mmHg</span>
-              <span>⏱ {prm.work}s 工作</span>
-              <span>🔄 {prm.rest}s 休息</span>
-              <span>🔁 {prm.cycles} 轮</span>
+
+          {!customMode ? (
+            <>
+              <div className="flex gap-1.5 mb-3">
+                {[1,2,3,4,5,6].map(l=>(
+                  <button key={l} onClick={()=>{ if(deviceState==="idle") setLevel(l); }}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
+                      ${level===l?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    L{l}
+                  </button>
+                ))}
+              </div>
+              <div className="bg-[#f0fdf4] rounded-xl p-3 text-sm text-[#065f46]">
+                <div className="font-semibold">{getLevelName(level)} · {LEVELS[level-1]}</div>
+                <div className="text-xs mt-1 text-[#4a8a6a]">{LEVEL_DESCS[level]}</div>
+                <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
+                  <span>💨 {prm.pressure} mmHg</span>
+                  <span>⏱ {prm.work}s 工作</span>
+                  <span>🔄 {prm.rest}s 休息</span>
+                  <span>🔁 {prm.cycles} 轮</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="bg-[#fef3c7] rounded-xl p-3">
+              <div className="font-semibold text-sm text-[#92400e] mb-3">⚙️ 自定义参数</div>
+
+              {/* Pressure */}
+              <div className="mb-3">
+                <label className="flex justify-between text-xs text-[#4a5568] mb-1">
+                  <span>💨 负压强度 (mmHg)</span>
+                  <span className="font-semibold text-[#1a202c]">{customPressure}</span>
+                </label>
+                <input type="range" min="80" max="200" step="5" value={customPressure}
+                  disabled={deviceState!=="idle"}
+                  onChange={(e)=>setCustomPressure(Number(e.target.value))}
+                  className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#2ECC71]
+                    [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md"/>
+              </div>
+
+              {/* Work time */}
+              <div className="mb-3">
+                <label className="flex justify-between text-xs text-[#4a5568] mb-1">
+                  <span>⏱ 作用时间 (秒)</span>
+                  <span className="font-semibold text-[#1a202c]">{customWork}s</span>
+                </label>
+                <input type="range" min="10" max="60" step="5" value={customWork}
+                  disabled={deviceState!=="idle"}
+                  onChange={(e)=>setCustomWork(Number(e.target.value))}
+                  className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#2ECC71]
+                    [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md"/>
+              </div>
+
+              {/* Rest time */}
+              <div className="mb-3">
+                <label className="flex justify-between text-xs text-[#4a5568] mb-1">
+                  <span>🔄 休息间隔 (秒)</span>
+                  <span className="font-semibold text-[#1a202c]">{customRest}s</span>
+                </label>
+                <input type="range" min="5" max="30" step="5" value={customRest}
+                  disabled={deviceState!=="idle"}
+                  onChange={(e)=>setCustomRest(Number(e.target.value))}
+                  className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#2ECC71]
+                    [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md"/>
+              </div>
+
+              {/* Cycles */}
+              <div className="mb-2">
+                <label className="flex justify-between text-xs text-[#4a5568] mb-1">
+                  <span>🔁 循环轮数</span>
+                  <span className="font-semibold text-[#1a202c]">{customCycles} 轮</span>
+                </label>
+                <input type="range" min="3" max="10" step="1" value={customCycles}
+                  disabled={deviceState!=="idle"}
+                  onChange={(e)=>setCustomCycles(Number(e.target.value))}
+                  className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#2ECC71]
+                    [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md"/>
+              </div>
+
+              {/* Total time preview */}
+              <div className="mt-3 pt-2 border-t border-[#fde68a] text-xs text-[#92400e]">
+                <span>预计总时长：</span>
+                <span className="font-semibold ml-1">{Math.floor(totalTime/60)}分{totalTime%60}秒</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Training control */}
         <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-          <div className="font-semibold text-[#1a202c] text-sm mb-3">训练控制</div>
+          <div className="font-semibold text-[#1a202c] text-sm mb-3">设备控制</div>
           {/* Progress bar */}
           <div className="mb-3">
             <div className="flex justify-between text-xs text-[#718096] mb-1.5">
@@ -148,12 +238,10 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
           <div className="text-xs text-[#718096] mb-3">当前轮数：{cycle}/{prm.cycles}</div>
           {/* Buttons */}
           <div className="flex gap-2">
-            {(deviceState==="disconnected"||deviceState==="idle") && (
-              <button onClick={deviceState==="disconnected"?handleConnect:handleStart}
-                disabled={false}
-                className={`flex-1 py-3 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-                  ${deviceState==="disconnected"?"bg-[#cbd5e0] text-white":"bg-[#2ECC71] text-white active:bg-[#27AE60]"}`}>
-                {deviceState==="disconnected"?"先连接设备":"▶ 开始"}
+            {deviceState==="idle" && (
+              <button onClick={handleStart}
+                className="flex-1 py-3 rounded-full font-bold text-sm border-0 cursor-pointer transition-all bg-[#2ECC71] text-white active:bg-[#27AE60]">
+                ▶ 开始
               </button>
             )}
             {(deviceState==="running"||deviceState==="paused") && <>
@@ -179,7 +267,7 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
         {/* Info tip */}
         <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-4 text-sm text-[#92400e]">
           <div className="font-medium mb-1">💡 提示</div>
-          <p className="text-xs leading-relaxed">本页面为手动控制模式，不含 AI 引导与反馈。如需智能陪伴，请前往「小瑞」页面。</p>
+          <div className="text-xs text-[#92400e]">本页面为手动控制模式，不含 AI 引导与反馈。如需智能陪伴，请前往「小瑞」页面。</div>
         </div>
       </div>
 
@@ -187,8 +275,8 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
       {showStopModal && (
         <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
           <div className="bg-white w-full rounded-t-3xl p-6">
-            <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 训练已结束</div>
-            <p className="text-sm text-[#4a5568] mb-4">今天没有完成预定治疗，主要原因是什么？（可多选）</p>
+            <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 设备已结束</div>
+            <p className="text-sm text-[#4a5568] mb-4">今天没有完成预定使用，主要原因是什么？（可多选）</p>
             {STOP_REASONS.map(r=>(
               <label key={r} className="flex items-center gap-2 py-2 cursor-pointer text-sm text-[#2d3748]">
                 <input type="checkbox" checked={!!stopReasons[r]}

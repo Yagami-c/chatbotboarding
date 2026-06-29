@@ -8,7 +8,7 @@ export function Pill({label,primary,onClick}: {label:string;primary?:boolean;onC
   return (
     <button onClick={onClick}
       className={`flex-1 min-w-[60px] px-3 py-[7px] rounded-full text-sm font-medium border-0 cursor-pointer transition-all active:scale-95
-        ${primary?"bg-[#2ECC71] text-white":"bg-[#edf2f7] text-[#2d3748]"}`}>
+        ${primary?"bg-[#07C160] text-white":"bg-[#edf2f7] text-[#2d3748]"}`}>
       {label}
     </button>
   );
@@ -25,19 +25,19 @@ export function FormGroup({label,children}: {label:string;children:React.ReactNo
   );
 }
 export function StyledInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-white outline-none focus:border-[#2ECC71]" />;
+  return <input {...props} className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-white outline-none focus:border-[#07C160]" />;
 }
 export function SubmitBtn({label,onClick}: {label:string;onClick:()=>void}) {
   return (
     <button onClick={onClick}
-      className="w-full py-3 rounded-full bg-[#2ECC71] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#27AE60] transition-all mt-2">
+      className="w-full py-3 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all mt-2">
       {label}
     </button>
   );
 }
 export function ResultCard({children,green}: {children:React.ReactNode;green?:boolean}) {
   return (
-    <div className={`rounded-2xl p-3.5 mt-1.5 border-l-4 ${green?"bg-[#f0fff4] border-[#48bb78]":"bg-[#f0fdf4] border-[#2ECC71]"}`}>
+    <div className={`rounded-2xl p-3.5 mt-1.5 border-l-4 ${green?"bg-[#f0fff4] border-[#48bb78]":"bg-[#f0fdf4] border-[#07C160]"}`}>
       {children}
     </div>
   );
@@ -53,7 +53,7 @@ export function ThinkingDots() {
   return (
     <span className="inline-flex gap-1 items-center ml-1">
       {[0,1,2].map(i=>(
-        <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#2ECC71] animate-bounce"
+        <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#07C160] animate-bounce"
           style={{animationDelay:`${[-0.32,-0.16,0][i]}s`,animationDuration:"1.4s"}} />
       ))}
     </span>
@@ -85,37 +85,64 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
   const elapsed=hwTotal-hwRemaining;
   const prm=LEVEL_PARAMS[hwLevel-1]||LEVEL_PARAMS[1];
 
-  const ballBg={disconnected:"rgba(150,150,150,0.5)",idle:"rgba(46,204,113,0.65)",running:"rgba(46,204,113,0.75)",paused:"rgba(243,156,18,0.65)"}[deviceState];
-  const badgeColor={disconnected:"#95A5A6",idle:"#27AE60",running:"#27AE60",paused:"#E67E22"}[deviceState];
-  const statusDot={disconnected:"#BDC3C7",idle:"#2ECC71",running:"#2ECC71",paused:"#F39C12"}[deviceState];
-  const statusLabel={disconnected:"未连接",idle:"已连接",running:"运行中",paused:"已暂停"}[deviceState];
-  const hint={disconnected:"点击「连接」开始使用",idle:"已连接，点击「开始」启动",running:"设备运行中...",paused:"已暂停"}[deviceState];
+  const ballBg={
+    disconnected:"linear-gradient(145deg,#b0bec5 0%,#78909c 45%,#455a64 100%)",
+    idle:"linear-gradient(145deg,#a8f0cc 0%,#07C160 45%,#14532d 100%)",
+    running:"linear-gradient(145deg,#7de8b8 0%,#22c55e 45%,#14532d 100%)",
+    paused:"linear-gradient(145deg,#fde68a 0%,#f59e0b 45%,#78350f 100%)",
+    stopped:"linear-gradient(145deg,#fde68a 0%,#fbbf24 45%,#92400e 100%)",
+  }[deviceState];
+  const ballShadow=dragging
+    ?"inset 0 2px 5px rgba(255,255,255,0.45),0 12px 32px rgba(0,0,0,0.35),0 4px 12px rgba(7,193,96,0.3)"
+    :deviceState==="running"
+    ?"inset 0 2px 5px rgba(255,255,255,0.45),inset 0 -1px 3px rgba(0,0,0,0.2),0 0 28px rgba(7,193,96,0.65),0 4px 16px rgba(7,193,96,0.35),0 2px 6px rgba(0,0,0,0.2)"
+    :deviceState==="paused"
+    ?"inset 0 2px 5px rgba(255,255,255,0.45),inset 0 -1px 3px rgba(0,0,0,0.2),0 4px 22px rgba(243,156,18,0.55),0 2px 8px rgba(0,0,0,0.2)"
+    :deviceState==="stopped"
+    ?"inset 0 2px 5px rgba(255,255,255,0.45),inset 0 -1px 3px rgba(0,0,0,0.2),0 4px 24px rgba(251,191,36,0.6),0 2px 8px rgba(0,0,0,0.2)"
+    :deviceState==="idle"
+    ?"inset 0 2px 5px rgba(255,255,255,0.45),inset 0 -1px 3px rgba(0,0,0,0.15),0 4px 22px rgba(7,193,96,0.45),0 2px 8px rgba(0,0,0,0.18)"
+    :"inset 0 2px 4px rgba(255,255,255,0.3),inset 0 -1px 3px rgba(0,0,0,0.25),0 6px 24px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.2)";
+  const badgeColor={disconnected:"#95A5A6",idle:"#06AE56",running:"#06AE56",paused:"#E67E22",stopped:"#F59E0B"}[deviceState];
+  const statusDot={disconnected:"#BDC3C7",idle:"#07C160",running:"#07C160",paused:"#F39C12",stopped:"#FBBF24"}[deviceState];
+  const statusLabel={disconnected:"未连接",idle:"已连接",running:"运行中",paused:"已暂停",stopped:"已完成"}[deviceState];
+  const hint={disconnected:"点击「连接」开始使用",idle:"已连接，点击「开始」启动",running:"设备运行中...",paused:"已暂停",stopped:"本次使用已完成"}[deviceState];
 
   const IconDisconnected=(
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-      <path d="M9 5.5v5M17 5.5v5M7.5 10.5h11a2 2 0 012 2v.5a7 7 0 01-14 0v-.5a2 2 0 012-2z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M13 18v3.5M4.5 4.5l17 17" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" filter="drop-shadow(0 1px 3px rgba(0,0,0,0.4))">
+      <path d="M9.5 5v5M16.5 5v5" stroke="rgba(255,255,255,0.95)" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M8 10h10a1.5 1.5 0 011.5 1.5v.5A6.5 6.5 0 0113 18.5 6.5 6.5 0 016.5 12v-.5A1.5 1.5 0 018 10z" stroke="white" strokeWidth="1.6" fill="rgba(255,255,255,0.12)"/>
+      <path d="M13 18.5V22" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M5 5l16 16" stroke="rgba(255,255,255,0.55)" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
   );
   const IconIdle=(
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-      <circle cx="13" cy="13" r="8.5" stroke="white" strokeWidth="1.5"/>
-      <path d="M8.5 13.5l3.5 3.5 5.5-7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" filter="drop-shadow(0 1px 3px rgba(0,0,0,0.3))">
+      <circle cx="13" cy="13" r="9" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" fill="rgba(255,255,255,0.08)"/>
+      <path d="M8.5 13l3.5 3.5L19 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
   const IconRunning=(
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" style={{animation:"spin 2s linear infinite",display:"block"}}>
-      <circle cx="13" cy="13" r="3" stroke="white" strokeWidth="1.5"/>
-      <path d="M13 4.5V7M13 19v2.5M4.5 13H7M19 13h2.5M7.1 7.1l1.8 1.8M17.1 17.1l1.8 1.8M7.1 18.9l1.8-1.8M17.1 8.9l1.8-1.8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" style={{animation:"spin 2s linear infinite",display:"block"}} filter="drop-shadow(0 1px 3px rgba(0,0,0,0.3))">
+      <circle cx="13" cy="13" r="3.5" fill="rgba(255,255,255,0.9)"/>
+      <circle cx="13" cy="13" r="6" stroke="rgba(255,255,255,0.35)" strokeWidth="1" strokeDasharray="2 3"/>
+      <path d="M13 4V7M13 19v3M4 13h3M19 13h3M6.5 6.5l2 2M17.5 17.5l2 2M6.5 19.5l2-2M17.5 8.5l2-2" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
   );
   const IconPaused=(
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-      <rect x="7.5" y="6.5" width="4" height="13" rx="2" fill="white"/>
-      <rect x="14.5" y="6.5" width="4" height="13" rx="2" fill="white"/>
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" filter="drop-shadow(0 1px 3px rgba(0,0,0,0.3))">
+      <rect x="8" y="6.5" width="3.5" height="13" rx="1.75" fill="white" opacity="0.95"/>
+      <rect x="14.5" y="6.5" width="3.5" height="13" rx="1.75" fill="white" opacity="0.95"/>
+      <rect x="8" y="6.5" width="3.5" height="4" rx="1.75" fill="rgba(255,255,255,0.5)"/>
+      <rect x="14.5" y="6.5" width="3.5" height="4" rx="1.75" fill="rgba(255,255,255,0.5)"/>
     </svg>
   );
-  const icon={disconnected:IconDisconnected,idle:IconIdle,running:IconRunning,paused:IconPaused}[deviceState];
+  const IconStopped=(
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" filter="drop-shadow(0 1px 3px rgba(0,0,0,0.3))">
+      <path d="M13 4l2.2 5.5 5.8.8-4.2 4.1 1 5.8L13 17.5l-4.8 2.7 1-5.8L5 10.3l5.8-.8z" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.6)" strokeWidth="0.5" strokeLinejoin="round"/>
+    </svg>
+  );
+  const icon={disconnected:IconDisconnected,idle:IconIdle,running:IconRunning,paused:IconPaused,stopped:IconStopped}[deviceState];
 
   const onPointerDown=(e:React.PointerEvent)=>{
     dragRef.current={startY:e.clientY,startPosY:posY,moved:false};
@@ -138,16 +165,29 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
       {open&&<div style={{position:"absolute",inset:0,zIndex:640,background:"rgba(0,0,0,0.2)"}} onClick={()=>setOpen(false)}/>}
       <div ref={ballRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
         style={{position:"absolute",right:0,top:posY-28,width:56,height:56,borderRadius:"50%",
-          background:ballBg,border:"1px solid rgba(255,255,255,0.3)",backdropFilter:"blur(8px)",
-          boxShadow:dragging?"0 8px 24px rgba(46,204,113,0.5)":deviceState==="running"?"0 0 20px rgba(46,204,113,0.6),0 4px 16px rgba(46,204,113,0.3)":"0 4px 16px rgba(46,204,113,0.3)",
+          background:ballBg,
+          border:"1px solid rgba(255,255,255,0.45)",
+          boxShadow:ballShadow,
           zIndex:650,display:"flex",alignItems:"center",justifyContent:"center",
           cursor:dragging?"grabbing":"grab",touchAction:"none",userSelect:"none",
-          transform:dragging?"scale(1.05)":"scale(1)",
+          transform:dragging?"scale(1.08)":"scale(1)",
           willChange:dragging?"top":"auto",
-          transition:dragging?"transform 0.15s ease,box-shadow 0.2s":"transform 0.2s ease,box-shadow 0.2s ease,background 0.3s ease,top 0.15s ease"}}>
+          transition:dragging?"transform 0.12s ease,box-shadow 0.15s":"transform 0.2s ease,box-shadow 0.25s ease,background 0.3s ease,top 0.15s ease"}}>
+        {/* inner top-left highlight — gives metallic sphere look */}
+        <span style={{position:"absolute",top:5,left:7,width:22,height:11,borderRadius:"50%",
+          background:"linear-gradient(175deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0) 100%)",
+          pointerEvents:"none"}}/>
+        {/* bottom edge rim light */}
+        <span style={{position:"absolute",bottom:4,left:"50%",transform:"translateX(-50%)",width:28,height:6,borderRadius:"50%",
+          background:"rgba(0,0,0,0.18)",pointerEvents:"none",filter:"blur(2px)"}}/>
         {deviceState==="running"&&(
-          <span style={{position:"absolute",inset:-8,borderRadius:"50%",border:"2px solid rgba(46,204,113,0.45)",
-            animation:"ballPulse 2s ease-in-out infinite",pointerEvents:"none"}}/>
+          <>
+            <span style={{position:"absolute",inset:-8,borderRadius:"50%",border:"2px solid rgba(7,193,96,0.45)",
+              animation:"ballPulse 2s ease-in-out infinite",pointerEvents:"none"}}/>
+            <span style={{position:"absolute",inset:-14,borderRadius:"50%",
+              border:"2px dashed rgba(7,193,96,0.55)",
+              animation:"spinRing 2s linear infinite",pointerEvents:"none"}}/>
+          </>
         )}
         {icon}
         <span style={{position:"absolute",top:4,right:4,width:12,height:12,borderRadius:"50%",
@@ -180,7 +220,7 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
           {deviceState!=="disconnected"&&(
             <div style={{background:"#F4FBF7",borderRadius:12,padding:"10px 12px",marginBottom:12}}>
               <div style={{fontSize:11,color:"#4A6A5A",marginBottom:4}}>当前模式</div>
-              <div style={{fontSize:15,fontWeight:700,color:"#27AE60"}}>{getLevelName(hwLevel)} · {LEVELS[hwLevel-1]||"温和"}</div>
+              <div style={{fontSize:15,fontWeight:700,color:"#06AE56"}}>{getLevelName(hwLevel)} · {LEVELS[hwLevel-1]||"温和"}</div>
               <div style={{fontSize:12,color:"#6A8A7A",marginTop:3,lineHeight:1.4}}>{LEVEL_DESCS[hwLevel]}</div>
             </div>
           )}
@@ -201,14 +241,15 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
                 <span style={{fontVariantNumeric:"tabular-nums"}}>{formatTime(elapsed)} / {formatTime(hwTotal)}</span>
               </div>
               <div style={{height:6,background:"#E0EFE6",borderRadius:10,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${progress}%`,background:"linear-gradient(90deg,#2ECC71,#27AE60)",borderRadius:10,transition:"width 0.3s"}}/>
+                <div style={{height:"100%",width:`${progress}%`,background:"linear-gradient(90deg,#07C160,#06AE56)",borderRadius:10,transition:"width 0.3s"}}/>
               </div>
             </div>
           )}
           <div style={{display:"flex",gap:8,marginBottom:10}}>
-            {deviceState==="disconnected"&&<button onClick={onConnect} style={{flex:1,height:44,borderRadius:22,background:"#2ECC71",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer",boxShadow:"0 2px 8px rgba(46,204,113,0.3)"}}>连接设备</button>}
-            {deviceState==="idle"&&<><button onClick={onStart} style={{flex:2,height:44,borderRadius:22,background:"#2ECC71",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer",boxShadow:"0 2px 8px rgba(46,204,113,0.3)"}}>开始</button><button onClick={onReset} style={{flex:1,height:44,borderRadius:22,background:"#E0EFE6",color:"#1A3A2A",border:"none",fontWeight:600,fontSize:13,cursor:"pointer"}}>重置</button></>}
-            {(deviceState==="running"||deviceState==="paused")&&<><button onClick={onTogglePause} style={{flex:1,height:44,borderRadius:22,background:deviceState==="paused"?"#2ECC71":"#F39C12",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer"}}>{deviceState==="paused"?"继续":"暂停"}</button><button onClick={onStop} style={{flex:1,height:44,borderRadius:22,background:"#E74C3C",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer"}}>结束</button></>}
+            {deviceState==="disconnected"&&<button onClick={onConnect} style={{flex:1,height:44,borderRadius:22,background:"#07C160",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer",boxShadow:"0 2px 8px rgba(7,193,96,0.3)"}}>连接设备</button>}
+            {deviceState==="idle"&&<><button onClick={onStart} style={{flex:2,height:44,borderRadius:22,background:"#07C160",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer",boxShadow:"0 2px 8px rgba(7,193,96,0.3)"}}>开始</button><button onClick={onReset} style={{flex:1,height:44,borderRadius:22,background:"#E0EFE6",color:"#1A3A2A",border:"none",fontWeight:600,fontSize:13,cursor:"pointer"}}>重置</button></>}
+            {(deviceState==="running"||deviceState==="paused")&&<><button onClick={onTogglePause} style={{flex:1,height:44,borderRadius:22,background:deviceState==="paused"?"#07C160":"#F39C12",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer"}}>{deviceState==="paused"?"继续":"暂停"}</button><button onClick={onStop} style={{flex:1,height:44,borderRadius:22,background:"#E74C3C",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer"}}>结束</button></>}
+            {deviceState==="stopped"&&<button onClick={onReset} style={{flex:1,height:44,borderRadius:22,background:"#F59E0B",color:"white",border:"none",fontWeight:600,fontSize:14,cursor:"pointer",boxShadow:"0 2px 8px rgba(245,158,11,0.3)"}}>🔄 重置</button>}
           </div>
           <div style={{fontSize:12,color:"#8AAA9A",textAlign:"center"}}>{hint}</div>
         </div>
@@ -222,15 +263,31 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
 import { Tab } from "./types";
 const NAV_ITEMS:{tab:Tab;icon:string;label:string}[]=[
   {tab:"home",icon:"🏠",label:"首页"},{tab:"training",icon:"🏃",label:"训练"},
-  {tab:"assistant",icon:"🧑‍⚕️",label:"小瑞"},{tab:"discover",icon:"✨",label:"发现"},{tab:"profile",icon:"👤",label:"我的"},
+  {tab:"assistant",icon:"🤖",label:"小瑞"},{tab:"discover",icon:"✨",label:"发现"},{tab:"profile",icon:"👤",label:"我的"},
 ];
 export function BottomNav({active,onChange}:{active:Tab;onChange:(t:Tab)=>void}) {
   return (
-    <div className="flex justify-around items-center bg-white border-t border-[#e9ecf0] pt-1 pb-3 flex-shrink-0">
+    <div className="flex justify-around items-center bg-white border-t border-[#e9ecf0] pt-1 flex-shrink-0"
+      style={{paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)"}}>
       {NAV_ITEMS.map(({tab,icon,label})=>(
         <button key={tab} onClick={()=>onChange(tab)}
-          className={`flex flex-col items-center gap-0.5 text-[10px] border-0 bg-transparent px-2.5 py-0.5 cursor-pointer
-            ${active===tab?"text-[#2ECC71] font-semibold":"text-[#8e98a3]"}`}>
+          className={`flex flex-col items-center gap-0.5 text-[10px] border-0 px-2.5 py-0.5 cursor-pointer transition-all
+            ${active===tab && tab!=="assistant" ?"text-[#07C160] font-semibold transform scale-110":""}
+            ${tab!=="assistant" && active!==tab ?"text-[#8e98a3] bg-transparent":""}
+            ${tab==="assistant"?"relative -translate-y-2":""}`}
+          style={tab==="assistant" ? {
+            background: active===tab
+              ? "linear-gradient(145deg, #07C160 0%, #06AE56 100%)"
+              : "linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%)",
+            color: active===tab ? "white" : "#07C160",
+            borderRadius: "20px",
+            padding: "8px 16px",
+            boxShadow: active===tab
+              ? "0 8px 24px rgba(7,193,96,0.35), 0 2px 8px rgba(7,193,96,0.2)"
+              : "0 4px 14px rgba(7,193,96,0.18), 0 1px 4px rgba(7,193,96,0.1)",
+            fontWeight: 600,
+            border: active===tab ? "none" : "1px solid rgba(7,193,96,0.2)",
+          } : {}}>
           <span className="text-[22px]">{icon}</span>{label}
         </button>
       ))}
