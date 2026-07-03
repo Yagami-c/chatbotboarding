@@ -589,76 +589,30 @@ const NAV: {tab:Tab; label:string; icon:(a:boolean)=>React.ReactNode}[] = [
 
 /** 小瑞 3D avatar for the center tab */
 function XiaoRuiAvatar({ active }: { active: boolean }) {
+  const c = active ? TAB_COLORS.assistant.active : "#C2C2C2";
   return (
-    <div style={{
-      width: 32, height: 32, borderRadius: "50%", position: "relative",
-      transition: "transform 0.2s ease",
-      transform: active ? "scale(1.08)" : "scale(1)",
-    }}>
-      {/* Outer glow ring when active */}
-      {active && (
-        <div style={{
-          position: "absolute", inset: -3, borderRadius: "50%",
-          background: "rgba(7,193,96,0.18)", zIndex: 0,
-        }}/>
-      )}
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style={{ position: "relative", zIndex: 1 }}>
-        {/* Body — 3D green sphere */}
-        <defs>
-          <radialGradient id="avatarBg" cx="38%" cy="32%" r="62%">
-            <stop offset="0%" stopColor="#4DEBA0"/>
-            <stop offset="45%" stopColor="#1A7AC7"/>
-            <stop offset="100%" stopColor="#04874A"/>
-          </radialGradient>
-          <radialGradient id="avatarSheen" cx="40%" cy="25%" r="50%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.55)"/>
-            <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-          </radialGradient>
-          <radialGradient id="faceGrad" cx="50%" cy="40%" r="55%">
-            <stop offset="0%" stopColor="#FFF0E0"/>
-            <stop offset="100%" stopColor="#FFD6A5"/>
-          </radialGradient>
-          <filter id="softShadow">
-            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="rgba(0,0,0,0.25)"/>
-          </filter>
-        </defs>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      {/* Head circle */}
+      <circle cx="12" cy="8" r="4"
+        stroke={c} strokeWidth="1.6"
+        fill={active ? "rgba(26,122,199,0.08)" : "none"}/>
 
-        {/* Drop shadow */}
-        <ellipse cx="16" cy="30" rx="8" ry="2" fill="rgba(0,0,0,0.12)"/>
+      {/* Doctor cap line on top of head */}
+      <path d="M8.5 6.5h7" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
 
-        {/* Main sphere */}
-        <circle cx="16" cy="15" r="13" fill="url(#avatarBg)" filter="url(#softShadow)"/>
+      {/* Cross on cap */}
+      <line x1="12" y1="5" x2="12" y2="7.5" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+      <line x1="10.5" y1="6.25" x2="13.5" y2="6.25" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
 
-        {/* Top-left specular highlight */}
-        <ellipse cx="11" cy="9" rx="5" ry="3.5" fill="url(#avatarSheen)" opacity="0.9"/>
+      {/* Body/coat */}
+      <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"
+        stroke={c} strokeWidth="1.6" strokeLinecap="round"
+        fill={active ? "rgba(26,122,199,0.08)" : "none"}/>
 
-        {/* Doctor cap (white cap with green cross) */}
-        <rect x="8" y="5" width="16" height="7" rx="3" fill="white" opacity="0.96"/>
-        <rect x="14.5" y="6.5" width="3" height="4" rx="1" fill="#1A7AC7"/>
-        <rect x="13" y="8" width="6" height="1.5" rx="0.75" fill="#1A7AC7"/>
-
-        {/* Face */}
-        <circle cx="16" cy="17" r="7" fill="url(#faceGrad)"/>
-
-        {/* Eyes */}
-        <ellipse cx="13.2" cy="16.2" rx="1.3" ry="1.6" fill="#2D1B00"/>
-        <ellipse cx="18.8" cy="16.2" rx="1.3" ry="1.6" fill="#2D1B00"/>
-        {/* Eye shine */}
-        <circle cx="13.8" cy="15.5" r="0.55" fill="white"/>
-        <circle cx="19.4" cy="15.5" r="0.55" fill="white"/>
-
-        {/* Smile */}
-        <path d="M12.5 19.2 Q16 21.8 19.5 19.2" stroke="#2D1B00" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-
-        {/* Rosy cheeks */}
-        <circle cx="11.5" cy="18.5" r="1.8" fill="rgba(255,140,120,0.35)"/>
-        <circle cx="20.5" cy="18.5" r="1.8" fill="rgba(255,140,120,0.35)"/>
-
-        {/* Stethoscope */}
-        <path d="M11 22 Q9 25 11 26 Q13 27 13 25 Q13 23 15 23" stroke="#1A7AC7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
-        <circle cx="15" cy="23" r="1.2" fill="#1A7AC7" opacity="0.85"/>
-      </svg>
-    </div>
+      {/* Stethoscope */}
+      <path d="M9 13 Q8 15 9 16" stroke={c} strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+      <circle cx="9" cy="16" r="1" stroke={c} strokeWidth="1.2" fill="none"/>
+    </svg>
   );
 }
 

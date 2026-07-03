@@ -43,7 +43,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
   const handleDenyPhone = () => { setStep("logging"); setTimeout(() => onLogin(MOCK.name), 1400); };
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#EDEDED", position: "relative" }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#EDEDED", position: "relative", alignItems: "center", justifyContent: "center" }}>
 
       {/* ── Top brand area ─────────────────────────────────── */}
       <div style={{

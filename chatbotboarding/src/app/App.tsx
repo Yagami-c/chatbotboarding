@@ -1288,7 +1288,18 @@ export default function App() {
             showOnboardingBanner={false}
             onShowOnboarding={() => setScreen("onboarding")}
             onAssessmentDone={(result) => {
-              setUserData((prev: UserData) => ({ ...prev, ...result, stiffness: null }));
+              // Convert stiffness string to numeric representation if needed
+              const stiffnessMap: Record<string, number> = {
+                "无": 0,
+                "有点紧": 1,
+                "很紧": 2,
+                "轻微受限": 1
+              };
+              setUserData((prev: UserData) => ({
+                ...prev,
+                ...result,
+                stiffness: stiffnessMap[result.stiffness] ?? null
+              }));
             }}
             onDeviceStart={(level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => {
               const params = custom ?? (LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1]);

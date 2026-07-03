@@ -37,6 +37,59 @@ const WEAR_STEPS = [
   { title: "放松享受", desc: "使用时放松腿部，让设备帮你养护。" },
 ];
 
+// ── Flow Header Component ──────────────────────────────────────────────────────
+
+function FlowHeader({ step, total, title, onBack, backDisabled }: {
+  step: number; total: number; title: string; onBack: () => void; backDisabled?: boolean;
+}) {
+  return (
+    <div className="px-4 pt-12 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
+      <div className="flex items-center gap-3 mb-4">
+        <button
+          onClick={onBack}
+          disabled={backDisabled}
+          className={`text-2xl bg-transparent border-0 transition-colors ${
+            backDisabled ? "text-[#d0d0d0] cursor-not-allowed" : "text-[#4a5568] cursor-pointer"
+          }`}
+          style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          ←
+        </button>
+        <div className="flex-1">
+          <div className="font-bold text-[#1a202c]">{title}</div>
+          <div className="text-xs text-[#718096]">设备使用流程</div>
+        </div>
+        <div className="text-xs text-[#718096] font-medium">{step + 1} / {total}</div>
+      </div>
+      {/* Step indicator */}
+      <div className="flex items-center mb-1">
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} className="flex items-center flex-1">
+            <div
+              className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold flex-shrink-0 transition-all ${
+                i < step
+                  ? "bg-[#1A7AC7] text-white"
+                  : i === step
+                  ? "bg-[#1A7AC7] text-white ring-2 ring-[#a8f0c6] ring-offset-1"
+                  : "bg-[#e2e8f0] text-[#a0aec0]"
+              }`}
+            >
+              {i < step ? "✓" : i + 1}
+            </div>
+            {i < total - 1 && (
+              <div
+                className={`flex-1 h-0.5 mx-1.5 transition-all duration-300 ${
+                  i < step ? "bg-[#1A7AC7]" : "bg-[#e2e8f0]"
+                }`}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Device Flow ────────────────────────────────────────────────────────────────
 
 function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles, onTogglePause, onStop, onReset, presetLevel }: {
