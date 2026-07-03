@@ -29,7 +29,7 @@ const INIT_NOTIFS: Notif[] = [
     id: 1, type: "training", read: false,
     title: "今日训练提醒",
     body: "你今天还没有完成训练，剩余时间不多啦！现在开始，保持连续打卡记录 💪",
-    time: "09:30", action: "去训练",
+    time: "09:30", action: "训练",
   },
   {
     id: 2, type: "achievement", read: false,

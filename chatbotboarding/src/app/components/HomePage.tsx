@@ -17,6 +17,7 @@ interface HomePageProps {
   hwLevel: number; hwRemaining: number; hwTotal: number;
   hwCycle: number; hwTotalCycles: number;
   onTogglePause: () => void; onStop: () => void; onReset: () => void;
+  userGender?: string; userAgeRange?: string;
 }
 
 function getGreeting() {
@@ -29,14 +30,15 @@ const SAFETY_LIST = [
   { v: "肿胀", l: "膝盖明显肿胀/发烫" },
   { v: "伤口", l: "膝盖周围有伤口或皮肤问题" },
   { v: "医生建议", l: "医生叮嘱暂不适合使用此类设备" },
+  { v: "显著受损", l: "膝盖有轻微脱臼或活动受限" },
   { v: "无", l: "以上都没有" },
 ];
 const TRIGGERS_LIST = ["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"];
 const WEAR_STEPS = [
-  { icon: "🪑", title: "坐在椅子上", desc: "找一把稳固的椅子坐好，保持膝盖自然弯曲约90°。" },
-  { icon: "🦵", title: "套上设备", desc: "将 PAD 套圈套在膝关节上方，调整至舒适位置。" },
-  { icon: "🔧", title: "检查松紧", desc: "确认绑带不过紧，能插入两指为宜。" },
-  { icon: "✅", title: "保持放松", desc: "使用期间放松腿部，避免强行移动或大幅弯曲膝盖。" },
+  { icon: "🪑", title: "舒适坐姿", desc: "坐在稳固的椅子上，膝盖自然弯曲。" },
+  { icon: "🦵", title: "套上设备", desc: "将套圈套在膝关节上方，调整到舒适位置。" },
+  { icon: "🔧", title: "调节松紧", desc: "绑带不要太紧，保持舒适即可。" },
+  { icon: "✅", title: "放松享受", desc: "使用时放松腿部，让设备帮你养护。" },
 ];
 
 function FlowHeader({ step, total, title, onBack, backDisabled }: {
@@ -63,69 +65,136 @@ function FlowHeader({ step, total, title, onBack, backDisabled }: {
 
 // ── Assessment Flow ────────────────────────────────────────────────────────────
 
-function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) => void; onCancel: () => void }) {
-  const [step, setStep] = useState(0);
-  const [name, setName] = useState(""); const [gender, setGender] = useState(""); const [ageRange, setAgeRange] = useState("");
-  const [duration, setDuration] = useState(""); const [safety, setSafety] = useState<Record<string,boolean>>({});
-  const [stiffness, setStiffness] = useState(""); const [triggers, setTriggers] = useState<Record<string,boolean>>({}); const [painLevel, setPainLevel] = useState<number|null>(null);
+function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillGender, prefillAgeRange }: {
+  onDone: (r: AssessmentResult) => void;
+  onCancel: () => void;
+  onStartDevice: (level: number) => void;
+  prefillName?: string;
+  prefillGender?: string;
+  prefillAgeRange?: string;
+}) {
+  // If user already has basic info, start from step 1 (knee condition)
+  const hasBasicInfo = !!(prefillName && prefillGender && prefillAgeRange);
+  const [step, setStep] = useState(hasBasicInfo ? 1 : 0);
+  const [name, setName] = useState(prefillName || "");
+  const [gender, setGender] = useState(prefillGender || "");
+  const [ageRange, setAgeRange] = useState(prefillAgeRange || "");
+  const [duration, setDuration] = useState("");
+  const [safety, setSafety] = useState<Record<string,boolean>>({});
+  const [stiffness, setStiffness] = useState("");
+  const [triggers, setTriggers] = useState<Record<string,boolean>>({});
+  const [painLevel, setPainLevel] = useState<number|null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [recommendedLevel, setRecommendedLevel] = useState(2);
+
   const safetyVals = Object.entries(safety).filter(([,v])=>v).map(([k])=>k);
   const triggerVals = Object.entries(triggers).filter(([,v])=>v).map(([k])=>k);
   const TITLES = ["基本信息","膝盖情况","症状详情"];
 
-  const handleBack = () => { if (step === 0) onCancel(); else setStep(s => s - 1); };
+  const handleBack = () => {
+    if (showResult) { setShowResult(false); return; }
+    if (step === 0 || (step === 1 && hasBasicInfo)) onCancel();
+    else setStep(s => s - 1);
+  };
+
   const handleSubmit = () => {
     const hasRisk = ["受伤","肿胀","伤口","医生建议"].some(r => safetyVals.includes(r));
     if (hasRisk && !window.confirm("有些情况需要先确认安全，建议找专业人员聊聊后再使用。要继续吗？")) return;
-    onDone({ name: name.trim(), gender, ageRange, duration, safety: safetyVals, stiffness, triggers: triggerVals, painLevel: painLevel! });
+
+    // Calculate recommended level based on stiffness and pain
+    const baseLevel = stiffness === "没有特别感觉" ? 2 : stiffness === "有点紧" ? 3 : 4;
+    const delta = painLevel === 0 ? -1 : painLevel! <= 2 ? 0 : 1;
+    const computed = Math.max(1, Math.min(6, baseLevel + delta));
+    setRecommendedLevel(computed);
+    setShowResult(true);
+  };
+
+  const handleConfirmResult = () => {
+    onDone({
+      name: name.trim(),
+      gender,
+      ageRange,
+      duration,
+      safety: safetyVals,
+      stiffness,
+      triggers: triggerVals,
+      painLevel: painLevel!
+    });
+    onStartDevice(recommendedLevel);
   };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <FlowHeader step={step} total={3} title={`📋 ${TITLES[step]}`} onBack={handleBack} />
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
-        {step === 0 && <>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">叫你什么好？</div>
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"
-              className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-[#fafcff] outline-none focus:border-[#1A7AC7]"/>
+      {!showResult && <FlowHeader step={step} total={3} title={`📋 ${TITLES[step]}`} onBack={handleBack} />}
+
+      {showResult ? (
+        // Result screen
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="px-4 pt-10 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
+            <div className="flex items-center gap-3 mb-3">
+              <button onClick={handleBack} className="text-xl bg-transparent border-0 cursor-pointer transition-colors text-[#4a5568]">←</button>
+              <div className="flex-1 font-bold text-[#1a202c] text-sm">评估结果</div>
+            </div>
           </div>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
+            <div className="bg-white rounded-2xl p-5 border border-[#e2e8f0] text-center">
+              <div className="text-4xl mb-3">✨</div>
+              <div className="font-bold text-[#1a202c] text-lg mb-2">评估完成</div>
+              <div className="text-sm text-[#718096] mb-4">根据你的情况，为你推荐以下强度：</div>
+              <div className="bg-[#EFF6FF] rounded-xl p-4 mb-3">
+                <div className="text-2xl font-bold text-[#1A7AC7] mb-1">{LEVELS[recommendedLevel-1]}</div>
+                <div className="text-xs text-[#2563EB]">{LEVEL_DESCS[recommendedLevel]}</div>
+              </div>
+              <div className="text-xs text-[#718096] leading-relaxed">
+                建议从此强度开始，后续可根据使用感受调整。
+              </div>
+            </div>
+            <button onClick={handleConfirmResult}
+              className="w-full py-3.5 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer active:bg-[#27AE60] transition-all">
+              确认并开启设备 →
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
+        {step === 0 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="text-sm font-semibold text-[#1a202c] mb-2">性别</div>
             <div className="flex gap-2">
-              {["男","女","其他"].map(g=>(
+              {["男","女"].map(g=>(
                 <button key={g} onClick={()=>setGender(g)}
-                  className={`flex-1 py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
+                  className={`flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all
                     ${gender===g?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                  {g==="男"?"👨 男":g==="女"?"👩 女":"其他"}
+                  {g}
                 </button>
               ))}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">年龄范围</div>
-            <div className="grid grid-cols-2 gap-2">
-              {["20岁以下","20-40岁","40-60岁","60岁以上"].map(a=>(
+            <div className="text-sm font-semibold text-[#1a202c] mb-2">年龄段</div>
+            <div className="flex gap-2 flex-wrap">
+              {["18-30","31-45","46-60","60+"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
-                  className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
+                  className={`flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all
                     ${ageRange===a?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {a}
                 </button>
               ))}
             </div>
           </div>
-          <button onClick={()=>{ if(!name.trim()||!gender||!ageRange){alert("请完整填写");return;} setStep(1); }}
-            className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
+          <button onClick={()=>{ if(!name.trim()||!gender||!ageRange){alert("请完整填写基本信息");return;} setStep(1); }}
+            className="w-full py-3.5 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer active:bg-[#27AE60] transition-all">
             下一步 →
           </button>
         </>}
 
         {step === 1 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">膝盖不适多久了？</div>
-            <div className="grid grid-cols-2 gap-2">
-              {["不到1个月","1-3个月","3-6个月","6个月-1年","1年以上","无特别不适"].map(d=>(
+            <div className="text-sm font-semibold text-[#1a202c] mb-2">持续多久了？</div>
+            <div className="flex gap-2 flex-wrap">
+              {["不到1周","1-4周","1-6个月","超过半年"].map(d=>(
                 <button key={d} onClick={()=>setDuration(d)}
-                  className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
+                  className={`flex-1 min-w-[calc(50%-4px)] py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all
                     ${duration===d?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {d}
                 </button>
@@ -133,11 +202,14 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
             </div>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">安全筛查（可多选）</div>
-            {SAFETY_LIST.map(({v,l})=>(
-              <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="checkbox" checked={!!safety[v]} onChange={e=>setSafety(p=>({...p,[v]:e.target.checked}))} className="accent-[#1A7AC7]"/>
-                {l}
+            <div className="text-sm font-semibold text-[#1a202c] mb-2">使用前确认（可多选）</div>
+            <div className="text-xs text-[#718096] mb-3">选择适合你的选项，若无请跳过：</div>
+            {["膝盖没有受伤","没有明显肿胀","没有开放伤口","医生建议过可以用","以上都不是"].map(s=>(
+              <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
+                <input type="checkbox" checked={!!safety[s]}
+                  onChange={e=>setSafety(p=>({...p,[s]:e.target.checked}))}
+                  className="accent-[#1A7AC7]"/>
+                {s}
               </label>
             ))}
           </div>
@@ -150,20 +222,25 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
 
         {step === 2 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">起床/久坐后膝盖紧绷感？</div>
-            {["没有特别感觉","有点紧","很紧"].map(s=>(
-              <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)} className="accent-[#1A7AC7]"/>
-                {s}
-              </label>
-            ))}
+            <div className="text-sm font-semibold text-[#1a202c] mb-2">膝盖感觉？</div>
+            <div className="flex flex-col gap-2">
+              {["没有特别感觉","有点紧","感觉僵硬"].map(st=>(
+                <button key={st} onClick={()=>setStiffness(st)}
+                  className={`w-full py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all text-left px-3
+                    ${stiffness===st?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  {st}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-1">哪些动作容易引发不适？（可多选）</div>
-            {TRIGGERS_LIST.map(v=>(
-              <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="checkbox" checked={!!triggers[v]} onChange={e=>setTriggers(p=>({...p,[v]:e.target.checked}))} className="accent-[#1A7AC7]"/>
-                {v}
+            <div className="text-sm font-semibold text-[#1a202c] mb-2">什么时候不舒服？（可多选）</div>
+            {["上下楼梯","走路久了","蹲下起立","长时间坐着","天气变化"].map(t=>(
+              <label key={t} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
+                <input type="checkbox" checked={!!triggers[t]}
+                  onChange={e=>setTriggers(p=>({...p,[t]:e.target.checked}))}
+                  className="accent-[#1A7AC7]"/>
+                {t}
               </label>
             ))}
             <div className="mt-3 pt-3 border-t border-[#e2e8f0]">
@@ -186,20 +263,22 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
           </div>
         </>}
       </div>
+      )}
     </div>
   );
 }
 
 // ── Device Flow ────────────────────────────────────────────────────────────────
 
-function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles, onTogglePause, onStop, onReset }: {
+function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles, onTogglePause, onStop, onReset, presetLevel }: {
   onStart: (level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => void; onMinimize: () => void; onCancel: () => void;
   deviceState: DeviceState; hwLevel: number; hwRemaining: number; hwTotal: number;
   hwCycle: number; hwTotalCycles: number;
   onTogglePause: () => void; onStop: () => void; onReset: () => void;
+  presetLevel?: number | null;
 }) {
   const [step, setStep] = useState(0);
-  const [level, setLevel] = useState(2);
+  const [level, setLevel] = useState(presetLevel || 2);
   const [customMode, setCustomMode] = useState(false);
   const [customPressure, setCustomPressure] = useState(125);
   const [customWork, setCustomWork] = useState(30);
@@ -298,8 +377,8 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
         </>}
 
         {step === 1 && <>
-          <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-4">
-            <div className="font-semibold text-[#92400e] text-sm">⚠️ 穿戴前请确认</div>
+          <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-4">
+            <div className="font-semibold text-[#1E3A5F] text-sm">💡 穿戴指引</div>
           </div>
           {WEAR_STEPS.map(({icon,title,desc},i)=>(
             <div key={i} className="bg-white rounded-2xl p-4 border border-[#e2e8f0] flex gap-3">
@@ -364,9 +443,23 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
             </button>
           )}
           {done && (
-            <button onClick={onCancel} className="w-full py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
-              ← 返回首页
-            </button>
+            <>
+              <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-3.5 text-sm text-[#1E3A5F]">
+                <div className="font-semibold mb-1">🎉 使用完成！</div>
+                <div className="text-xs">可到「训练」tab 跟练配套运动，或去「发现」tab 了解科普知识。</div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => { onCancel(); /* TODO: switch to training tab */ }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
+                  🏃 训练
+                </button>
+                <button onClick={() => { onCancel(); /* TODO: switch to discover tab */ }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                  📖 科普
+                </button>
+              </div>
+              <button onClick={onCancel} className="w-full py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
+                ← 返回首页
+              </button>
+            </>
           )}
         </>}
       </div>
@@ -725,26 +818,33 @@ export function HomePage({
   onAssessmentDone, onDeviceStart, onDeviceMinimize,
   deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles,
   onTogglePause, onStop, onReset,
+  userGender, userAgeRange,
 }: HomePageProps) {
   const [subView, setSubView] = useState<"main"|"assessment"|"device"|"notifications">("main");
+  const [presetLevel, setPresetLevel] = useState<number|null>(null);
 
   if (subView === "notifications") {
     return <NotificationsPage onBack={() => setSubView("main")} />;
   }
   if (subView === "assessment") {
     return <AssessmentFlow
-      onDone={(r) => { onAssessmentDone(r); setSubView("main"); }}
+      onDone={(r) => { onAssessmentDone(r); }}
       onCancel={() => setSubView("main")}
+      onStartDevice={(level) => { setPresetLevel(level); setSubView("device"); }}
+      prefillName={userName}
+      prefillGender={userGender}
+      prefillAgeRange={userAgeRange}
     />;
   }
   if (subView === "device") {
     return <DeviceFlow
       onStart={(level, custom) => onDeviceStart(level, custom)}
       onMinimize={() => { onDeviceMinimize(); setSubView("main"); }}
-      onCancel={() => setSubView("main")}
+      onCancel={() => { setPresetLevel(null); setSubView("main"); }}
       deviceState={deviceState} hwLevel={hwLevel} hwRemaining={hwRemaining}
       hwTotal={hwTotal} hwCycle={hwCycle} hwTotalCycles={hwTotalCycles}
       onTogglePause={onTogglePause} onStop={onStop} onReset={onReset}
+      presetLevel={presetLevel}
     />;
   }
 

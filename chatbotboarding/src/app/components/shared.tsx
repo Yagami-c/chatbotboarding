@@ -170,11 +170,11 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
 
   // State palette — each state has a distinct identity
   const STATE_CFG = {
-    disconnected: { color:"#94A3B8", bg:"#F1F5F9", label:"未连接",    emoji:"🔌", hint:"点击右侧按钮连接设备" },
-    idle:         { color:"#1A7AC7", bg:"#DBEAFE", label:"已连接·待机", emoji:"✅", hint:"设备就绪，点击「开始」启动养护" },
-    running:      { color:"#2563EB", bg:"#EFF6FF", label:"运行中",    emoji:"⚙️", hint:"养护进行中，请保持静止放松" },
-    paused:       { color:"#F59E0B", bg:"#FFFBE6", label:"已暂停",    emoji:"⏸", hint:"已暂停，点击「继续」恢复" },
-    stopped:      { color:"#1A7AC7", bg:"#DBEAFE", label:"本次完成",  emoji:"🏆", hint:"本次养护已完成，记得及时反馈感受" },
+    disconnected: { color:"#94A3B8", bg:"#F1F5F9", label:"未连接",      emoji:"🔌", hint:"点击右侧按钮连接设备" },
+    idle:         { color:"#16A34A", bg:"#DCFCE7", label:"已连接·待机", emoji:"✅", hint:"设备就绪，点击「开始」启动养护" },
+    running:      { color:"#FFFFFF", bg:"#2563EB", label:"运行中",      emoji:"▶️", hint:"养护进行中，请保持静止放松" },
+    paused:       { color:"#92400E", bg:"#FEF3C7", label:"已暂停",      emoji:"⏸", hint:"已暂停，点击「继续」恢复" },
+    stopped:      { color:"#16A34A", bg:"#DCFCE7", label:"本次完成",    emoji:"✓", hint:"本次养护已完成，记得及时反馈感受" },
   }[deviceState];
   const stateColor  = STATE_CFG.color;
   const stateBg     = STATE_CFG.bg;
@@ -201,24 +201,24 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
   // 3D orb gradient — each state is visually distinct
   const ballGrad = {
     disconnected: "radial-gradient(circle at 36% 28%, #CBD5E1 0%, #94A3B8 42%, #475569 100%)",
-    idle:         "radial-gradient(circle at 36% 28%, #86EFAC 0%, #1A7AC7 42%, #064D27 100%)",
-    running:      "radial-gradient(circle at 36% 28%, #93C5FD 0%, #2563EB 42%, #1E3A8A 100%)",
-    paused:       "radial-gradient(circle at 36% 28%, #FDE68A 0%, #F59E0B 42%, #78350F 100%)",
-    stopped:      "radial-gradient(circle at 36% 28%, #6EE7B7 0%, #1A7AC7 42%, #064D27 100%)",
+    idle:         "radial-gradient(circle at 36% 28%, #86EFAC 0%, #16A34A 42%, #166534 100%)",
+    running:      "radial-gradient(circle at 36% 28%, #60A5FA 0%, #2563EB 42%, #1E40AF 100%)",
+    paused:       "radial-gradient(circle at 36% 28%, #FDE68A 0%, #F59E0B 42%, #92400E 100%)",
+    stopped:      "radial-gradient(circle at 36% 28%, #86EFAC 0%, #16A34A 42%, #166534 100%)",
   }[deviceState];
 
   const ballShadow = dragging
     ? "0 16px 36px rgba(0,0,0,0.4)"
     : deviceState === "running"
-    ? "0 0 32px rgba(37,99,235,0.7), 0 8px 24px rgba(0,0,0,0.25)"
+    ? "0 0 40px rgba(37,99,235,0.9), 0 0 80px rgba(37,99,235,0.6), 0 8px 28px rgba(0,0,0,0.3)"
     : deviceState === "paused"
-    ? "0 0 24px rgba(245,158,11,0.65), 0 8px 20px rgba(0,0,0,0.22)"
+    ? "0 0 28px rgba(245,158,11,0.7), 0 8px 22px rgba(0,0,0,0.25)"
     : deviceState === "idle" || deviceState === "stopped"
-    ? "0 0 22px rgba(7,193,96,0.5), 0 8px 20px rgba(0,0,0,0.2)"
+    ? "0 0 24px rgba(22,163,74,0.6), 0 8px 20px rgba(0,0,0,0.2)"
     : "0 8px 24px rgba(0,0,0,0.35)";
 
   const badgeCol = {
-    disconnected:"#94A3B8", idle:"#1A7AC7", running:"#2563EB", paused:"#F59E0B", stopped:"#1A7AC7"
+    disconnected:"#94A3B8", idle:"#16A34A", running:"#EF4444", paused:"#F59E0B", stopped:"#16A34A"
   }[deviceState];
 
   // Knee PAD device icon — white, always same shape, state shown by orb color
@@ -315,22 +315,27 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
         {(deviceState==="running"||deviceState==="idle")&&<>
           <div style={{
             position:"absolute", inset:-8, borderRadius:"50%",
-            border:`2px solid ${deviceState==="running"?"rgba(37,99,235,0.5)":"rgba(7,193,96,0.35)"}`,
+            border:`2.5px solid ${deviceState==="running"?"rgba(37,99,235,0.7)":"rgba(22,163,74,0.4)"}`,
             animation:"ballPulse 2s ease-in-out infinite",
             pointerEvents:"none",
           }}/>
           {deviceState==="running"&&<div style={{
-            position:"absolute", inset:-15, borderRadius:"50%",
-            border:"1.5px solid rgba(37,99,235,0.22)",
+            position:"absolute", inset:-16, borderRadius:"50%",
+            border:"2px solid rgba(37,99,235,0.4)",
             animation:"ballPulse 2s ease-in-out infinite 0.5s",
             pointerEvents:"none",
           }}/>}
         </>}
-        {/* Completed state — green star sparkle */}
+        {/* Completed state — green checkmark */}
         {deviceState==="stopped"&&<div style={{
-          position:"absolute", top:-4, right:-4,
-          fontSize:14, lineHeight:1, pointerEvents:"none",
-        }}>🏆</div>}
+          position:"absolute", top:-6, right:-6,
+          width:20, height:20, borderRadius:"50%",
+          background:"#16A34A", border:"3px solid white",
+          display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:11, color:"white", fontWeight:"bold",
+          boxShadow:"0 2px 8px rgba(22,163,74,0.4)",
+          pointerEvents:"none",
+        }}>✓</div>}
 
         {/* Device icon */}
         {deviceState==="disconnected" ? DisconnectedIcon : KneePadIcon}

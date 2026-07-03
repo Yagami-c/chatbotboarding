@@ -36,6 +36,7 @@ export type Phase =
   | "day1_therapy" | "day1_early_stop_reason" | "day1_post_training" | "day1_post_strength" | "day1_optimize"
   | "daily_feel" | "daily_recommend" | "daily_therapy" | "daily_early_stop_reason" | "daily_optimize"
   | "day7_check" | "day7_trigger" | "day7_pain" | "day7_feel" | "day7_summary"
+  | "safety_warning"
   | "done";
 
 export type SurveyStep = null

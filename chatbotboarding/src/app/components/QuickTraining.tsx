@@ -16,10 +16,10 @@ const STEPS = [
 const STOP_REASONS = ["忘记了","没时间","效果不明显","使用不舒服","其他"];
 
 const WEAR_STEPS = [
-  { icon: "🪑", title: "坐在椅子上", desc: "找一把稳固的椅子坐好，保持膝盖自然弯曲约90°。" },
-  { icon: "🦵", title: "套上设备", desc: "将 PAD 套圈套在膝关节上方，调整至舒适位置。" },
-  { icon: "🔧", title: "检查松紧", desc: "确认绑带不过紧，能插入两指为宜。" },
-  { icon: "✅", title: "保持放松", desc: "使用期间放松腿部，避免强行移动或大幅弯曲膝盖。" },
+  { icon: "🪑", title: "舒适坐姿", desc: "坐在稳固的椅子上，膝盖自然弯曲。" },
+  { icon: "🦵", title: "套上设备", desc: "将套圈套在膝关节上方，调整到舒适位置。" },
+  { icon: "🔧", title: "调节松紧", desc: "绑带不要太紧，保持舒适即可。" },
+  { icon: "✅", title: "放松享受", desc: "使用时放松腿部，让设备帮你养护。" },
 ];
 
 export function QuickTraining({ onBack }: QuickTrainingProps) {
@@ -207,9 +207,9 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
       {/* Page 1: 穿戴准备 */}
       {page === 1 && (
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-          <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-4">
-            <div className="font-semibold text-[#92400e] text-sm mb-1">⚠️ 穿戴前请确认</div>
-            <div className="text-xs text-[#92400e]">请按以下步骤正确穿戴设备，确保安全使用。</div>
+          <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-4">
+            <div className="font-semibold text-[#1E3A5F] text-sm mb-1">💡 穿戴指引</div>
+            <div className="text-xs text-[#2563EB]">按照以下步骤穿戴设备</div>
           </div>
           {WEAR_STEPS.map(({icon,title,desc},i)=>(
             <div key={i} className="bg-white rounded-2xl p-4 border border-[#e2e8f0] flex gap-3">
@@ -310,10 +310,24 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
           </div>
 
           {deviceState==="stopped" && (
-            <button onClick={onBack}
-              className="w-full py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
-              ← 返回首页
-            </button>
+            <>
+              <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-3.5 text-sm text-[#1E3A5F]">
+                <div className="font-semibold mb-1">🎉 使用完成！</div>
+                <div className="text-xs">可到「训练」tab 跟练配套运动，或去「发现」tab 了解科普知识。</div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => { onBack(); /* TODO: switch to training tab */ }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
+                  🏃 训练
+                </button>
+                <button onClick={() => { onBack(); /* TODO: switch to discover tab */ }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                  📖 科普
+                </button>
+              </div>
+              <button onClick={onBack}
+                className="w-full py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
+                ← 返回首页
+              </button>
+            </>
           )}
         </div>
       )}

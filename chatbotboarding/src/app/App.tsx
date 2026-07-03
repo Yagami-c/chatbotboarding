@@ -103,7 +103,7 @@ function SafetySurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
     <div>
       <p className="text-sm text-[#4a5568] mb-3">请问目前是否有以下情况？（可多选）</p>
       <FormCard>
-        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
+        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"显著受损",l:"膝盖有轻微脱臼或活动受限"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
           <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
             <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))}/>{l}
           </label>
@@ -328,7 +328,9 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
 }
 
 // ── DailyOptimizeSummary — extracted to avoid hook-in-conditional violation ────
-function DailyOptimizeSummary({feel,currentDay,onNext}:{feel:string;currentDay:number;onNext:()=>void}) {
+function DailyOptimizeSummary({feel,currentDay,onNext,onGoTraining,onGoDiscover}:{
+  feel:string;currentDay:number;onNext:()=>void;onGoTraining?:()=>void;onGoDiscover?:()=>void;
+}) {
   const [tab,setTab]=useState<"today"|"example">("today");
   const better=feel==="better", worse=feel==="worse";
   const title=better?"看到进步了！":worse?"最近状态有所波动。":"状态稳定。";
@@ -357,6 +359,23 @@ function DailyOptimizeSummary({feel,currentDay,onNext}:{feel:string;currentDay:n
           <div className="border-t border-[#e2e8f0] pt-3"><div className="text-xs font-semibold text-[#f97316] mb-0.5">还是不舒服：</div><div className="text-sm text-[#374151]">最近状态有所波动。请留意活动量变化，如持续不适请及时反馈。</div></div>
         </div>
       )}
+
+      {/* 快捷导航按钮 */}
+      {(onGoTraining || onGoDiscover) && (
+        <div className="flex gap-2">
+          {onGoTraining && (
+            <button onClick={onGoTraining} className="flex-1 py-2.5 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
+              🏃 训练
+            </button>
+          )}
+          {onGoDiscover && (
+            <button onClick={onGoDiscover} className="flex-1 py-2.5 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+              📖 科普
+            </button>
+          )}
+        </div>
+      )}
+
       <button onClick={onNext} className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#1570B8] transition-all">
         📅 {currentDay<6?`进入第${currentDay+1}天`:currentDay===6?"进入阶段回顾":"完成"}
       </button>
@@ -435,13 +454,13 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               <div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#DBEAFE,#C8F0DC)",
                 display:"flex",alignItems:"center",justifyContent:"center",fontSize:36}}>🦵</div>
             </div>
-            <div style={{fontWeight:700,fontSize:17,color:"#1a202c",textAlign:"center",marginBottom:6}}>准备好开始了吗？</div>
+            <div style={{fontWeight:700,fontSize:17,color:"#1a202c",textAlign:"center",marginBottom:6}}>开始膝盖养护</div>
             <div style={{fontSize:13,color:"#6b7280",textAlign:"center",marginBottom:8,lineHeight:1.6,padding:"0 32px"}}>
-              请确保设备已正确穿戴，舒适贴合膝盖
+              设备已就绪，让我们开始吧
             </div>
             {/* Checklist */}
-            <div style={{margin:"0 20px 20px",background:"#F8FFF9",borderRadius:12,padding:"12px 14px"}}>
-              {["治疗部位清爽干燥","绑带松紧适度（可插两指）","保持坐姿，放松腿部"].map((t,i)=>(
+            <div style={{margin:"0 20px 20px",background:"#EFF6FF",borderRadius:12,padding:"12px 14px",border:"1px solid #93C5FD"}}>
+              {["膝盖清洁干燥","绑带舒适贴合","坐姿放松"].map((t,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#374151",
                   marginBottom:i<2?8:0}}>
                   <span style={{width:18,height:18,borderRadius:"50%",background:"#1A7AC7",
@@ -686,14 +705,17 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               ].map(({i,label,emoji,color,bg})=>(
                 <button key={i} onClick={()=>{
                   addMsg("user",`${emoji} ${i} — ${label}`,"day1_pain");
-                  setUserData(p=>({...p,painLevel:i}));
+                  const base = ud.baseLevel ?? 2;
+                  const delta = i === 0 ? -1 : i <= 2 ? 0 : 1;
+                  const computed = Math.max(1, Math.min(6, base + delta));
+                  setUserData(p=>({...p,painLevel:i,finalLevel:computed}));
                   day1PainRef.current=i;
                   simulateThinking(()=>{
                     addMsg("bot","收到！我会根据你的情况生成初始方案。");
                     setTimeout(()=>{
                       setTaskIdx(1);
                       setPhase("day1_recommend");
-                      addMsg("bot",`根据你的情况，我为你推荐<strong>${LEVELS[Math.max(0,2-Math.floor(i/2))]}</strong>模式开始。`);
+                      addMsg("bot",`根据你的情况，我为你推荐<strong>${getLevelName(computed)}</strong>强度开始。`);
                     },800);
                   });
                 }}
@@ -776,13 +798,13 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             </div>
 
             {/* Compact tips */}
-            <div style={{background:"#FFFBE6",borderRadius:12,padding:"12px 14px",
-              border:"1px solid #FDE68A"}}>
-              <div style={{fontSize:12,fontWeight:600,color:"#92400E",marginBottom:6}}>使用前请确认</div>
+            <div style={{background:"#EFF6FF",borderRadius:12,padding:"12px 14px",
+              border:"1px solid #93C5FD"}}>
+              <div style={{fontSize:12,fontWeight:600,color:"#1E3A5F",marginBottom:6}}>💡 使用提示</div>
               <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                {["使用部位清爽干燥","绑带固定舒适","使用中保持静止放松"].map((t,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"#78350F"}}>
-                    <span style={{color:"#F59E0B",flexShrink:0}}>•</span>{t}
+                {["确保膝盖清洁干燥","绑带舒适不紧绷","使用时放松享受"].map((t,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"#1E3A5F"}}>
+                    <span style={{color:"#1A7AC7",flexShrink:0}}>•</span>{t}
                   </div>
                 ))}
               </div>
@@ -824,9 +846,14 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#1570B8] transition-all">
                 📅 进入第2天
               </button>
-              <button onClick={()=>setTab("training")} className="w-full py-3 rounded-full bg-[#ebf8f0] text-[#1A7AC7] font-semibold text-base border border-[#1A7AC7] cursor-pointer active:bg-[#d4f5e3] transition-all">
-                🏃 去训练页面
-              </button>
+              <div className="flex gap-2">
+                <button onClick={()=>setTab("training")} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
+                  🏃 训练
+                </button>
+                <button onClick={()=>setTab("discover")} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                  📖 科普
+                </button>
+              </div>
             </div>
           );
         })()}
@@ -883,7 +910,28 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             feel={ud.dailyFeel}
             currentDay={currentDay}
             onNext={onGoToNextDay}
+            onGoTraining={() => setTab("training")}
+            onGoDiscover={() => setTab("discover")}
           />
+        )}
+        {phase==="safety_warning"&&(
+          <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-3">
+            <div className="bg-[#FEF3C7] border border-[#FDE68A] rounded-2xl p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0">⚠️</span>
+                <div className="flex-1">
+                  <div className="font-semibold text-[#92400E] text-sm mb-1">温馨提示</div>
+                  <div className="text-xs text-[#92400E] leading-relaxed">
+                    建议先休息 1-2 天，或咨询专业医生后再使用设备。
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button onClick={() => setTab("discover")}
+              className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#1570B8] transition-all">
+              📖 去科普了解更多
+            </button>
+          </div>
         )}
         {phase==="day7_summary"&&(()=>{
           const d7pain=ud.day7Pain;
@@ -995,6 +1043,9 @@ export default function App() {
     postTrainingPain: 0,
     postTrainingStrength: 0,
     day7Trigger: "", day7Pain: 0, day7Feel: "",
+    lastTrainingDate: "",
+    trainingDates: [],
+    sessionsToday: 0,
   });
 
   const [deviceState, setDeviceState] = useState<DeviceState>("disconnected");
@@ -1022,27 +1073,51 @@ export default function App() {
       setDeviceState("idle");
 
       if (phase === "day1_therapy") {
+        const today = new Date().toISOString().split("T")[0];
+        setUserData(prev => ({
+          ...prev,
+          lastTrainingDate: today,
+          trainingDates: [...(prev.trainingDates || []), today],
+          sessionsToday: prev.lastTrainingDate === today ? (prev.sessionsToday || 0) + 1 : 1,
+        }));
         setTaskIdx(3);
         simulateThinking(() => {
           addMsg("bot", "第一次使用完成！请告诉我你的感受。");
           setTimeout(() => { setSurveyStep("day1_post_use"); }, 600);
         }, 500);
       } else if (phase === "daily_therapy") {
+        const today = new Date().toISOString().split("T")[0];
+        setUserData(prev => ({
+          ...prev,
+          lastTrainingDate: today,
+          trainingDates: [...(prev.trainingDates || []), today],
+          sessionsToday: prev.lastTrainingDate === today ? (prev.sessionsToday || 0) + 1 : 1,
+        }));
         setTaskIdx(3);
-        simulateThinking(() => {
-          addMsg("bot", "今日使用完成！");
-          setTimeout(() => {
-            // 显示今日总结
-            addMsg("bot", "让我为你生成今日总结。");
+
+        // Day 7特殊处理：使用完成后进入阶段回顾
+        if (currentDay === 7) {
+          simulateThinking(() => {
+            addMsg("bot", "恭喜你已经完成第一阶段的养护计划啦！现在跟我一起做阶段性回顾和总结，看看是否需要调整计划哦！");
             setTimeout(() => {
-              setPhase("daily_optimize");
-              // Daily优化完成后，推荐训练和发现tab
-              setTimeout(() => {
-                addMsg("bot", "记得查看下方「训练」tab 跟练运动，或者到「发现」tab 了解更多膝盖训练技巧！");
-              }, 800);
+              setSurveyStep("day7_trigger");
             }, 800);
-          }, 600);
-        }, 500);
+          }, 500);
+        } else {
+          // 正常日常流程
+          simulateThinking(() => {
+            addMsg("bot", "今日使用完成！");
+            setTimeout(() => {
+              addMsg("bot", "让我为你生成今日总结。");
+              setTimeout(() => {
+                setPhase("daily_optimize");
+                setTimeout(() => {
+                  addMsg("bot", "完成后可到「训练」tab 跟练配套运动，或去「发现」tab 了解科普知识。");
+                }, 800);
+              }, 800);
+            }, 600);
+          }, 500);
+        }
       }
     }
   }, [hwRemaining, hwTotal, hwState, phase, tab]);
@@ -1161,21 +1236,25 @@ export default function App() {
       )}
       {screen === "onboarding" && <Onboarding onDone={(smartModeParam, next) => {
         setSmartMode(smartModeParam);
-        if (next === "assessment") { setScreen("manual-assessment"); return; }
-        if (next === "quick-training") { setScreen("quick-training"); return; }
-        setScreen("home");
         if (smartModeParam) {
-          // step2 smart confirm → start AI chat
+          // 智能模式：跳转到小瑞，直接开始评估
+          setScreen("home");
           setTab("assistant");
           setPhase("smart_intro");
           setTimeout(() => {
             addMsg("bot", "你好！我是小瑞，你的护膝助手。先了解一下你的情况，帮你找到最合适的方案。");
-            setTimeout(() => { setPhase("smart_confirm_assessment"); }, 1000);
+            setTimeout(() => {
+              // 直接启动评估，无需用户点击确认
+              setSurveyStep(userData.name ? "safety" : "new_user");
+            }, 1200);
           }, 500);
-        } else {
-          // skip → 首页 tab
-          setTab("home");
+          return;
         }
+        // 非智能模式：根据next路由
+        if (next === "assessment") { setScreen("manual-assessment"); return; }
+        if (next === "quick-training") { setScreen("quick-training"); return; }
+        setScreen("home");
+        setTab("home");
       }} />}
 
       {screen === "home" && (
@@ -1208,6 +1287,8 @@ export default function App() {
             hwLevel={hwLevel} hwRemaining={hwRemaining} hwTotal={hwTotal}
             hwCycle={hwCycle} hwTotalCycles={hwTotalCycles}
             onTogglePause={handleTogglePause} onStop={handleStop} onReset={handleReset}
+            userGender={userData.gender}
+            userAgeRange={userData.ageRange}
           />}
           {tab === "training" && <TrainingPage />}
           {tab === "assistant" && (
@@ -1246,7 +1327,8 @@ export default function App() {
                 });
               }}
               onSubmitStiffness={(l) => {
-                setUserData((prev: UserData) => ({ ...prev, stiffness: l }));
+                const base = l === 0 ? 2 : l === 1 ? 3 : 4;
+                setUserData((prev: UserData) => ({ ...prev, stiffness: l, baseLevel: base }));
                 addMsg("user", l === 0 ? "没有特别感觉" : l === 1 ? "有点紧" : "很紧", "day1_stiffness");
                 simulateThinking(() => {
                   addMsg("bot", "好的，记下来了。现在告诉我，哪个动作最容易让你的膝盖不舒服？");
@@ -1254,22 +1336,52 @@ export default function App() {
                 }, 600);
               }}
               onGoToNextDay={() => {
-                setCurrentDay((prev: number) => prev + 1);
-                setTaskIdx(0);
-                setMsgs([]);
+                const today = new Date().toISOString().split("T")[0];
+                const last = userData.lastTrainingDate;
+                const dayGap = last ? Math.floor((new Date(today).getTime() - new Date(last).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
-                // 检查是否进入Day 7复评
-                if (currentDay === 6) {
-                  // 进入Day 7复评流程
-                  setPhase("day7_check");
+                setMsgs([]);
+                setTaskIdx(0);
+
+                // 特殊场景：同一天第二次使用
+                if (last === today && userData.sessionsToday >= 1) {
+                  addMsg("bot", `${userData.name}，今天第二次训练，继续使用当前方案！`);
+                  setTimeout(() => setPhase("daily_recommend"), 500);
+                  return;
+                }
+
+                // 特殊场景：中断超过14天，重新评估
+                if (dayGap >= 14) {
+                  setCurrentDay(1);
+                  setPhase("day1_stiffness");
+                  setUserData(prev => ({ ...prev, baseLevel: 2, finalLevel: 2 }));
                   simulateThinking(() => {
-                    addMsg("bot", `恭喜完成第一阶段！现在让我们做一个阶段回顾，看看你的进展情况。`);
-                    setTimeout(() => {
-                      setSurveyStep("day7_trigger");
-                    }, 800);
+                    addMsg("bot", `欢迎回来！距上次训练已${dayGap}天，为了安全，建议重新评估。`);
+                    setTimeout(() => setPhase("day1_stiffness"), 600);
+                  }, 500);
+                  return;
+                }
+
+                // 特殊场景：中断7-14天，继续日常流程但保持等级
+                if (dayGap >= 7) {
+                  setCurrentDay(prev => prev + 1);
+                  setPhase("daily_feel");
+                  simulateThinking(() => {
+                    addMsg("bot", `欢迎回来！距上次训练${dayGap}天，继续按当前方案进行。今天膝盖感觉如何？`);
+                  }, 500);
+                  return;
+                }
+
+                // 正常流程
+                setCurrentDay((prev: number) => prev + 1);
+
+                if (currentDay === 6) {
+                  // Day 7: 先正常使用设备，使用完后再复评
+                  setPhase("daily_feel");
+                  simulateThinking(() => {
+                    addMsg("bot", `${userData.name}，今天是第7天，完成使用后我们一起做阶段回顾！先告诉我今天膝盖感觉如何？`);
                   }, 500);
                 } else {
-                  // 正常日常流程
                   setPhase("daily_feel");
                   simulateThinking(() => {
                     addMsg("bot", `${userData.name}，第${currentDay + 1}天开始啦！今天膝盖感觉如何？`);
@@ -1282,7 +1394,12 @@ export default function App() {
                 simulateThinking(() => {
                   setTaskIdx(1);
                   setPhase("daily_recommend");
-                  addMsg("bot", "收到！我已根据你的反馈调整今日方案。");
+                  const msg = f === "better"
+                    ? "🎉 看到进步了！建议继续保持当前方案。"
+                    : f === "same"
+                    ? "👍 状态稳定。建议继续完成本阶段计划。"
+                    : "⚠️ 最近状态有所波动。请留意活动量变化，如持续不适请及时反馈。";
+                  addMsg("bot", msg);
                 });
               }}
               onReset={() => {
@@ -1387,15 +1504,37 @@ export default function App() {
           if (surveyStep === "new_user") {
             setTimeout(() => setSurveyStep("safety"), 300);
           } else if (surveyStep === "safety") {
+            const hasSevere = data.safety?.includes("显著受损");
+            const hasOtherIssues = data.safety?.some((s: string) => ["受伤", "肿胀", "伤口", "医生建议"].includes(s));
             const safe = data.safety?.includes("无");
-            if (safe) {
+
+            if (hasSevere) {
+              // 选项5：直接设置L1强度，跳过所有评估，直接进入推荐
+              setUserData((prev: UserData) => ({
+                ...prev,
+                finalLevel: 1,
+                baseLevel: 1,
+                stiffness: null,
+                triggers: [],
+                mainTrigger: "",
+                painLevel: 0
+              }));
+              simulateThinking(() => {
+                addMsg("bot", "考虑到你的情况，我为你推荐<strong>L1（低）</strong>强度开始。");
+                setTaskIdx(1);
+                setTimeout(() => setPhase("day1_recommend"), 800);
+              }, 500);
+            } else if (hasOtherIssues) {
+              // 选项1-4：显示警告和科普按钮
+              simulateThinking(() => {
+                addMsg("bot", "根据你的情况，建议先休息 1-2 天或咨询专业医生。");
+                setPhase("safety_warning");
+              }, 500);
+            } else if (safe) {
+              // 选项6：正常继续
               simulateThinking(() => {
                 addMsg("bot", "好的！接下来问一下，早上起床或久坐后，膝盖会不会有僵硬的感觉？");
                 setPhase("day1_stiffness");
-              }, 500);
-            } else {
-              simulateThinking(() => {
-                addMsg("bot", "根据你的情况，建议先休息 1-2 天，好转后随时回来继续～");
               }, 500);
             }
           } else if (surveyStep === "day1_post_use") {
