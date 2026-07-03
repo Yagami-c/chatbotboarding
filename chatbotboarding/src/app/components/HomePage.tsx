@@ -189,7 +189,7 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="text-sm font-semibold text-[#1a202c] mb-2">年龄段</div>
             <div className="flex gap-2 flex-wrap">
-              {["18-30","31-45","46-60","60+"].map(a=>(
+              {["40岁以下","40-60岁","60岁以上"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
                   style={{
                     minHeight: 44,
