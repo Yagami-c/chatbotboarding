@@ -1484,6 +1484,7 @@ export default function App() {
 
       {screen === "manual-assessment" && <ManualAssessment
         onBack={() => setScreen("home")}
+        existingData={{ name: userData.name, gender: userData.gender, ageRange: userData.ageRange }}
         onDone={(result) => {
           setUserData((prev: UserData) => ({...prev, ...result, stiffness: null}));
           setScreen("home");

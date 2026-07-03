@@ -3,6 +3,7 @@ import { useState } from "react";
 interface ManualAssessmentProps {
   onBack: () => void;
   onDone: (result: AssessmentResult) => void;
+  existingData?: { name?: string; gender?: string; ageRange?: string };
 }
 
 export interface AssessmentResult {
@@ -31,11 +32,15 @@ const STEPS = [
   { label: "症状详情", sub: "触发动作与疼痛" },
 ];
 
-export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
-  const [step, setStep] = useState(0);
-  const [name, setName] = useState("");
-  const [gender, setGender] = useState("");
-  const [ageRange, setAgeRange] = useState("");
+export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessmentProps) {
+  // Check if user has already provided basic info
+  const hasBasicInfo = !!(existingData?.name && existingData?.gender && existingData?.ageRange);
+  const initialStep = hasBasicInfo ? 1 : 0;
+
+  const [step, setStep] = useState(initialStep);
+  const [name, setName] = useState(existingData?.name || "");
+  const [gender, setGender] = useState(existingData?.gender || "");
+  const [ageRange, setAgeRange] = useState(existingData?.ageRange || "");
   const [duration, setDuration] = useState("");
   const [safety, setSafety] = useState<Record<string,boolean>>({});
   const [stiffness, setStiffness] = useState("");
@@ -57,7 +62,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
   };
 
   const handleBack = () => {
-    if (step === 0) onBack();
+    if (step === initialStep) onBack();
     else setStep(s => s - 1);
   };
 
