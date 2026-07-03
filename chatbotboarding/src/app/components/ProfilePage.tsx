@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const G = {
-  primary:  "#07C160",
-  dark:     "#059945",
+  primary:  "#1A7AC7",
+  dark:     "#155FA0",
   light:    "#E8F8F0",
   bg:       "#F4FBF7",
-  text1:    "#1A3A2A",
-  text2:    "#4A6A5A",
+  text1:    "#1E3A5F",
+  text2:    "#1E3A5F",
   text3:    "#8AAA9A",
   border:   "#F0F5F2",
   arrow:    "#C5D5CD",
@@ -204,7 +204,7 @@ function OtaPanel({ currentVer, onClose }: { currentVer:string; onClose:()=>void
         {state==="available"&&(
           <div style={{padding:"0 20px"}}>
             {/* Version banner */}
-            <div style={{background:"linear-gradient(135deg,#07C160,#059945)",
+            <div style={{background:"linear-gradient(135deg,#1A7AC7,#155FA0)",
               borderRadius:14,padding:"16px",marginBottom:16,
               display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div>
@@ -320,7 +320,7 @@ function OtaPanel({ currentVer, onClose }: { currentVer:string; onClose:()=>void
         {state==="done"&&(
           <div style={{padding:"0 20px",textAlign:"center"}}>
             <div style={{width:80,height:80,borderRadius:"50%",
-              background:"linear-gradient(135deg,#07C160,#059945)",
+              background:"linear-gradient(135deg,#1A7AC7,#155FA0)",
               display:"flex",alignItems:"center",justifyContent:"center",
               margin:"0 auto 16px",boxShadow:"0 8px 24px rgba(7,193,96,0.4)"}}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -378,7 +378,7 @@ function DevicePage({ onBack }: { onBack:()=>void }) {
             {/* Device header */}
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
               <div style={{width:52,height:52,borderRadius:14,
-                background:"linear-gradient(135deg,#E8F8EF,#C8F0DC)",
+                background:"linear-gradient(135deg,#DBEAFE,#C8F0DC)",
                 display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0}}>🦵</div>
               <div style={{flex:1}}>
                 <div style={{fontSize:15,fontWeight:600,color:G.text1}}>智能膝关节康养仪 PAD</div>
@@ -395,7 +395,7 @@ function DevicePage({ onBack }: { onBack:()=>void }) {
             {/* Info grid */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
               {[
-                {l:"🔋 电量",   v:"85%",          color:"#07C160"},
+                {l:"🔋 电量",   v:"85%",          color:"#1A7AC7"},
                 {l:"固件版本", v:currentFirmware, color:G.text1},
                 {l:"设备型号", v:"PAD-K200",       color:G.text1},
                 {l:"序列号",   v:"PAD-2024-001234",color:G.text1},
@@ -534,7 +534,7 @@ function RecordsPage({ onBack }: { onBack:()=>void }) {
         <div style={{
           margin:"0 16px 12px",borderRadius:16,
           background:detail.completed
-            ?"linear-gradient(135deg,#07C160,#059945)"
+            ?"linear-gradient(135deg,#1A7AC7,#155FA0)"
             :"linear-gradient(135deg,#F59E0B,#D97706)",
           padding:"20px 20px",
         }}>
@@ -689,7 +689,7 @@ function RecordsPage({ onBack }: { onBack:()=>void }) {
                 <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4,flexShrink:0}}>
                   <span style={{
                     fontSize:11,padding:"3px 8px",borderRadius:20,fontWeight:500,
-                    background:r.completed?"#E8F8EF":"#FEF3C7",
+                    background:r.completed?"#DBEAFE":"#FEF3C7",
                     color:r.completed?G.primary:"#D97706",
                   }}>
                     {r.completed?"已完成":"未完成"}
@@ -774,7 +774,7 @@ function AppearancePage({ onBack }: { onBack:()=>void }) {
   const [theme,setTheme] = useState("light");
   const [color,setColor] = useState(G.primary);
   const themes=[{v:"light",l:"☀️ 浅色模式"},{v:"dark",l:"🌙 深色模式"},{v:"system",l:"⚙️ 跟随系统"}];
-  const colors=["#07C160","#3B82F6","#8B5CF6","#F59E0B"];
+  const colors=["#1A7AC7","#3B82F6","#8B5CF6","#F59E0B"];
   return (
     <div style={{flex:1,display:"flex",flexDirection:"column",background:G.bg}}>
       <SubHeader title="外观设置" onBack={onBack}/>
@@ -825,7 +825,7 @@ function SettingsPage({ onBack, onLogout }: { onBack:()=>void; onLogout?:()=>voi
       <div style={{flex:1,overflowY:"auto",padding:"16px 0"}}>
         <Card>
           <MenuCell icon="🔊" iconBg="#E8F4FF" label="通知设置" sub="训练提醒、康复资讯推送"/>
-          <MenuCell icon="🤖" iconBg="#E8F8EF" label="智能模式" right="已开启" sub="AI全程引导"/>
+          <MenuCell icon="🤖" iconBg="#DBEAFE" label="智能模式" right="已开启" sub="AI全程引导"/>
           <MenuCell icon="🔒" iconBg="#F3E8FF" label="隐私设置" sub="数据授权与隐私保护"/>
           <MenuCell icon="📄" iconBg="#FEF3C7" label="用户协议"/>
           <MenuCell icon="📄" iconBg="#FFF3E8" label="隐私政策"/>
@@ -967,7 +967,7 @@ export function ProfilePage({ userName="用户", onLogout }: ProfilePageProps) {
         {/* ── Group 1: Device + Plan + Points ── */}
         <Card>
           <MenuCell
-            icon="🔗" iconBg="#E8F8EF" label="设备管理"
+            icon="🔗" iconBg="#DBEAFE" label="设备管理"
             right={<span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:7,height:7,borderRadius:"50%",background:G.primary,display:"inline-block"}}/>已连接</span>}
             onClick={()=>setSub("device")}
           />

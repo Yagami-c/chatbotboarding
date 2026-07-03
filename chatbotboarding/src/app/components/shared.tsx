@@ -3,9 +3,9 @@ import { useState, useRef } from "react";
 
 // ── WeChat Mini Program design tokens ─────────────────────────────────────────
 const WX = {
-  green:    "#07C160",
-  greenDk:  "#06AE56",
-  greenLt:  "#E8F8EF",
+  green:    "#1A7AC7",
+  greenDk:  "#1570B8",
+  greenLt:  "#DBEAFE",
   bg:       "#F7F8FA",
   card:     "#FFFFFF",
   border:   "#E8E8E8",
@@ -100,8 +100,8 @@ export function SubmitBtn({label,onClick,disabled}: {label:string;onClick:()=>vo
 export function ResultCard({children,green}: {children:React.ReactNode;green?:boolean}) {
   return (
     <div style={{
-      background:green?"#E8F8EF":"#F0FDF4",
-      borderLeft:`4px solid ${green?"#07C160":"#07C160"}`,
+      background:green?"#DBEAFE":"#EFF6FF",
+      borderLeft:`4px solid ${green?"#1A7AC7":"#1A7AC7"}`,
       borderRadius:"0 12px 12px 0",
       padding:"14px",marginTop:8,
     }}>
@@ -171,10 +171,10 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
   // State palette — each state has a distinct identity
   const STATE_CFG = {
     disconnected: { color:"#94A3B8", bg:"#F1F5F9", label:"未连接",    emoji:"🔌", hint:"点击右侧按钮连接设备" },
-    idle:         { color:"#07C160", bg:"#E8F8EF", label:"已连接·待机", emoji:"✅", hint:"设备就绪，点击「开始」启动养护" },
+    idle:         { color:"#1A7AC7", bg:"#DBEAFE", label:"已连接·待机", emoji:"✅", hint:"设备就绪，点击「开始」启动养护" },
     running:      { color:"#2563EB", bg:"#EFF6FF", label:"运行中",    emoji:"⚙️", hint:"养护进行中，请保持静止放松" },
     paused:       { color:"#F59E0B", bg:"#FFFBE6", label:"已暂停",    emoji:"⏸", hint:"已暂停，点击「继续」恢复" },
-    stopped:      { color:"#07C160", bg:"#E8F8EF", label:"本次完成",  emoji:"🏆", hint:"本次养护已完成，记得及时反馈感受" },
+    stopped:      { color:"#1A7AC7", bg:"#DBEAFE", label:"本次完成",  emoji:"🏆", hint:"本次养护已完成，记得及时反馈感受" },
   }[deviceState];
   const stateColor  = STATE_CFG.color;
   const stateBg     = STATE_CFG.bg;
@@ -201,10 +201,10 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
   // 3D orb gradient — each state is visually distinct
   const ballGrad = {
     disconnected: "radial-gradient(circle at 36% 28%, #CBD5E1 0%, #94A3B8 42%, #475569 100%)",
-    idle:         "radial-gradient(circle at 36% 28%, #86EFAC 0%, #07C160 42%, #064D27 100%)",
+    idle:         "radial-gradient(circle at 36% 28%, #86EFAC 0%, #1A7AC7 42%, #064D27 100%)",
     running:      "radial-gradient(circle at 36% 28%, #93C5FD 0%, #2563EB 42%, #1E3A8A 100%)",
     paused:       "radial-gradient(circle at 36% 28%, #FDE68A 0%, #F59E0B 42%, #78350F 100%)",
-    stopped:      "radial-gradient(circle at 36% 28%, #6EE7B7 0%, #07C160 42%, #064D27 100%)",
+    stopped:      "radial-gradient(circle at 36% 28%, #6EE7B7 0%, #1A7AC7 42%, #064D27 100%)",
   }[deviceState];
 
   const ballShadow = dragging
@@ -218,7 +218,7 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
     : "0 8px 24px rgba(0,0,0,0.35)";
 
   const badgeCol = {
-    disconnected:"#94A3B8", idle:"#07C160", running:"#2563EB", paused:"#F59E0B", stopped:"#07C160"
+    disconnected:"#94A3B8", idle:"#1A7AC7", running:"#2563EB", paused:"#F59E0B", stopped:"#1A7AC7"
   }[deviceState];
 
   // Knee PAD device icon — white, always same shape, state shown by orb color
@@ -395,7 +395,7 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
                     <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
                       <rect x="0.5" y="0.5" width="15" height="9" rx="2" stroke={WX.text3} strokeWidth="1.2"/>
                       <rect x="1.5" y="1.5" width="11" height="7" rx="1.5"
-                        fill={85>20?"#07C160":"#FA5151"}/>
+                        fill={85>20?"#1A7AC7":"#FA5151"}/>
                       <path d="M16.5 3.5v3" stroke={WX.text3} strokeWidth="1.2" strokeLinecap="round"/>
                     </svg>
                     <span style={{fontSize:12,color:WX.text2,fontWeight:500}}>85%</span>
@@ -479,7 +479,7 @@ function btnStyle(bg:string,color="white"): React.CSSProperties {
 const TAB_COLORS = {
   home:      { active: "#FF6B35", light: "rgba(255,107,53,0.12)"  },
   training:  { active: "#3B82F6", light: "rgba(59,130,246,0.12)"  },
-  assistant: { active: "#07C160", light: "rgba(7,193,96,0.12)"    },
+  assistant: { active: "#1A7AC7", light: "rgba(7,193,96,0.12)"    },
   discover:  { active: "#F59E0B", light: "rgba(245,158,11,0.12)"  },
   profile:   { active: "#8B5CF6", light: "rgba(139,92,246,0.12)"  },
 };
@@ -602,7 +602,7 @@ function XiaoRuiAvatar({ active }: { active: boolean }) {
         <defs>
           <radialGradient id="avatarBg" cx="38%" cy="32%" r="62%">
             <stop offset="0%" stopColor="#4DEBA0"/>
-            <stop offset="45%" stopColor="#07C160"/>
+            <stop offset="45%" stopColor="#1A7AC7"/>
             <stop offset="100%" stopColor="#04874A"/>
           </radialGradient>
           <radialGradient id="avatarSheen" cx="40%" cy="25%" r="50%">
@@ -629,8 +629,8 @@ function XiaoRuiAvatar({ active }: { active: boolean }) {
 
         {/* Doctor cap (white cap with green cross) */}
         <rect x="8" y="5" width="16" height="7" rx="3" fill="white" opacity="0.96"/>
-        <rect x="14.5" y="6.5" width="3" height="4" rx="1" fill="#07C160"/>
-        <rect x="13" y="8" width="6" height="1.5" rx="0.75" fill="#07C160"/>
+        <rect x="14.5" y="6.5" width="3" height="4" rx="1" fill="#1A7AC7"/>
+        <rect x="13" y="8" width="6" height="1.5" rx="0.75" fill="#1A7AC7"/>
 
         {/* Face */}
         <circle cx="16" cy="17" r="7" fill="url(#faceGrad)"/>
@@ -650,8 +650,8 @@ function XiaoRuiAvatar({ active }: { active: boolean }) {
         <circle cx="20.5" cy="18.5" r="1.8" fill="rgba(255,140,120,0.35)"/>
 
         {/* Stethoscope */}
-        <path d="M11 22 Q9 25 11 26 Q13 27 13 25 Q13 23 15 23" stroke="#07C160" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
-        <circle cx="15" cy="23" r="1.2" fill="#07C160" opacity="0.85"/>
+        <path d="M11 22 Q9 25 11 26 Q13 27 13 25 Q13 23 15 23" stroke="#1A7AC7" strokeWidth="1.1" strokeLinecap="round" fill="none"/>
+        <circle cx="15" cy="23" r="1.2" fill="#1A7AC7" opacity="0.85"/>
       </svg>
     </div>
   );

@@ -114,7 +114,7 @@ function RealtimeAssessment() {
             {[{x:150,y:14,r:8},{x:150,y:56},{x:130,y:74},{x:170,y:74},
               {x:137,y:80+(active?angle*0.12:0)},{x:163,y:80+(active?angle*0.12:0)},
               {x:132,y:118},{x:168,y:118}].map(({x,y,r=5},i) =>
-              <circle key={i} cx={x} cy={y} r={r} fill="#07C160" stroke="#4ADE80" strokeWidth="1.5"/>
+              <circle key={i} cx={x} cy={y} r={r} fill="#1A7AC7" stroke="#4ADE80" strokeWidth="1.5"/>
             )}
             {/* knee angle */}
             {active && <>
@@ -126,15 +126,15 @@ function RealtimeAssessment() {
           {/* corner brackets */}
           {[[28,20],[282,20],[28,162],[282,162]].map(([x,y],i) => (
             <g key={i} transform={`translate(${x},${y}) rotate(${[0,90,270,180][i]})`}>
-              <line x1="0" y1="0" x2="16" y2="0" stroke="#07C160" strokeWidth="2.5" strokeLinecap="round"/>
-              <line x1="0" y1="0" x2="0" y2="16" stroke="#07C160" strokeWidth="2.5" strokeLinecap="round"/>
+              <line x1="0" y1="0" x2="16" y2="0" stroke="#1A7AC7" strokeWidth="2.5" strokeLinecap="round"/>
+              <line x1="0" y1="0" x2="0" y2="16" stroke="#1A7AC7" strokeWidth="2.5" strokeLinecap="round"/>
             </g>
           ))}
           {/* joint labels */}
           {active && [["髋关节",150,56],["膝关节",137,80+angle*0.12],["踝关节",132,118]].map(([l,x,y]) => (
             <g key={String(l)}>
               <line x1={Number(x)+8} y1={Number(y)} x2={Number(x)+30} y2={Number(y)}
-                stroke="#07C160" strokeWidth="1" opacity="0.6"/>
+                stroke="#1A7AC7" strokeWidth="1" opacity="0.6"/>
               <text x={Number(x)+32} y={Number(y)+4} fontSize="9" fill="#4ADE80">{l}</text>
             </g>
           ))}
@@ -145,7 +145,7 @@ function RealtimeAssessment() {
           fontSize: 10, color: active ? "#4ADE80" : "#9CA3AF",
           display: "flex", alignItems: "center", gap: 4 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", display: "inline-block",
-            background: active ? "#07C160" : "#6B7280" }}/>
+            background: active ? "#1A7AC7" : "#6B7280" }}/>
           {active ? "实时检测" : "待机"}
         </div>
       </div>
@@ -158,7 +158,7 @@ function RealtimeAssessment() {
               padding: "6px 14px", borderRadius: 20, border: "none", flexShrink: 0,
               cursor: active && ex !== i ? "not-allowed" : "pointer", fontSize: 13,
               fontWeight: ex === i ? 600 : 400,
-              background: ex === i ? "#07C160" : "#F3F4F6",
+              background: ex === i ? "#1A7AC7" : "#F3F4F6",
               color: ex === i ? "white" : "#374151",
               opacity: active && ex !== i ? 0.4 : 1, transition: "all 0.15s",
             }}>{e}</button>
@@ -168,7 +168,7 @@ function RealtimeAssessment() {
         {/* metrics */}
         {active && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
-            {[{l:"评分",v:`${score}`,u:"分",c:"#07C160"},{l:"次数",v:`${reps}`,u:"次",c:"#3B82F6"},{l:"角度",v:`${angle}`,u:"°",c:"#F59E0B"}].map(({l,v,u,c}) => (
+            {[{l:"评分",v:`${score}`,u:"分",c:"#1A7AC7"},{l:"次数",v:`${reps}`,u:"次",c:"#3B82F6"},{l:"角度",v:`${angle}`,u:"°",c:"#F59E0B"}].map(({l,v,u,c}) => (
               <div key={l} style={{ background: "#F7F8FA", borderRadius: 10, padding: "10px 6px", textAlign: "center" }}>
                 <div style={{ fontSize: 20, fontWeight: 800, color: c, lineHeight: 1 }}>
                   {v}<span style={{ fontSize: 11 }}>{u}</span>
@@ -181,7 +181,7 @@ function RealtimeAssessment() {
 
         {/* feedback */}
         {active && (
-          <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10,
+          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10,
             padding: "10px 12px", marginBottom: 12, display: "flex", alignItems: "center",
             gap: 8, fontSize: 13, color: "#065F46" }}>
             <span style={{ fontSize: 16 }}>🤖</span>
@@ -192,7 +192,7 @@ function RealtimeAssessment() {
         <button onClick={startStop} style={{
           width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: "pointer",
           fontSize: 15, fontWeight: 700, color: "white", transition: "all 0.2s",
-          background: active ? "linear-gradient(135deg,#EF4444,#DC2626)" : "linear-gradient(135deg,#07C160,#059945)",
+          background: active ? "linear-gradient(135deg,#EF4444,#DC2626)" : "linear-gradient(135deg,#1A7AC7,#155FA0)",
           boxShadow: active ? "0 4px 14px rgba(239,68,68,0.35)" : "0 4px 14px rgba(7,193,96,0.35)",
         }}>
           {active ? "⏹ 停止测评" : "▶ 开始实时测评"}
@@ -312,7 +312,7 @@ export function TrainingPage() {
 
         {/* today stats */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:14 }}>
-          {[{icon:"🔥",v:"2/3",l:"今日循环",c:"#F97316"},{icon:"⏱",v:"18分",l:"已用时",c:"#3B82F6"},{icon:"💪",v:"32",l:"动作次数",c:"#07C160"}].map(({icon,v,l,c}) => (
+          {[{icon:"🔥",v:"2/3",l:"今日循环",c:"#F97316"},{icon:"⏱",v:"18分",l:"已用时",c:"#3B82F6"},{icon:"💪",v:"32",l:"动作次数",c:"#1A7AC7"}].map(({icon,v,l,c}) => (
             <div key={l} style={{ background:"white", borderRadius:12, padding:"10px 6px",
               textAlign:"center", boxShadow:"0 1px 4px rgba(0,0,0,0.06)" }}>
               <div style={{fontSize:18,marginBottom:2}}>{icon}</div>

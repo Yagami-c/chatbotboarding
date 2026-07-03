@@ -12,7 +12,7 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
         <div key={i} style={{
           height: 4, borderRadius: 4,
           width: i === current ? 24 : 8,
-          background: i === current ? "#07C160" : "#E0E0E0",
+          background: i === current ? "#1A7AC7" : "#E0E0E0",
           transition: "all 0.3s ease",
         }} />
       ))}
@@ -27,7 +27,7 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
       {/* Illustrated hero — full top half */}
       <div style={{
         flex: "0 0 55%",
-        background: "linear-gradient(160deg, #07C160 0%, #06AE56 55%, #04783D 100%)",
+        background: "linear-gradient(160deg, #1A7AC7 0%, #1570B8 55%, #04783D 100%)",
         position: "relative", overflow: "hidden",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       }}>
@@ -45,8 +45,8 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
           marginBottom: 20, position: "relative", zIndex: 1,
         }}>
           <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-            <path d="M28 7L5 24h6v19a3 3 0 003 3h28a3 3 0 003-3V24h6L28 7z" fill="#07C160"/>
-            <path d="M28 7L5 24h6v5L28 17l17 12v-5h6L28 7z" fill="#06AE56" opacity="0.5"/>
+            <path d="M28 7L5 24h6v19a3 3 0 003 3h28a3 3 0 003-3V24h6L28 7z" fill="#1A7AC7"/>
+            <path d="M28 7L5 24h6v5L28 17l17 12v-5h6L28 7z" fill="#1570B8" opacity="0.5"/>
             <path d="M28 40s-9-5.5-9-12a6.5 6.5 0 0113 0 6.5 6.5 0 0113 0C45 34.5 28 40 28 40z" fill="white"/>
             <rect x="23" y="33" width="10" height="12" rx="5" fill="#E8FBF0"/>
           </svg>
@@ -87,7 +87,7 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
           ].map(({ icon, text }) => (
             <div key={text} style={{
               display: "flex", alignItems: "center", gap: 5,
-              background: "#F0FDF4", border: "1px solid #BBF7D0",
+              background: "#EFF6FF", border: "1px solid #BFDBFE",
               borderRadius: 20, padding: "5px 12px",
               fontSize: 12, color: "#065F46", fontWeight: 500,
             }}>
@@ -98,7 +98,7 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
 
         <button onClick={onNext} style={{
           width: "100%", padding: "16px", borderRadius: 14,
-          background: "linear-gradient(135deg, #07C160, #059945)",
+          background: "linear-gradient(135deg, #1A7AC7, #155FA0)",
           color: "white", fontWeight: 700, fontSize: 17,
           border: "none", cursor: "pointer",
           boxShadow: "0 6px 20px rgba(7,193,96,0.4)",
@@ -131,7 +131,7 @@ function Step2({
   const features = [
     { icon: "📅", title: "每日评估", desc: "追踪你的膝盖状态变化", color: "#EEF4FF" },
     { icon: "🔔", title: "训练提醒", desc: "按时推送，不落一次", color: "#FEF3C7" },
-    { icon: "📈", title: "强度优化", desc: "实时调整训练方案", color: "#E8F8EF" },
+    { icon: "📈", title: "强度优化", desc: "实时调整训练方案", color: "#DBEAFE" },
     { icon: "💡", title: "科普推送", desc: "专家知识随时获取", color: "#F3E8FF" },
   ];
 
@@ -140,7 +140,7 @@ function Step2({
       {/* Header */}
       <div style={{
         padding: "52px 24px 24px",
-        background: "linear-gradient(160deg, #F0FDF4, white)",
+        background: "linear-gradient(160deg, #EFF6FF, white)",
         borderBottom: "1px solid #F0F0F0",
       }}>
         <div style={{ fontSize: 44, marginBottom: 12, textAlign: "center" }}>🤖</div>
@@ -170,8 +170,8 @@ function Step2({
         {/* Toggle row */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: smartMode ? "#F0FDF4" : "#F7F8FA",
-          border: `1.5px solid ${smartMode ? "#BBF7D0" : "#E8E8E8"}`,
+          background: smartMode ? "#EFF6FF" : "#F7F8FA",
+          border: `1.5px solid ${smartMode ? "#BFDBFE" : "#E8E8E8"}`,
           borderRadius: 14, padding: "14px 16px",
           transition: "all 0.25s", marginBottom: 16,
         }}>
@@ -185,7 +185,7 @@ function Step2({
           </div>
           <button onClick={() => setSmartMode(!smartMode)} style={{
             width: 48, height: 28, borderRadius: 14, border: "none",
-            background: smartMode ? "#07C160" : "#D1D5DB",
+            background: smartMode ? "#1A7AC7" : "#D1D5DB",
             cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0,
           }}>
             <span style={{
@@ -204,7 +204,7 @@ function Step2({
       <div style={{ padding: "0 20px" }}>
         <button onClick={onConfirm} style={{
           width: "100%", padding: "15px", borderRadius: 14,
-          background: "linear-gradient(135deg, #07C160, #059945)",
+          background: "linear-gradient(135deg, #1A7AC7, #155FA0)",
           color: "white", fontWeight: 700, fontSize: 16,
           border: "none", cursor: "pointer",
           boxShadow: "0 5px 18px rgba(7,193,96,0.38)",
@@ -246,7 +246,7 @@ function Step3({
       <div style={{ flex: 1, padding: "0 20px", display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Card 1: Assessment (recommended) */}
         <button onClick={onAssess} style={{
-          width: "100%", background: "linear-gradient(135deg, #07C160, #059945)",
+          width: "100%", background: "linear-gradient(135deg, #1A7AC7, #155FA0)",
           borderRadius: 18, padding: "22px 20px",
           border: "none", cursor: "pointer", textAlign: "left",
           position: "relative", overflow: "hidden",

@@ -74,7 +74,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#f5f9f5] overflow-hidden">
+    <div className="flex-1 flex flex-col bg-[#f0f6ff] overflow-hidden">
       {/* Header */}
       <div className="px-4 pt-12 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
         <div className="flex items-center gap-3 mb-4">
@@ -90,11 +90,11 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
           {STEPS.map((s, i) => (
             <div key={i} className="flex items-center flex-1">
               <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold flex-shrink-0 transition-all
-                ${i < step ? "bg-[#2ECC71] text-white" : i === step ? "bg-[#2ECC71] text-white ring-2 ring-[#a8f0c6] ring-offset-1" : "bg-[#e2e8f0] text-[#a0aec0]"}`}>
+                ${i < step ? "bg-[#1A7AC7] text-white" : i === step ? "bg-[#1A7AC7] text-white ring-2 ring-[#a8f0c6] ring-offset-1" : "bg-[#e2e8f0] text-[#a0aec0]"}`}>
                 {i < step ? "✓" : i + 1}
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-1.5 transition-all duration-300 ${i < step ? "bg-[#2ECC71]" : "bg-[#e2e8f0]"}`}/>
+                <div className={`flex-1 h-0.5 mx-1.5 transition-all duration-300 ${i < step ? "bg-[#1A7AC7]" : "bg-[#e2e8f0]"}`}/>
               )}
             </div>
           ))}
@@ -102,7 +102,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
         <div className="flex">
           {STEPS.map((s, i) => (
             <div key={i} className={`flex-1 text-center text-[10px] font-medium transition-colors
-              ${i === step ? "text-[#2ECC71]" : i < step ? "text-[#48bb78]" : "text-[#a0aec0]"}`}>
+              ${i === step ? "text-[#1A7AC7]" : i < step ? "text-[#1A7AC7]" : "text-[#a0aec0]"}`}>
               {s.label}
             </div>
           ))}
@@ -115,7 +115,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q1. 你的称呼？</div>
             <input value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"
-              className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-[#fafcff] outline-none focus:border-[#2ECC71]"/>
+              className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-[#fafcff] outline-none focus:border-[#1A7AC7]"/>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q2. 你的性别？</div>
@@ -123,7 +123,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
               {["男","女","其他"].map(g=>(
                 <button key={g} onClick={()=>setGender(g)}
                   className={`flex-1 py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${gender===g?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    ${gender===g?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {g==="男"?"👨 男":g==="女"?"👩 女":"其他"}
                 </button>
               ))}
@@ -135,7 +135,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
               {["20岁以下","20-40岁","40-60岁","60岁以上"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
                   className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${ageRange===a?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    ${ageRange===a?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {a}
                 </button>
               ))}
@@ -143,7 +143,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
           </div>
           <button onClick={handleNext}
             className={`w-full py-3.5 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-              ${canNext0?"bg-[#2ECC71] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
+              ${canNext0?"bg-[#1A7AC7] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
             下一步 →
           </button>
         </div>
@@ -158,7 +158,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
               {DURATIONS.map(d=>(
                 <button key={d} onClick={()=>setDuration(d)}
                   className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all text-center
-                    ${duration===d?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    ${duration===d?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {d}
                 </button>
               ))}
@@ -170,7 +170,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
               <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
                 <input type="checkbox" checked={!!safety[v]}
                   onChange={e=>setSafety(p=>({...p,[v]:e.target.checked}))}
-                  className="accent-[#2ECC71]"/>
+                  className="accent-[#1A7AC7]"/>
                 {l}
               </label>
             ))}
@@ -182,7 +182,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
             </button>
             <button onClick={handleNext}
               className={`flex-[2] py-3 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-                ${canNext1?"bg-[#2ECC71] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
+                ${canNext1?"bg-[#1A7AC7] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
               下一步 →
             </button>
           </div>
@@ -196,7 +196,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q6. 膝盖紧度？</div>
             {["没有特别感觉","有点紧","很紧"].map(s=>(
               <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)} className="accent-[#2ECC71]"/>
+                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)} className="accent-[#1A7AC7]"/>
                 {s}
               </label>
             ))}
@@ -208,7 +208,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
               <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
                 <input type="checkbox" checked={!!triggers[v]}
                   onChange={e=>setTriggers(p=>({...p,[v]:e.target.checked}))}
-                  className="accent-[#2ECC71]"/>
+                  className="accent-[#1A7AC7]"/>
                 {v}
               </label>
             ))}
@@ -218,7 +218,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
                 {[0,1,2,3,4].map(n=>(
                   <button key={n} onClick={()=>setPainLevel(n)}
                     className={`flex-1 py-2 rounded-xl text-sm font-bold border cursor-pointer transition-all
-                      ${painLevel===n?"bg-[#2ECC71] text-white border-[#2ECC71]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                      ${painLevel===n?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                     {n}
                   </button>
                 ))}
@@ -235,7 +235,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
             </button>
             <button onClick={handleSubmit}
               className={`flex-[2] py-3 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-                ${canSubmit?"bg-[#2ECC71] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
+                ${canSubmit?"bg-[#1A7AC7] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
               提交并查看方案 →
             </button>
           </div>
@@ -259,7 +259,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
                 返回修改
               </button>
               <button onClick={submit}
-                className="flex-1 py-2.5 rounded-full bg-[#2ECC71] text-white font-semibold text-sm border-0 cursor-pointer">
+                className="flex-1 py-2.5 rounded-full bg-[#1A7AC7] text-white font-semibold text-sm border-0 cursor-pointer">
                 仍要继续 →
               </button>
             </div>

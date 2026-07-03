@@ -22,7 +22,7 @@ interface Section {
 const DIMENSIONS = [
   { icon: "🏛️", title: "稳定之基", color: "#EEF4FF", border: "#BFDBFE", text: "#1D4ED8",
     desc: "建立动态核心稳定，提升运动中保护膝盖的抗旋转与协调能力。" },
-  { icon: "🔑", title: "激活之钥", color: "#F0FDF4", border: "#86EFAC", text: "#15803D",
+  { icon: "🔑", title: "激活之钥", color: "#EFF6FF", border: "#86EFAC", text: "#15803D",
     desc: "激活臀部肌肉，稳定骨盆，从根源改善力线，预防膝痛。" },
   { icon: "💪", title: "支撑之力", color: "#FFFBEB", border: "#FCD34D", text: "#B45309",
     desc: "强化日常功能性力量，直接提升坐下、站起、上下楼时的轻松与稳健。" },
@@ -298,7 +298,7 @@ function ExerciseCard({ ex, accentColor, lightColor }: {
 // ── Forum Section (moved from HomePage) ─────────────────────────────────────
 
 const FORUM_POSTS_D = [
-  { id:1, avatar:"李", avatarColor:"#4CAF50", name:"膝盖要好好的", time:"2小时前",
+  { id:1, avatar:"李", avatarColor:"#1A7AC7", name:"膝盖要好好的", time:"2小时前",
     content:"今天做了第二阶段的下蹲动作，明显感觉比上周轻松了，疼痛感从5降到了2，继续坚持！",
     likes:24 },
   { id:2, avatar:"陈", avatarColor:"#2196F3", name:"健康生活家", time:"5小时前",
@@ -321,9 +321,9 @@ function DiscoverForum({ onShowWx }: { onShowWx: ()=>void }) {
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 16px 10px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <span style={{ fontSize:16 }}>💬</span>
-          <span style={{ fontSize:15, fontWeight:700, color:"#1A3A2A" }}>社区互动</span>
+          <span style={{ fontSize:15, fontWeight:700, color:"#1E3A5F" }}>社区互动</span>
         </div>
-        <span style={{ fontSize:12, color:"#07C160", cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
+        <span style={{ fontSize:12, color:"#1A7AC7", cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
       </div>
       {FORUM_POSTS_D.map((p, i) => (
         <div key={p.id} style={{ padding:"11px 16px", borderTop:`1px solid #F5F5F5`,
@@ -368,8 +368,8 @@ function DiscoverForum({ onShowWx }: { onShowWx: ()=>void }) {
       {/* WeChat group CTA */}
       <div onClick={onShowWx} style={{
         display:"flex", alignItems:"center", gap:12, padding:"13px 16px",
-        background:"#F0FDF4", cursor:"pointer" }}>
-        <div style={{ width:38, height:38, borderRadius:"50%", background:"#07C160",
+        background:"#EFF6FF", cursor:"pointer" }}>
+        <div style={{ width:38, height:38, borderRadius:"50%", background:"#1A7AC7",
           display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
           <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
             <ellipse cx="7.8" cy="8.5" rx="6" ry="4.5" stroke="white" strokeWidth="1.5" fill="none"/>
@@ -381,11 +381,11 @@ function DiscoverForum({ onShowWx }: { onShowWx: ()=>void }) {
           </svg>
         </div>
         <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:"#07C160" }}>加入康群微信群</div>
-          <div style={{ fontSize:11, color:"#4A6A5A", marginTop:1 }}>与病友交流康养经验</div>
+          <div style={{ fontSize:13, fontWeight:600, color:"#1A7AC7" }}>加入康群微信群</div>
+          <div style={{ fontSize:11, color:"#1E3A5F", marginTop:1 }}>与病友交流康养经验</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18l6-6-6-6" stroke="#07C160" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M9 18l6-6-6-6" stroke="#1A7AC7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
     </div>
@@ -443,7 +443,7 @@ export function DiscoverPage() {
                 <div style={{ fontSize:36, marginBottom:6 }}>📱</div>
                 <div style={{ fontSize:11, color:"#999" }}>长按识别加入群聊</div>
               </div>
-              <div style={{ fontSize:13, color:"#07C160", textAlign:"center", fontWeight:600 }}>
+              <div style={{ fontSize:13, color:"#1A7AC7", textAlign:"center", fontWeight:600 }}>
                 已有 1,284 位病友在群内交流
               </div>
             </div>
@@ -456,7 +456,7 @@ export function DiscoverPage() {
         {/* Expert card */}
         <div style={{
           margin: "14px 14px 0",
-          background: "linear-gradient(135deg, #07C160 0%, #059945 100%)",
+          background: "linear-gradient(135deg, #1A7AC7 0%, #155FA0 100%)",
           borderRadius: 20, padding: "18px 18px 16px",
           position: "relative", overflow: "hidden",
         }}>
@@ -614,7 +614,7 @@ export function DiscoverPage() {
             关于内容来源
           </div>
           <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.7 }}>
-            以上内容由<strong style={{ color: "#07C160" }}>香港理工大学武汉研究院</strong>智慧康复与创新老龄健康转化研究中心提供，系一般性科普信息，供日常参考，不构成任何医疗建议或诊断依据。
+            以上内容由<strong style={{ color: "#1A7AC7" }}>香港理工大学武汉研究院</strong>智慧康复与创新老龄健康转化研究中心提供，系一般性科普信息，供日常参考，不构成任何医疗建议或诊断依据。
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ interface WeChatLoginProps {
 }
 
 const MOCK_PROFILES = [
-  { name: "微信用户_3721", avatar: "M", phone: "138****8823", color: "#1AAD19" },
+  { name: "微信用户_3721", avatar: "M", phone: "138****8823", color: "#1A7AC7" },
   { name: "微信用户_5590", avatar: "F", phone: "186****2047", color: "#576B95" },
   { name: "微信用户_8814", avatar: "L", phone: "159****6631", color: "#E05C4B" },
 ];
@@ -18,8 +18,8 @@ type Step = "landing" | "permission" | "phone" | "logging";
 function WeChatLockIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <rect x="2" y="6" width="10" height="7" rx="1.5" fill="#07C160"/>
-      <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="#07C160" strokeWidth="1.4" fill="none"/>
+      <rect x="2" y="6" width="10" height="7" rx="1.5" fill="#1A7AC7"/>
+      <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="#1A7AC7" strokeWidth="1.4" fill="none"/>
     </svg>
   );
 }
@@ -47,7 +47,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
 
       {/* ── Top brand area ─────────────────────────────────── */}
       <div style={{
-        background: "linear-gradient(175deg, #07C160 0%, #06AE56 55%, #059945 100%)",
+        background: "linear-gradient(175deg, #1A7AC7 0%, #1570B8 55%, #155FA0 100%)",
         paddingTop: 60, paddingBottom: 44,
         display: "flex", flexDirection: "column", alignItems: "center",
         position: "relative", overflow: "hidden",
@@ -65,9 +65,9 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
         }}>
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
             {/* house body */}
-            <path d="M25 8L6 23h5v16a2.5 2.5 0 002.5 2.5h23A2.5 2.5 0 0039 39V23h5L25 8z" fill="#07C160"/>
+            <path d="M25 8L6 23h5v16a2.5 2.5 0 002.5 2.5h23A2.5 2.5 0 0039 39V23h5L25 8z" fill="#1A7AC7"/>
             {/* roof sheen */}
-            <path d="M25 8L6 23h5v4L25 15l14 12v-4h5L25 8z" fill="#06AE56" opacity="0.5"/>
+            <path d="M25 8L6 23h5v4L25 15l14 12v-4h5L25 8z" fill="#1570B8" opacity="0.5"/>
             {/* heart */}
             <path d="M25 36s-8-5-8-10.5a5 5 0 0110 0 5 5 0 0110 0C37 31 25 36 25 36z" fill="white"/>
             {/* door */}
@@ -88,7 +88,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
         <div style={{ background: "white", borderRadius: 14, overflow: "hidden", marginBottom: 12,
           boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
           {[
-            { icon: "🏥", color: "#E8F8EF", title: "AI 个性化方案", sub: "根据你的情况智能推荐" },
+            { icon: "🏥", color: "#DBEAFE", title: "AI 个性化方案", sub: "根据你的情况智能推荐" },
             { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡，看见成长" },
             { icon: "🔬", color: "#FFF5E8", title: "专家团队研发", sub: "香港理工大学研究成果" },
           ].map(({ icon, color, title, sub }, i, arr) => (
@@ -114,7 +114,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
         {/* WeChat login button — authentic green pill */}
         <button onClick={handleWeChatTap} style={{
           width: "100%", height: 50, borderRadius: 10,
-          background: "#07C160", color: "white",
+          background: "#1A7AC7", color: "white",
           border: "none", cursor: "pointer",
           fontWeight: 600, fontSize: 17,
           display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -166,10 +166,10 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
 
             {/* App info row */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 20px", marginBottom: 20 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "#07C160", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "#1A7AC7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <svg width="28" height="28" viewBox="0 0 50 50" fill="none">
                   <path d="M25 8L6 23h5v16a2.5 2.5 0 002.5 2.5h23A2.5 2.5 0 0039 39V23h5L25 8z" fill="white"/>
-                  <path d="M25 36s-8-5-8-10.5a5 5 0 0110 0 5 5 0 0110 0C37 31 25 36 25 36z" fill="#07C160"/>
+                  <path d="M25 36s-8-5-8-10.5a5 5 0 0110 0 5 5 0 0110 0C37 31 25 36 25 36z" fill="#1A7AC7"/>
                 </svg>
               </div>
               <div>
@@ -206,7 +206,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
               <button onClick={onSkip} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#F2F2F2", color: "#666", fontWeight: 500, fontSize: 16, border: "none", cursor: "pointer" }}>
                 拒绝
               </button>
-              <button onClick={handleAllowProfile} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#07C160", color: "white", fontWeight: 600, fontSize: 16, border: "none", cursor: "pointer" }}>
+              <button onClick={handleAllowProfile} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#1A7AC7", color: "white", fontWeight: 600, fontSize: 16, border: "none", cursor: "pointer" }}>
                 允许
               </button>
             </div>
@@ -230,9 +230,9 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
 
             {/* Phone number display */}
             <div style={{ margin: "0 16px 20px", background: "#F7F8FA", borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: "#E8F8EF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: "#DBEAFE", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" fill="#07C160"/>
+                  <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" fill="#1A7AC7"/>
                 </svg>
               </div>
               <div>
@@ -245,7 +245,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
               <button onClick={handleDenyPhone} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#F2F2F2", color: "#666", fontWeight: 500, fontSize: 16, border: "none", cursor: "pointer" }}>
                 暂不授权
               </button>
-              <button onClick={handleAllowPhone} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#07C160", color: "white", fontWeight: 600, fontSize: 16, border: "none", cursor: "pointer" }}>
+              <button onClick={handleAllowPhone} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#1A7AC7", color: "white", fontWeight: 600, fontSize: 16, border: "none", cursor: "pointer" }}>
                 允许
               </button>
             </div>
@@ -261,7 +261,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
             <div style={{ width: 40, height: 40, position: "relative" }}>
               <svg width="40" height="40" viewBox="0 0 40 40" style={{ animation: "spin 0.7s linear infinite" }}>
                 <circle cx="20" cy="20" r="16" stroke="#E8E8E8" strokeWidth="3.5" fill="none"/>
-                <path d="M20 4 A16 16 0 0 1 36 20" stroke="#07C160" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+                <path d="M20 4 A16 16 0 0 1 36 20" stroke="#1A7AC7" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
               </svg>
             </div>
             <div style={{ fontSize: 15, color: "#191919", fontWeight: 500 }}>正在登录{dots}</div>

@@ -19,7 +19,7 @@ interface Notif {
 const TYPE_META: Record<NotifType, { icon: string; color: string; bg: string; label: string }> = {
   training:    { icon: "🏃", color: "#3B82F6", bg: "#EEF4FF", label: "训练提醒" },
   achievement: { icon: "🏆", color: "#F59E0B", bg: "#FFFBE6", label: "成就徽章" },
-  expert:      { icon: "👨‍⚕️", color: "#07C160", bg: "#E8F8EF", label: "专家建议" },
+  expert:      { icon: "👨‍⚕️", color: "#1A7AC7", bg: "#DBEAFE", label: "专家建议" },
   system:      { icon: "🔔", color: "#6B7280", bg: "#F3F4F6", label: "系统通知" },
   reminder:    { icon: "📅", color: "#8B5CF6", bg: "#F5F3FF", label: "康养提醒" },
 };
@@ -105,13 +105,13 @@ export function NotificationsPage({ onBack }: NotificationsPageProps) {
             <div>
               <div style={{ fontSize: 17, fontWeight: 700, color: "#191919" }}>消息通知</div>
               {unreadCount > 0 && (
-                <div style={{ fontSize: 12, color: "#07C160", marginTop: 2 }}>{unreadCount} 条未读</div>
+                <div style={{ fontSize: 12, color: "#1A7AC7", marginTop: 2 }}>{unreadCount} 条未读</div>
               )}
             </div>
           </div>
           {unreadCount > 0 && (
             <button onClick={markAllRead} style={{
-              background: "none", border: "none", fontSize: 13, color: "#07C160",
+              background: "none", border: "none", fontSize: 13, color: "#1A7AC7",
               cursor: "pointer", fontWeight: 500,
             }}>
               全部已读
@@ -125,7 +125,7 @@ export function NotificationsPage({ onBack }: NotificationsPageProps) {
             <button key={v} onClick={() => setFilter(v)} style={{
               padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer",
               fontSize: 13, fontWeight: filter === v ? 600 : 400, flexShrink: 0,
-              background: filter === v ? "#07C160" : "#F5F5F5",
+              background: filter === v ? "#1A7AC7" : "#F5F5F5",
               color: filter === v ? "white" : "#666",
               transition: "all 0.15s",
             }}>
@@ -208,7 +208,7 @@ function NotifCard({ notif, onRead }: { notif: Notif; onRead: () => void }) {
         <div style={{
           position: "absolute", top: 18, right: 16,
           width: 8, height: 8, borderRadius: "50%",
-          background: "#07C160",
+          background: "#1A7AC7",
         }} />
       )}
 

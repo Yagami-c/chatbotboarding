@@ -54,7 +54,7 @@ function FlowHeader({ step, total, title, onBack, backDisabled }: {
       <div className="flex gap-1.5">
         {Array.from({ length: total }).map((_, i) => (
           <div key={i} className="h-1.5 rounded-full transition-all duration-300"
-            style={{ flex: i === step ? 2 : 1, background: i <= step ? "#07C160" : "#e2e8f0" }} />
+            style={{ flex: i === step ? 2 : 1, background: i <= step ? "#1A7AC7" : "#e2e8f0" }} />
         ))}
       </div>
     </div>
@@ -82,12 +82,12 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <FlowHeader step={step} total={3} title={`📋 ${TITLES[step]}`} onBack={handleBack} />
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f5f9f5]">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
         {step === 0 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="text-sm font-semibold text-[#1a202c] mb-2">叫你什么好？</div>
             <input value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"
-              className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-[#fafcff] outline-none focus:border-[#07C160]"/>
+              className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-xl text-sm bg-[#fafcff] outline-none focus:border-[#1A7AC7]"/>
           </div>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="text-sm font-semibold text-[#1a202c] mb-2">性别</div>
@@ -95,7 +95,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
               {["男","女","其他"].map(g=>(
                 <button key={g} onClick={()=>setGender(g)}
                   className={`flex-1 py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${gender===g?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    ${gender===g?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {g==="男"?"👨 男":g==="女"?"👩 女":"其他"}
                 </button>
               ))}
@@ -107,14 +107,14 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
               {["20岁以下","20-40岁","40-60岁","60岁以上"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
                   className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${ageRange===a?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    ${ageRange===a?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {a}
                 </button>
               ))}
             </div>
           </div>
           <button onClick={()=>{ if(!name.trim()||!gender||!ageRange){alert("请完整填写");return;} setStep(1); }}
-            className="w-full py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">
+            className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
             下一步 →
           </button>
         </>}
@@ -126,7 +126,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
               {["不到1个月","1-3个月","3-6个月","6个月-1年","1年以上","无特别不适"].map(d=>(
                 <button key={d} onClick={()=>setDuration(d)}
                   className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${duration===d?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    ${duration===d?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                   {d}
                 </button>
               ))}
@@ -136,7 +136,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
             <div className="text-sm font-semibold text-[#1a202c] mb-2">安全筛查（可多选）</div>
             {SAFETY_LIST.map(({v,l})=>(
               <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="checkbox" checked={!!safety[v]} onChange={e=>setSafety(p=>({...p,[v]:e.target.checked}))} className="accent-[#07C160]"/>
+                <input type="checkbox" checked={!!safety[v]} onChange={e=>setSafety(p=>({...p,[v]:e.target.checked}))} className="accent-[#1A7AC7]"/>
                 {l}
               </label>
             ))}
@@ -144,7 +144,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
           <div className="flex gap-3 pb-4">
             <button onClick={()=>setStep(0)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
             <button onClick={()=>{ if(!duration||safetyVals.length===0){alert("请完整填写");return;} setStep(2); }}
-              className="flex-[2] py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">下一步 →</button>
+              className="flex-[2] py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">下一步 →</button>
           </div>
         </>}
 
@@ -153,7 +153,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
             <div className="text-sm font-semibold text-[#1a202c] mb-2">起床/久坐后膝盖紧绷感？</div>
             {["没有特别感觉","有点紧","很紧"].map(s=>(
               <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)} className="accent-[#07C160]"/>
+                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)} className="accent-[#1A7AC7]"/>
                 {s}
               </label>
             ))}
@@ -162,7 +162,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
             <div className="text-sm font-semibold text-[#1a202c] mb-1">哪些动作容易引发不适？（可多选）</div>
             {TRIGGERS_LIST.map(v=>(
               <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="checkbox" checked={!!triggers[v]} onChange={e=>setTriggers(p=>({...p,[v]:e.target.checked}))} className="accent-[#07C160]"/>
+                <input type="checkbox" checked={!!triggers[v]} onChange={e=>setTriggers(p=>({...p,[v]:e.target.checked}))} className="accent-[#1A7AC7]"/>
                 {v}
               </label>
             ))}
@@ -172,7 +172,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
                 {[0,1,2,3,4].map(n=>(
                   <button key={n} onClick={()=>setPainLevel(n)}
                     className={`flex-1 py-2 rounded-xl text-sm font-bold border cursor-pointer transition-all
-                      ${painLevel===n?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                      ${painLevel===n?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                     {n}
                   </button>
                 ))}
@@ -182,7 +182,7 @@ function AssessmentFlow({ onDone, onCancel }: { onDone: (r: AssessmentResult) =>
           <div className="flex gap-3 pb-4">
             <button onClick={()=>setStep(1)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
             <button onClick={()=>{ if(!stiffness||triggerVals.length===0||painLevel===null){alert("请完整填写");return;} handleSubmit(); }}
-              className="flex-[2] py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">提交查看方案 →</button>
+              className="flex-[2] py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">提交查看方案 →</button>
           </div>
         </>}
       </div>
@@ -225,7 +225,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <FlowHeader step={step} total={3} title={`⚡ ${TITLES[step]}`} onBack={handleBack} backDisabled={step === 2 && running} />
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f5f9f5]">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
 
         {step === 0 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
@@ -233,12 +233,12 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
             <div className="flex gap-2 mb-3">
               <button onClick={()=>setCustomMode(false)}
                 className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
-                  ${!customMode?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  ${!customMode?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                 📋 设定模式
               </button>
               <button onClick={()=>setCustomMode(true)}
                 className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
-                  ${customMode?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  ${customMode?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                 ⚙️ 自定义模式
               </button>
             </div>
@@ -249,14 +249,14 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
                   {[1,2,3,4,5,6].map(l=>(
                     <button key={l} onClick={()=>setLevel(l)}
                       className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
-                        ${level===l?"bg-[#07C160] text-white border-[#07C160]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                        ${level===l?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
                       L{l}
                     </button>
                   ))}
                 </div>
-                <div className="bg-[#f0fdf4] rounded-xl p-3 text-sm">
-                  <div className="font-semibold text-[#065f46]">{getLevelName(level)} · {LEVELS[level-1]}</div>
-                  <div className="text-xs mt-1 text-[#4a8a6a]">{LEVEL_DESCS[level]}</div>
+                <div className="bg-[#EFF6FF] rounded-xl p-3 text-sm">
+                  <div className="font-semibold text-[#1E3A5F]">{getLevelName(level)} · {LEVELS[level-1]}</div>
+                  <div className="text-xs mt-1 text-[#2563EB]">{LEVEL_DESCS[level]}</div>
                   <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
                     <span>💨 {prm.pressure} mmHg</span><span>⏱ {prm.work}s 工作</span>
                     <span>🔄 {prm.rest}s 休息</span><span>🔁 {prm.cycles} 轮</span>
@@ -282,7 +282,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
                       onChange={e=>set(Number(e.target.value))}
                       className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
                         [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#07C160] [&::-webkit-slider-thumb]:cursor-pointer"/>
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1A7AC7] [&::-webkit-slider-thumb]:cursor-pointer"/>
                   </div>
                 ))}
                 <div className="pt-2 border-t border-[#fde68a] text-xs text-[#92400e]">
@@ -292,7 +292,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
             )}
           </div>
           <button onClick={()=>setStep(1)}
-            className="w-full py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">
+            className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
             下一步：穿戴准备 →
           </button>
         </>}
@@ -303,7 +303,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           </div>
           {WEAR_STEPS.map(({icon,title,desc},i)=>(
             <div key={i} className="bg-white rounded-2xl p-4 border border-[#e2e8f0] flex gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#f0fdf4] flex items-center justify-center text-lg flex-shrink-0">{icon}</div>
+              <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center text-lg flex-shrink-0">{icon}</div>
               <div>
                 <div className="text-sm font-semibold text-[#1a202c]">步骤 {i+1}：{title}</div>
                 <div className="text-xs text-[#718096] mt-0.5 leading-relaxed">{desc}</div>
@@ -313,7 +313,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           <div className="flex gap-3 pb-4">
             <button onClick={()=>setStep(0)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
             <button onClick={()=>{ onStart(customMode ? -1 : level, customMode ? {pressure:customPressure,work:customWork,rest:customRest,cycles:customCycles} : undefined); setStep(2); }}
-              className="flex-[2] py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">
+              className="flex-[2] py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
               已准备好，开始使用 →
             </button>
           </div>
@@ -326,7 +326,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
               <div className="flex-1">
                 <div className="text-sm font-semibold text-[#1a202c]">智能膝关节康养仪 PAD</div>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={`w-2 h-2 rounded-full ${running?"bg-[#07C160] animate-pulse":done?"bg-[#fbbf24]":"bg-[#07C160]"}`}/>
+                  <span className={`w-2 h-2 rounded-full ${running?"bg-[#1A7AC7] animate-pulse":done?"bg-[#fbbf24]":"bg-[#1A7AC7]"}`}/>
                   <span className="text-xs text-[#718096]">{running?(deviceState==="paused"?"已暂停":"运行中"):done?"已完成":"启动中..."}</span>
                 </div>
               </div>
@@ -341,7 +341,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
               <span>使用进度</span><span>{formatTime(runTotal - hwRemaining)} / {formatTime(runTotal)}</span>
             </div>
             <div className="h-3 bg-[#e2e8f0] rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-gradient-to-r from-[#07C160] to-[#06AE56] rounded-full transition-all duration-300" style={{width:`${progress}%`}}/>
+              <div className="h-full bg-gradient-to-r from-[#1A7AC7] to-[#1570B8] rounded-full transition-all duration-300" style={{width:`${progress}%`}}/>
             </div>
             <div className="flex justify-between text-xs text-[#718096]">
               <span>轮数：{hwCycle} / {hwTotalCycles}</span><span>{progress}%</span>
@@ -350,16 +350,16 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0] flex gap-2">
             {running && <>
               <button onClick={onTogglePause}
-                className={`flex-1 py-3 rounded-full font-bold text-sm border-0 cursor-pointer ${deviceState==="paused"?"bg-[#07C160] text-white":"bg-[#F39C12] text-white"}`}>
+                className={`flex-1 py-3 rounded-full font-bold text-sm border-0 cursor-pointer ${deviceState==="paused"?"bg-[#1A7AC7] text-white":"bg-[#F39C12] text-white"}`}>
                 {deviceState==="paused"?"▶ 继续":"⏸ 暂停"}
               </button>
               <button onClick={onStop} className="flex-1 py-3 rounded-full bg-[#E74C3C] text-white font-bold text-sm border-0 cursor-pointer">⏹ 结束</button>
             </>}
-            {done && <button onClick={onReset} className="flex-1 py-3 rounded-full bg-[#07C160] text-white font-bold text-sm border-0 cursor-pointer">🔄 重新开始</button>}
+            {done && <button onClick={onReset} className="flex-1 py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">🔄 重新开始</button>}
           </div>
           {running && (
             <button onClick={onMinimize}
-              className="w-full py-3 rounded-full bg-[#f0fdf4] text-[#07C160] font-semibold text-sm border border-[#07C160] cursor-pointer">
+              className="w-full py-3 rounded-full bg-[#EFF6FF] text-[#1A7AC7] font-semibold text-sm border border-[#1A7AC7] cursor-pointer">
               ⬇ 收起 · 设备继续运行
             </button>
           )}
@@ -382,14 +382,14 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
 
 const INIT_POSTS = [
   {
-    id: 1, avatar: "李", avatarColor: "#4CAF50",
+    id: 1, avatar: "李", avatarColor: "#1A7AC7",
     name: "膝盖要好好的", time: "2小时前",
     content: "今天做了第二阶段的下蹲动作，明显感觉比上周轻松了，疼痛感从5降到了2，继续坚持！大家有没有类似的感受？",
     likes: 24,
     commentList: [
       { id:1, avatar:"王", color:"#9C27B0", name:"运动达人", time:"1小时前", text:"我也有同感！坚持下去会越来越好的 💪" },
       { id:2, avatar:"张", color:"#FF5722", name:"老病友", time:"45分钟前", text:"第三阶段更明显，加油！" },
-      { id:3, avatar:"M",  color:"#1AAD19", name:"专家医生", time:"20分钟前", text:"很好的恢复进展，建议配合拉伸效果更佳。" },
+      { id:3, avatar:"M",  color:"#1A7AC7", name:"专家医生", time:"20分钟前", text:"很好的恢复进展，建议配合拉伸效果更佳。" },
     ],
   },
   {
@@ -432,7 +432,7 @@ function ForumSection_UNUSED() {
   const sendComment = (postId: number) => {
     const text = (commentTexts[postId] || "").trim();
     if (!text) return;
-    const newComment = { id: Date.now(), avatar:"我", color:"#07C160", name:"我", time:"刚刚", text };
+    const newComment = { id: Date.now(), avatar:"我", color:"#1A7AC7", name:"我", time:"刚刚", text };
     setCommentLists(prev => ({ ...prev, [postId]: [...(prev[postId]||[]), newComment] }));
     setCommentTexts(prev => ({ ...prev, [postId]: "" }));
   };
@@ -447,7 +447,7 @@ function ForumSection_UNUSED() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "14px 16px 10px" }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: "#1A3A2A" }}>康养论坛</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: "#1E3A5F" }}>康养论坛</span>
           <button onClick={() => setShowPostModal(true)}
             style={{ padding: "5px 14px", borderRadius: 20, background: "#2D5BFF",
               color: "white", fontSize: 13, fontWeight: 600, border: "none", cursor: "pointer" }}>
@@ -518,8 +518,8 @@ function ForumSection_UNUSED() {
         {/* WeChat group CTA */}
         <div onClick={() => setShowWxModal(true)}
           style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px",
-            background: "#f0fdf4", cursor: "pointer" }}>
-          <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#07C160",
+            background: "#EFF6FF", cursor: "pointer" }}>
+          <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#1A7AC7",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <ellipse cx="7.8" cy="8.5" rx="6" ry="4.5" stroke="white" strokeWidth="1.5" fill="none"/>
@@ -531,11 +531,11 @@ function ForumSection_UNUSED() {
             </svg>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#07C160" }}>加入康群微信群</div>
-            <div style={{ fontSize: 12, color: "#4A6A5A", marginTop: 2 }}>与病友交流康养经验</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#1A7AC7" }}>加入康群微信群</div>
+            <div style={{ fontSize: 12, color: "#1E3A5F", marginTop: 2 }}>与病友交流康养经验</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18l6-6-6-6" stroke="#07C160" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18l6-6-6-6" stroke="#1A7AC7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
       </div>
@@ -603,7 +603,7 @@ function ForumSection_UNUSED() {
               padding:"10px 16px 28px", borderTop:"1px solid #F5F5F5",
               background:"white", flexShrink:0 }}>
               {/* My avatar */}
-              <div style={{ width:32, height:32, borderRadius:"50%", background:"#07C160",
+              <div style={{ width:32, height:32, borderRadius:"50%", background:"#1A7AC7",
                 display:"flex", alignItems:"center", justifyContent:"center",
                 color:"white", fontWeight:700, fontSize:13, flexShrink:0 }}>我</div>
               <input
@@ -616,7 +616,7 @@ function ForumSection_UNUSED() {
               />
               <button onClick={() => sendComment(openCommentId!)}
                 style={{ width:36, height:36, borderRadius:"50%",
-                  background:(commentTexts[openCommentId]||"").trim() ? "#07C160" : "#E0E0E0",
+                  background:(commentTexts[openCommentId]||"").trim() ? "#1A7AC7" : "#E0E0E0",
                   border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
                   transition:"background 0.2s", flexShrink:0 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -656,14 +656,14 @@ function ForumSection_UNUSED() {
                 <rect x="11" y="39" width="10" height="10" rx="1" fill="#333"/>
                 <rect x="33" y="33" width="4" height="4" fill="#333"/><rect x="40" y="33" width="4" height="4" fill="#333"/>
                 <rect x="47" y="33" width="4" height="4" fill="#333"/><rect x="33" y="40" width="4" height="4" fill="#333"/>
-                <rect x="40" y="40" width="11" height="4" fill="#333"/><rect x="47" y="47" width="8" height="8" rx="1" fill="#07C160"/>
+                <rect x="40" y="40" width="11" height="4" fill="#333"/><rect x="47" y="47" width="8" height="8" rx="1" fill="#1A7AC7"/>
               </svg>
               <div style={{ fontSize: 11, color: "#999", marginTop: 8 }}>长按识别加入群聊</div>
             </div>
             <div style={{ textAlign: "center", fontSize: 12, color: "#F59E0B", marginBottom: 20 }}>
               ⚠️ 群二维码 7 天内有效，如过期请刷新
             </div>
-            <div style={{ fontSize: 13, color: "#07C160", textAlign: "center", fontWeight: 600 }}>
+            <div style={{ fontSize: 13, color: "#1A7AC7", textAlign: "center", fontWeight: 600 }}>
               已有 1,284 位病友在群内交流
             </div>
           </div>
@@ -698,7 +698,7 @@ function ForumSection_UNUSED() {
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {["康复经验","疑问求助","打卡分享","其他"].map(tag => (
                   <button key={tag} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 13,
-                    border: "1px solid #07C160", background: "transparent", color: "#07C160", cursor: "pointer" }}>
+                    border: "1px solid #1A7AC7", background: "transparent", color: "#1A7AC7", cursor: "pointer" }}>
                     {tag}
                   </button>
                 ))}
@@ -710,7 +710,7 @@ function ForumSection_UNUSED() {
               style={{ flex: 1, padding: "13px", borderRadius: 10, background: "#f5f5f5",
                 color: "#666", fontSize: 15, fontWeight: 500, border: "none", cursor: "pointer" }}>取消</button>
             <button onClick={() => { alert("发布成功！"); setShowPostModal(false); }}
-              style={{ flex: 2, padding: "13px", borderRadius: 10, background: "#07C160",
+              style={{ flex: 2, padding: "13px", borderRadius: 10, background: "#1A7AC7",
                 color: "white", fontSize: 15, fontWeight: 600, border: "none", cursor: "pointer" }}>发布 →</button>
           </div>
         </div>
@@ -789,9 +789,9 @@ export function HomePage({
           </button>
         </div>
         {/* Stats row */}
-        <div className="bg-white rounded-2xl px-5 py-4 flex gap-8 shadow-sm border border-[#e8f5e9]">
+        <div className="bg-white rounded-2xl px-5 py-4 flex gap-8 shadow-sm border border-[#DBEAFE]">
           <div>
-            <div className="text-2xl font-bold text-[#07C160]">{streak}</div>
+            <div className="text-2xl font-bold text-[#1A7AC7]">{streak}</div>
             <div className="text-xs text-[#718096] mt-0.5">连续打卡</div>
           </div>
           <div>
@@ -826,7 +826,7 @@ function RecentRecords() {
           <span style={{ fontSize:11, color:"#9CA3AF", background:"#F3F4F6",
             borderRadius:20, padding:"2px 8px" }}>近3次</span>
         </div>
-        <span style={{ fontSize:12, color:"#07C160", cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
+        <span style={{ fontSize:12, color:"#1A7AC7", cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
       </div>
       {records.map((r, i) => (
         <div key={r.date} style={{
@@ -836,11 +836,11 @@ function RecentRecords() {
         }}>
           <div style={{
             width:40, height:44, borderRadius:10, flexShrink:0, textAlign:"center",
-            background:r.done?"#E8F8EF":"#FEF3C7",
+            background:r.done?"#DBEAFE":"#FEF3C7",
             display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
           }}>
-            <div style={{ fontSize:15, fontWeight:700, color:r.done?"#07C160":"#F59E0B", lineHeight:1 }}>{r.date.slice(3)}</div>
-            <div style={{ fontSize:10, color:r.done?"#07C160":"#F59E0B" }}>{r.weekday}</div>
+            <div style={{ fontSize:15, fontWeight:700, color:r.done?"#1A7AC7":"#F59E0B", lineHeight:1 }}>{r.date.slice(3)}</div>
+            <div style={{ fontSize:10, color:r.done?"#1A7AC7":"#F59E0B" }}>{r.weekday}</div>
           </div>
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ fontSize:13, fontWeight:500, color:"#1a1a1a", marginBottom:2 }}>{r.plan}</div>
@@ -848,8 +848,8 @@ function RecentRecords() {
           </div>
           <span style={{
             fontSize:11, fontWeight:600, padding:"3px 9px", borderRadius:20, flexShrink:0,
-            background:r.done?"#E8F8EF":"#FEF3C7",
-            color:r.done?"#07C160":"#D97706",
+            background:r.done?"#DBEAFE":"#FEF3C7",
+            color:r.done?"#1A7AC7":"#D97706",
           }}>{r.done?"✅ 完成":"⏸ 未完成"}</span>
         </div>
       ))}
