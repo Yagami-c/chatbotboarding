@@ -75,8 +75,8 @@ function TaskBreakdown({tasks,current,deviceRunning}: {tasks:Task[];current:numb
 
 // ── Survey forms ───────────────────────────────────────────────────────────────
 
-function NewUserSurvey({onDone}:{onDone:(n:string,g:string,a:string,d:string)=>void}) {
-  const [name,setName]=useState("");const [g,setG]=useState("");const [a,setA]=useState("");const [d,setD]=useState("");
+function NewUserSurvey({onDone,prefill}:{onDone:(n:string,g:string,a:string,d:string)=>void;prefill?:{name?:string;gender?:string;ageRange?:string}}) {
+  const [name,setName]=useState(prefill?.name||"");const [g,setG]=useState(prefill?.gender||"");const [a,setA]=useState(prefill?.ageRange||"");const [d,setD]=useState("");
   return (
     <div>
       <FormGroup label="叫你什么好？"><StyledInput value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"/></FormGroup>
@@ -309,7 +309,7 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
           :step==="day7_skin"?"皮肤还好吗"
           :"问卷"}
         </div>
-        {step==="new_user"&&<NewUserSurvey onDone={(n,g,a,d)=>{onSubmit({name:n,gender:g,ageRange:a,duration:d,firstTime:true});onClose();}}/>}
+        {step==="new_user"&&<NewUserSurvey prefill={{name:userData.name,gender:userData.gender,ageRange:userData.ageRange}} onDone={(n,g,a,d)=>{onSubmit({name:n,gender:g,ageRange:a,duration:d,firstTime:true});onClose();}}/>}
         {step==="returner"&&<ReturnerSurvey onDone={(g,a)=>{onSubmit({gender:g,ageRange:a,firstTime:false});onClose();}}/>}
         {step==="safety"&&<SafetySurvey onSubmit={v=>{onSubmit({safety:v});onClose();}}/>}
         {step==="triggers"&&<TriggerSurvey onSubmit={v=>{onSubmit({triggers:v});onClose();}}/>}
@@ -569,7 +569,12 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
             <button onClick={() => {
               addMsg("user", "开始了解");
-              setSurveyStep("new_user");
+              // Skip profile questions if name/gender/age already collected
+              if (ud.name && ud.gender && ud.ageRange) {
+                setSurveyStep("safety");
+              } else {
+                setSurveyStep("new_user");
+              }
             }}
               className="bg-[#1A7AC7] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#1570B8] transition-colors">
               📋 开始
