@@ -91,6 +91,15 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
 
   return (
     <div className="flex-1 flex flex-col bg-[#f0f6ff] overflow-hidden">
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
       {/* Header */}
       <div className="px-4 pt-12 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
         <div className="flex items-center gap-3 mb-4">
@@ -155,15 +164,37 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
 
             {!customMode ? (
               <>
-                <div className="flex gap-1.5 mb-3">
-                  {[1,2,3,4,5,6].map(l=>(
-                    <button key={l} onClick={()=>setLevel(l)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
-                        ${level===l?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                      L{l}
-                    </button>
-                  ))}
+                <div className="relative mb-3">
+                  {/* Scroll hint indicators */}
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none opacity-50" />
+                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none opacity-50" />
+
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide snap-x snap-mandatory"
+                    style={{
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none',
+                      WebkitOverflowScrolling: 'touch'
+                    }}>
+                    {[1,2,3,4,5,6].map(l=>(
+                      <button key={l} onClick={()=>setLevel(l)}
+                        className={`flex-shrink-0 w-[72px] py-2.5 rounded-xl text-xs font-bold border cursor-pointer transition-all snap-center
+                          ${level===l?"bg-[#1A7AC7] text-white border-[#1A7AC7] shadow-md scale-105":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                        <div className="text-sm">L{l}</div>
+                        <div className={`text-[9px] mt-0.5 ${level===l?"text-white/70":"text-[#94a3b8]"}`}>
+                          {LEVELS[l-1].split(' ')[0]}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Scroll hint text */}
+                  <div className="flex items-center justify-center gap-1 mt-1.5 text-[10px] text-[#94a3b8]">
+                    <span>←</span>
+                    <span>左右滑动查看更多强度</span>
+                    <span>→</span>
+                  </div>
                 </div>
+
                 <div className="bg-[#EFF6FF] rounded-xl p-3 text-sm text-[#1E3A5F]">
                   <div className="font-semibold">{getLevelName(level)} · {LEVELS[level-1]}</div>
                   <div className="text-xs mt-1 text-[#2563EB]">{LEVEL_DESCS[level]}</div>

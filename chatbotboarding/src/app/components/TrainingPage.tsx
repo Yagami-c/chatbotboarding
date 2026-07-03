@@ -15,6 +15,8 @@ const ANIM_CSS = `
 @keyframes pulse    { 0%,100%{opacity:0.6} 50%{opacity:1} }
 @keyframes scanDown { 0%{top:0} 100%{top:88%} }
 @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 `;
 
 const GIF_MAP: Record<string, string> = {
@@ -152,17 +154,51 @@ function RealtimeAssessment() {
 
       <div style={{ padding: "14px 16px" }}>
         {/* exercise tabs */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 12, overflowX: "auto" }}>
-          {ASSESS_EX.map((e, i) => (
-            <button key={e} onClick={() => !active && setEx(i)} style={{
-              padding: "6px 14px", borderRadius: 20, border: "none", flexShrink: 0,
-              cursor: active && ex !== i ? "not-allowed" : "pointer", fontSize: 13,
-              fontWeight: ex === i ? 600 : 400,
-              background: ex === i ? "#1A7AC7" : "#F3F4F6",
-              color: ex === i ? "white" : "#374151",
-              opacity: active && ex !== i ? 0.4 : 1, transition: "all 0.15s",
-            }}>{e}</button>
-          ))}
+        <div style={{ position: "relative", marginBottom: 12 }}>
+          {/* Gradient indicators for scroll */}
+          <div style={{
+            position: "absolute", left: 0, top: 0, bottom: 0, width: 24,
+            background: "linear-gradient(to right, rgba(255,255,255,0.9), transparent)",
+            pointerEvents: "none", zIndex: 1
+          }} />
+          <div style={{
+            position: "absolute", right: 0, top: 0, bottom: 0, width: 24,
+            background: "linear-gradient(to left, rgba(255,255,255,0.9), transparent)",
+            pointerEvents: "none", zIndex: 1
+          }} />
+
+          <div style={{
+            display: "flex", gap: 6, overflowX: "auto",
+            scrollbarWidth: "none", msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
+            scrollSnapType: "x mandatory"
+          }}
+            className="hide-scrollbar">
+            {ASSESS_EX.map((e, i) => (
+              <button key={e} onClick={() => !active && setEx(i)} style={{
+                padding: "8px 18px", borderRadius: 20, border: "none", flexShrink: 0,
+                cursor: active && ex !== i ? "not-allowed" : "pointer", fontSize: 13,
+                fontWeight: ex === i ? 600 : 400,
+                background: ex === i ? "#1A7AC7" : "#F3F4F6",
+                color: ex === i ? "white" : "#374151",
+                opacity: active && ex !== i ? 0.4 : 1,
+                transition: "all 0.15s",
+                boxShadow: ex === i ? "0 2px 8px rgba(26,122,199,0.3)" : "none",
+                transform: ex === i ? "scale(1.05)" : "scale(1)",
+                scrollSnapAlign: "center"
+              }}>{e}</button>
+            ))}
+          </div>
+
+          {/* Scroll hint */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 4, marginTop: 6, fontSize: 10, color: "#9CA3AF"
+          }}>
+            <span>←</span>
+            <span>滑动选择动作</span>
+            <span>→</span>
+          </div>
         </div>
 
         {/* metrics */}
