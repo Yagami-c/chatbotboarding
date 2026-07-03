@@ -136,14 +136,20 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
             <div className="font-semibold text-[#1a202c] text-sm mb-3">选择模式</div>
             <div className="flex gap-2 mb-3">
               <button onClick={() => setCustomMode(false)}
-                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                className={`flex-1 py-3 rounded-xl text-xs font-semibold border transition-all
                   ${!customMode?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                📋 设定模式
+                <div>🤖 智能模式</div>
+                <div className={`text-[10px] mt-0.5 ${!customMode?"text-white/80":"text-[#718096]"}`}>
+                  自选强度（标准/自定义），AI chatbot控制
+                </div>
               </button>
               <button onClick={() => setCustomMode(true)}
-                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                className={`flex-1 py-3 rounded-xl text-xs font-semibold border transition-all
                   ${customMode?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                ⚙️ 自定义模式
+                <div>⚙️ 手动模式</div>
+                <div className={`text-[10px] mt-0.5 ${customMode?"text-white/80":"text-[#718096]"}`}>
+                  自选强度（标准/自定义），用户自己配置
+                </div>
               </button>
             </div>
 
