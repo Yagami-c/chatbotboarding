@@ -283,7 +283,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
 
             {/* Buttons */}
             <div style={{ padding: "0 16px", display: "flex", gap: 10 }}>
-              <button onClick={onSkip} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#F2F2F2", color: "#666", fontWeight: 500, fontSize: 16, border: "none", cursor: "pointer" }}>
+              <button onClick={() => setStep("landing")} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#F2F2F2", color: "#666", fontWeight: 500, fontSize: 16, border: "none", cursor: "pointer" }}>
                 拒绝
               </button>
               <button onClick={handleAllowProfile} style={{ flex: 1, padding: "13px 0", borderRadius: 8, background: "#1A7AC7", color: "white", fontWeight: 600, fontSize: 16, border: "none", cursor: "pointer" }}>
