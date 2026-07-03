@@ -43,7 +43,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
   const handleDenyPhone = () => { setStep("logging"); setTimeout(() => onLogin(MOCK.name), 1400); };
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#EDEDED", position: "relative", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#EDEDED", position: "relative" }}>
 
       {/* ── Top brand area ─────────────────────────────────── */}
       <div style={{
@@ -84,9 +84,9 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
       </div>
 
       {/* ── Features list ──────────────────────────────────── */}
-      <div style={{ padding: "20px 16px", flex: 1 }}>
+      <div style={{ padding: "20px 16px", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ background: "white", borderRadius: 14, overflow: "hidden", marginBottom: 12,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+          boxShadow: "0 1px 4px rgba(0,0,0,0.06)", width: "100%" }}>
           {[
             { icon: "🏥", color: "#DBEAFE", title: "AI 个性化方案", sub: "根据你的情况智能推荐" },
             { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡，看见成长" },
