@@ -132,7 +132,7 @@ export function ManualAssessment({ onBack, onDone }: ManualAssessmentProps) {
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q3. 你的年龄范围？</div>
             <div className="grid grid-cols-2 gap-2">
-              {["20岁以下","20-40岁","40-60岁","60岁以上"].map(a=>(
+              {["40岁以下","40-60岁","60岁以上"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
                   className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
                     ${ageRange===a?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
