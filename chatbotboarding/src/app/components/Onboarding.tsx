@@ -38,23 +38,23 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
 
         {/* Aiyovita logo */}
         <div style={{
-          width: 200, height: 90, borderRadius: 20,
+          width: 240, height: 100, borderRadius: 20,
           background: "white",
           boxShadow: DESIGN.shadow.card,
           display: "flex", alignItems: "center", justifyContent: "center",
           marginBottom: 16, position: "relative", zIndex: 1,
           overflow: "hidden",
-          padding: "12px 16px",
+          padding: "16px 20px",
         }}>
           <img
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 150'%3E%3Cg transform='translate(20,25)'%3E%3Cpath d='M45,10 L55,20 L45,30 M35,20 h20 M30,10 v20 M50,10 v20' stroke='%234A90E2' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M15,45 Q25,35 35,45 T55,45' stroke='%2370C244' stroke-width='2.5' fill='none'/%3E%3Cellipse cx='18' cy='42' rx='2' ry='2.5' fill='%23DC2626'/%3E%3C/g%3E%3Cg transform='translate(90,35)'%3E%3Ctext x='0' y='35' font-family='Arial,sans-serif' font-size='42' font-weight='700' fill='%234A90E2'%3EAiyovita%3C/text%3E%3Ctext x='0' y='75' font-family='Microsoft YaHei,SimHei,sans-serif' font-size='28' font-weight='700' fill='%234A90E2' letter-spacing='2'%3E光年瑞康%3C/text%3E%3C/g%3E%3C/svg%3E"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 150'%3E%3Cg transform='translate(15,20)'%3E%3Cpath d='M30,15 L35,20 L30,25 M25,20 h10 M22,15 v10 M33,15 v10' stroke='%234A90E2' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M10,35 Q15,28 20,35 T30,35' stroke='%2370C244' stroke-width='2' fill='none'/%3E%3Cellipse cx='12' cy='33' rx='1.5' ry='2' fill='%23DC2626'/%3E%3C/g%3E%3Cg transform='translate(65,35)'%3E%3Ctext x='0' y='30' font-family='Arial,sans-serif' font-size='38' font-weight='700' fill='%234A90E2'%3EAiyovita%3C/text%3E%3Ctext x='0' y='65' font-family='Microsoft YaHei,SimHei,sans-serif' font-size='24' font-weight='700' fill='%234A90E2' letter-spacing='2'%3E光年瑞康%3C/text%3E%3C/g%3E%3C/svg%3E"
             alt="光年瑞康 Aiyovita"
             style={{ width: "100%", height: "100%", objectFit: "contain" }}
           />
         </div>
 
-        <div style={{ color: "white", fontWeight: 700, fontSize: 20, letterSpacing: 0.3, position: "relative", zIndex: 1, marginBottom: 4 }}>
-          让膝盖越来越好
+        <div style={{ color: "white", fontWeight: 700, fontSize: 18, letterSpacing: 0.3, position: "relative", zIndex: 1, marginBottom: 4 }}>
+          科学康养，守护膝关节健康
         </div>
         <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, position: "relative", zIndex: 1 }}>
           让膝盖越来越好
