@@ -29,6 +29,8 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
   const [profileGranted, setProfileGranted] = useState(false);
   const [phoneGranted, setPhoneGranted] = useState(false);
   const [dots, setDots] = useState(".");
+  const [showAgreement, setShowAgreement] = useState(false);
+  const [agreementType, setAgreementType] = useState<"user" | "privacy">("user");
 
   // Animated dots for loading
   useEffect(() => {
@@ -84,7 +86,7 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
       </div>
 
       {/* ── Features list ──────────────────────────────────── */}
-      <div style={{ padding: "20px 16px", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ padding: "20px 16px", flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "10vh" }}>
         <div style={{ background: "white", borderRadius: 14, overflow: "hidden", marginBottom: 12,
           boxShadow: "0 1px 4px rgba(0,0,0,0.06)", width: "100%" }}>
           {[
@@ -147,13 +149,91 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
           <div style={{ marginTop: 1 }}><WeChatLockIcon/></div>
           <div style={{ fontSize: 11, color: "#B2B2B2", lineHeight: 1.6, textAlign: "center" }}>
             登录即代表同意
-            <span style={{ color: "#576B95" }}>《用户协议》</span>
+            <span
+              style={{ color: "#576B95", cursor: "pointer" }}
+              onClick={() => { setAgreementType("user"); setShowAgreement(true); }}
+            >《用户协议》</span>
             和
-            <span style={{ color: "#576B95" }}>《隐私政策》</span>
+            <span
+              style={{ color: "#576B95", cursor: "pointer" }}
+              onClick={() => { setAgreementType("privacy"); setShowAgreement(true); }}
+            >《隐私政策》</span>
             <br/>信息仅用于个性化服务，不会泄露给第三方
           </div>
         </div>
       </div>
+
+      {/* ── Agreement Modal ──────────────────────────────────── */}
+      {showAgreement && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 900, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "white", borderRadius: 16, margin: "0 24px", maxWidth: 500, width: "100%", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid #E8E8E8" }}>
+              <span style={{ fontSize: 17, fontWeight: 600, color: "#191919" }}>
+                {agreementType === "user" ? "用户协议" : "隐私政策"}
+              </span>
+              <button onClick={() => setShowAgreement(false)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontSize: 22, lineHeight: 1, padding: "2px 6px" }}>✕</button>
+            </div>
+
+            {/* Content */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "20px", fontSize: 14, color: "#333", lineHeight: 1.8 }}>
+              {agreementType === "user" ? (
+                <>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>用户协议</h3>
+                  <p style={{ marginBottom: 12 }}>欢迎使用哎哟爱膝之家！在使用本应用前，请仔细阅读并理解本用户协议。</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>1. 服务说明</h4>
+                  <p style={{ marginBottom: 12 }}>哎哟爱膝之家是一款 AI 驱动的膝关节康复训练应用，为用户提供个性化的训练方案、进度追踪等服务。</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>2. 用户责任</h4>
+                  <p style={{ marginBottom: 12 }}>• 用户应如实提供个人健康信息，以便获得更准确的训练建议</p>
+                  <p style={{ marginBottom: 12 }}>• 用户应在医生或专业人士指导下使用本应用</p>
+                  <p style={{ marginBottom: 12 }}>• 用户不得将本应用用于任何非法或未经授权的用途</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>3. 免责声明</h4>
+                  <p style={{ marginBottom: 12 }}>本应用提供的训练方案和建议仅供参考，不能替代专业医疗建议。使用过程中如有不适，请立即停止并咨询医生。</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>4. 协议变更</h4>
+                  <p style={{ marginBottom: 12 }}>我们保留随时修改本协议的权利，修改后的协议将在应用内公布。继续使用本应用即表示您接受修改后的协议。</p>
+                </>
+              ) : (
+                <>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>隐私政策</h3>
+                  <p style={{ marginBottom: 12 }}>我们非常重视您的隐私保护。本隐私政策说明了我们如何收集、使用、存储和保护您的个人信息。</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>1. 信息收集</h4>
+                  <p style={{ marginBottom: 12 }}>我们可能收集以下信息：</p>
+                  <p style={{ marginBottom: 12 }}>• 账户信息：微信昵称、头像、手机号（可选）</p>
+                  <p style={{ marginBottom: 12 }}>• 健康信息：年龄、性别、膝关节状况评估结果</p>
+                  <p style={{ marginBottom: 12 }}>• 使用数据：训练记录、进度数据、设备使用情况</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>2. 信息使用</h4>
+                  <p style={{ marginBottom: 12 }}>我们使用收集的信息用于：</p>
+                  <p style={{ marginBottom: 12 }}>• 提供个性化的训练方案和建议</p>
+                  <p style={{ marginBottom: 12 }}>• 追踪和分析您的康复进度</p>
+                  <p style={{ marginBottom: 12 }}>• 改进我们的服务和用户体验</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>3. 信息保护</h4>
+                  <p style={{ marginBottom: 12 }}>我们采取适当的安全措施保护您的个人信息，防止未经授权的访问、披露、修改或销毁。您的信息不会在未经您同意的情况下与第三方共享。</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>4. 数据存储</h4>
+                  <p style={{ marginBottom: 12 }}>您的数据将被安全地存储在我们的服务器上。您可以随时请求访问、更正或删除您的个人信息。</p>
+
+                  <h4 style={{ fontSize: 15, fontWeight: 600, marginTop: 16, marginBottom: 8 }}>5. 联系我们</h4>
+                  <p style={{ marginBottom: 12 }}>如果您对本隐私政策有任何疑问，请通过应用内的反馈功能联系我们。</p>
+                </>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: "12px 20px", borderTop: "1px solid #E8E8E8" }}>
+              <button onClick={() => setShowAgreement(false)} style={{ width: "100%", padding: "12px", borderRadius: 8, background: "#1A7AC7", color: "white", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 600 }}>
+                我已阅读
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Permission sheet — profile ──────────────────────── */}
       {step === "permission" && (
