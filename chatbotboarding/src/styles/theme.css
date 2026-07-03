@@ -1,9 +1,19 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
-  --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  /* WeChat Mini Program design tokens */
+  --font-size: 14px;
+  --wechat-green: #07C160;
+  --wechat-green-dark: #06AE56;
+  --wechat-green-light: #E8F8EF;
+  --wechat-bg: #F7F8FA;
+  --wechat-card: #FFFFFF;
+  --wechat-border: #E8E8E8;
+  --wechat-text-primary: #191919;
+  --wechat-text-secondary: #666666;
+  --wechat-text-hint: #BBBBBB;
+  --background: #F7F8FA;
+  --foreground: #191919;
   --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);

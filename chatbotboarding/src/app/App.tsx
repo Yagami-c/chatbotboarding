@@ -327,6 +327,44 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
   );
 }
 
+// ── DailyOptimizeSummary — extracted to avoid hook-in-conditional violation ────
+function DailyOptimizeSummary({feel,currentDay,onNext}:{feel:string;currentDay:number;onNext:()=>void}) {
+  const [tab,setTab]=useState<"today"|"example">("today");
+  const better=feel==="better", worse=feel==="worse";
+  const emoji=better?"🎉":worse?"⚠️":"👍";
+  const title=better?"看到进步了！":worse?"最近状态有所波动。":"状态稳定。";
+  const body=better?"建议继续保持当前方案。":worse?"请留意活动量变化，如持续不适请及时反馈。":"建议继续完成本阶段计划。";
+  return (
+    <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
+      <div className="flex gap-2 mb-1">
+        <button onClick={()=>setTab("today")}
+          className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-all ${tab==="today"?"border-[#07C160] text-[#07C160]":"border-transparent text-[#8e98a3]"}`}>
+          今日总结
+        </button>
+        <button onClick={()=>setTab("example")}
+          className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-all ${tab==="example"?"border-[#07C160] text-[#07C160]":"border-transparent text-[#8e98a3]"}`}>
+          举例
+        </button>
+      </div>
+      {tab==="today"?(
+        <div className={`rounded-2xl p-4 border-l-4 ${worse?"bg-[#fff7ed] border-[#f97316]":better?"bg-[#f0fdf4] border-[#22c55e]":"bg-[#f0fdf4] border-[#07C160]"}`}>
+          <div className="text-base font-bold mb-1">{emoji} {title}</div>
+          <div className="text-sm text-[#374151]">{body}</div>
+        </div>
+      ):(
+        <div className="rounded-2xl p-4 bg-[#f7fafc] border border-[#e2e8f0] space-y-3">
+          <div><div className="text-xs font-semibold text-[#22c55e] mb-0.5">好多了：</div><div className="text-sm text-[#374151]">🎉 看到进步了！建议继续保持当前方案。</div></div>
+          <div className="border-t border-[#e2e8f0] pt-3"><div className="text-xs font-semibold text-[#718096] mb-0.5">差不多：</div><div className="text-sm text-[#374151]">👍 状态稳定。建议继续完成本阶段计划。</div></div>
+          <div className="border-t border-[#e2e8f0] pt-3"><div className="text-xs font-semibold text-[#f97316] mb-0.5">还是不舒服：</div><div className="text-sm text-[#374151]">⚠️ 最近状态有所波动。请留意活动量变化，如持续不适请及时反馈。</div></div>
+        </div>
+      )}
+      <button onClick={onNext} className="w-full py-3 rounded-full bg-[#07C160] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#06AE56] transition-all">
+        📅 {currentDay<6?`进入第${currentDay+1}天`:currentDay===6?"进入阶段回顾":"完成"}
+      </button>
+    </div>
+  );
+}
+
 // ── AssistantPage ─────────────────────────────────────────────────────────────
 
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
@@ -369,74 +407,164 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
+  // Small bot avatar inline
+  const BotAvatar = () => (
+    <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#07C160,#059945)",
+      display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+      boxShadow:"0 2px 8px rgba(7,193,96,0.3)"}}>
+      <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="14" fill="white" opacity="0.15"/>
+        <path d="M16 4C16 4 8 9 8 16a8 8 0 0016 0C24 9 16 4 16 4z" fill="rgba(255,255,255,0.9)"/>
+        <circle cx="12" cy="16" r="2" fill="#07C160"/><circle cx="20" cy="16" r="2" fill="#07C160"/>
+        <path d="M12 20 Q16 23 20 20" stroke="#07C160" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      </svg>
+    </div>
+  );
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{minHeight:0}}>
-      {/* Device start confirm overlay */}
+
+      {/* Device confirm sheet */}
       {showDeviceConfirm&&(
-        <div style={{position:"absolute",inset:0,zIndex:820,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
-          <div style={{background:"white",width:"100%",borderRadius:"24px 24px 0 0",padding:"24px 20px 32px",boxShadow:"0 -8px 32px rgba(0,0,0,0.12)"}}>
-            <div style={{width:40,height:4,background:"#e2e8f0",borderRadius:4,margin:"0 auto 16px"}}/>
-            <div style={{fontSize:32,textAlign:"center",marginBottom:8}}>🦵</div>
-            <div style={{fontWeight:700,fontSize:16,color:"#1a202c",textAlign:"center",marginBottom:6}}>准备好开始了吗？</div>
-            <div style={{fontSize:13,color:"#4a5568",textAlign:"center",marginBottom:20,lineHeight:1.6}}>
-              请确保设备已穿戴好，<br/>点击「开始」后设备将自动启动。
+        <div style={{position:"absolute",inset:0,zIndex:820,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"flex-end"}}>
+          <div style={{background:"white",width:"100%",borderRadius:"24px 24px 0 0",padding:"0 0 36px",boxShadow:"0 -8px 32px rgba(0,0,0,0.12)"}}>
+            <div style={{textAlign:"center",paddingTop:12,paddingBottom:20}}>
+              <span style={{display:"inline-block",width:40,height:4,background:"#e2e8f0",borderRadius:2}}/>
             </div>
-            <button onClick={()=>{
-              setShowDeviceConfirm(false);
-              onStartDevice(lvRef.current);
-              setTimeout(()=>setPhase(targetTherapyPhase.current),1000);
-            }} style={{width:"100%",padding:"13px 0",borderRadius:32,background:"#07C160",color:"white",fontWeight:700,fontSize:15,border:"none",cursor:"pointer",marginBottom:10}}>
-              ✅ 开始使用
-            </button>
-            <button onClick={()=>setShowDeviceConfirm(false)} style={{width:"100%",padding:"12px 0",borderRadius:32,background:"#f7fafc",color:"#4a5568",fontWeight:600,fontSize:14,border:"1px solid #e2e8f0",cursor:"pointer"}}>
-              稍后再用
-            </button>
+            {/* Device illustration */}
+            <div style={{display:"flex",justifyContent:"center",marginBottom:16}}>
+              <div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#E8F8EF,#C8F0DC)",
+                display:"flex",alignItems:"center",justifyContent:"center",fontSize:36}}>🦵</div>
+            </div>
+            <div style={{fontWeight:700,fontSize:17,color:"#1a202c",textAlign:"center",marginBottom:6}}>准备好开始了吗？</div>
+            <div style={{fontSize:13,color:"#6b7280",textAlign:"center",marginBottom:8,lineHeight:1.6,padding:"0 32px"}}>
+              请确保设备已正确穿戴，舒适贴合膝盖
+            </div>
+            {/* Checklist */}
+            <div style={{margin:"0 20px 20px",background:"#F8FFF9",borderRadius:12,padding:"12px 14px"}}>
+              {["治疗部位清爽干燥","绑带松紧适度（可插两指）","保持坐姿，放松腿部"].map((t,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#374151",
+                  marginBottom:i<2?8:0}}>
+                  <span style={{width:18,height:18,borderRadius:"50%",background:"#07C160",
+                    display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:11,color:"white",fontWeight:700}}>✓</span>
+                  {t}
+                </div>
+              ))}
+            </div>
+            <div style={{padding:"0 20px",display:"flex",flexDirection:"column",gap:10}}>
+              <button onClick={()=>{
+                setShowDeviceConfirm(false);
+                onStartDevice(lvRef.current);
+                setTimeout(()=>setPhase(targetTherapyPhase.current),1000);
+              }} style={{width:"100%",padding:"14px 0",borderRadius:32,background:"#07C160",color:"white",
+                fontWeight:700,fontSize:16,border:"none",cursor:"pointer",
+                boxShadow:"0 4px 16px rgba(7,193,96,0.4)"}}>
+                开始使用
+              </button>
+              <button onClick={()=>setShowDeviceConfirm(false)}
+                style={{width:"100%",padding:"12px 0",borderRadius:32,background:"transparent",
+                  color:"#9ca3af",fontWeight:500,fontSize:14,border:"none",cursor:"pointer"}}>
+                稍后再用
+              </button>
+            </div>
           </div>
         </div>
       )}
-      <div className="px-4 pt-3 pb-1.5 bg-[#fafcff] border-b border-[#e9ecf0] flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-3xl">🤖</span>
+
+      {/* ── Header ── */}
+      <div style={{background:"white",borderBottom:"1px solid #F0F0F0",padding:"44px 16px 10px",flexShrink:0}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            {/* 小瑞 avatar */}
+            <div style={{width:40,height:40,borderRadius:"50%",
+              background:"linear-gradient(135deg,#07C160,#059945)",
+              display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+              boxShadow:"0 3px 10px rgba(7,193,96,0.35)"}}>
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="10" r="5" fill="white" opacity="0.9"/>
+                <path d="M8 24c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+                <circle cx="13" cy="10" r="1.2" fill="#07C160"/><circle cx="19" cy="10" r="1.2" fill="#07C160"/>
+                <path d="M13 13 Q16 15 19 13" stroke="#07C160" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+              </svg>
+            </div>
             <div>
-              <div className="font-bold text-base text-[#1a202c]">小瑞 · <span className="text-[#07C160]">AI 训练助手</span></div>
-              <div className="text-[11px] text-[#48bb78] flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#07C160] inline-block"/>
-                在线 · 7天计划
-                <span className="bg-[#07C160] text-white px-3 py-0.5 rounded-full ml-2 text-[11px] font-medium">第{currentDay}天</span>
+              <div style={{fontSize:15,fontWeight:700,color:"#1a202c",lineHeight:1.2}}>
+                小瑞 <span style={{color:"#07C160",fontSize:13,fontWeight:500}}>AI 训练助手</span>
+              </div>
+              <div style={{fontSize:11,color:"#07C160",display:"flex",alignItems:"center",gap:4,marginTop:2}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:"#07C160",display:"inline-block"}}/>
+                在线
+                <span style={{background:"#07C160",color:"white",padding:"1px 8px",borderRadius:20,fontSize:10,fontWeight:600,marginLeft:4}}>
+                  第{currentDay}天
+                </span>
               </div>
             </div>
           </div>
-          {/* Smart mode toggle - top right */}
-          <button onClick={onToggleSmartMode}
-            className={`relative w-11 h-6 rounded-full transition-colors duration-200 border-0 cursor-pointer flex-shrink-0
-              ${smartMode?"bg-[#07C160]":"bg-[#cbd5e0]"}`}>
-            <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200
-              ${smartMode?"translate-x-5":"translate-x-0.5"}`}/>
-          </button>
+          {/* Smart mode toggle */}
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:11,color:"#9ca3af"}}>{smartMode?"智能":"手动"}</span>
+            <button onClick={onToggleSmartMode}
+              style={{width:44,height:24,borderRadius:12,border:"none",cursor:"pointer",position:"relative",
+                background:smartMode?"#07C160":"#d1d5db",transition:"background 0.2s",flexShrink:0}}>
+              <span style={{position:"absolute",top:2,left:smartMode?22:2,width:20,height:20,
+                borderRadius:"50%",background:"white",transition:"left 0.2s",
+                boxShadow:"0 1px 4px rgba(0,0,0,0.2)"}}/>
+            </button>
+          </div>
         </div>
       </div>
+
       <TaskBreakdown tasks={tasks} current={taskIdx} deviceRunning={deviceState==="running"}/>
-      <div ref={messagesRef} className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col gap-2.5 bg-[#fafcff]
-        [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-[#cbd5e0] [&::-webkit-scrollbar-thumb]:rounded-full">
+
+      {/* ── Chat area ── */}
+      <div ref={messagesRef}
+        style={{flex:1,overflowY:"auto",padding:"16px 14px 8px",display:"flex",flexDirection:"column",gap:12,
+          background:"#F0F2F5"}}
+        className="[&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:bg-[#c8c8c8] [&::-webkit-scrollbar-thumb]:rounded-full">
 
         {msgs.map((m,idx)=>(
-          <div key={m.id} className={`flex flex-col ${m.role==="bot"?"items-start":"items-end"}`}>
-            <div
-              className={`max-w-[92%] px-3.5 py-2.5 text-sm leading-relaxed rounded-2xl animate-[fadeUp_0.3s_ease]
-                ${m.role==="bot"?"self-start bg-white border border-[#e8ecf0] rounded-bl-[3px] text-[#1a202c]":"self-end bg-[#07C160] text-white rounded-br-[3px]"}`}
-              dangerouslySetInnerHTML={{__html:m.html}}/>
-            {m.role==="user"&&m.editPhase&&(
-              <button onClick={()=>{
-                setMsgs(prev=>prev.slice(0,idx));
-                setPhase(m.editPhase!);
-              }} className="mt-1 text-[11px] text-[#a0aec0] bg-transparent border border-[#e2e8f0] rounded-full px-2.5 py-0.5 cursor-pointer hover:text-[#07C160] hover:border-[#07C160] transition-colors">
-                ✏️ 修改
-              </button>
+          <div key={m.id} style={{display:"flex",flexDirection:"column",
+            alignItems:m.role==="bot"?"flex-start":"flex-end",gap:4}}>
+            {/* Bot: avatar + bubble row */}
+            {m.role==="bot"?(
+              <div style={{display:"flex",alignItems:"flex-end",gap:8,maxWidth:"88%"}}>
+                <BotAvatar/>
+                <div style={{
+                  background:"white",borderRadius:"18px 18px 18px 4px",
+                  padding:"10px 14px",fontSize:14,lineHeight:1.55,color:"#1a202c",
+                  boxShadow:"0 1px 4px rgba(0,0,0,0.08)",
+                  animation:"fadeUp 0.25s ease",
+                }} dangerouslySetInnerHTML={{__html:m.html}}/>
+              </div>
+            ):(
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,maxWidth:"80%"}}>
+                <div style={{
+                  background:"#07C160",borderRadius:"18px 18px 4px 18px",
+                  padding:"10px 14px",fontSize:14,lineHeight:1.55,color:"white",
+                  animation:"fadeUp 0.25s ease",
+                }} dangerouslySetInnerHTML={{__html:m.html}}/>
+                {m.editPhase&&(
+                  <button onClick={()=>{setMsgs(prev=>prev.slice(0,idx));setPhase(m.editPhase!);}}
+                    style={{fontSize:11,color:"#9ca3af",background:"transparent",border:"1px solid #e2e8f0",
+                      borderRadius:20,padding:"2px 10px",cursor:"pointer"}}>
+                    ✏️ 修改
+                  </button>
+                )}
+              </div>
             )}
           </div>
         ))}
-        {thinking&&<div className="self-start bg-white border border-[#e8ecf0] rounded-2xl rounded-bl-[3px] px-3.5 py-2.5"><ThinkingDots/></div>}
+
+        {/* Thinking indicator */}
+        {thinking&&(
+          <div style={{display:"flex",alignItems:"flex-end",gap:8}}>
+            <BotAvatar/>
+            <div style={{background:"white",borderRadius:"18px 18px 18px 4px",padding:"12px 16px",
+              boxShadow:"0 1px 4px rgba(0,0,0,0.08)"}}>
+              <ThinkingDots/>
+            </div>
+          </div>
+        )}
 
         {phase==="smart_confirm_assessment"&&(
           <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
@@ -460,68 +588,132 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           </div>
         )}
 
+        {/* Duration — compact chips */}
         {phase==="day1_duration"&&(
-          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease]">
-            <BtnRow>
-              {["不到3个月","3个月以上","没有特别不适"].map(d=>(
-                <Pill key={d} label={d} onClick={()=>onSubmitDuration(d)}/>
+          <div style={{alignSelf:"flex-start",maxWidth:"88%",animation:"fadeUp 0.25s ease"}}>
+            <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+              {[{l:"不到3个月",icon:"🕐"},{l:"3个月以上",icon:"📅"},{l:"没有特别不适",icon:"✨"}].map(({l,icon})=>(
+                <button key={l} onClick={()=>onSubmitDuration(l)}
+                  style={{padding:"9px 16px",borderRadius:20,border:"1.5px solid #E8E8E8",
+                    background:"white",color:"#333",fontSize:14,cursor:"pointer",
+                    display:"flex",alignItems:"center",gap:6,fontFamily:"inherit",
+                    boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
+                  <span>{icon}</span>{l}
+                </button>
               ))}
-            </BtnRow>
+            </div>
           </div>
         )}
+
+        {/* Stiffness — illustrated cards */}
         {phase==="day1_stiffness"&&(
-          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease]">
-            <BtnRow>
-              <Pill label="没有特别感觉" onClick={()=>onSubmitStiffness(0)}/>
-              <Pill label="有点紧" onClick={()=>onSubmitStiffness(1)}/>
-              <Pill label="很紧" onClick={()=>onSubmitStiffness(2)}/>
-            </BtnRow>
+          <div style={{alignSelf:"flex-start",width:"88%",animation:"fadeUp 0.25s ease"}}>
+            <div style={{display:"flex",gap:8}}>
+              {[
+                {l:"没有特别感觉",icon:"😊",sub:"关节活动自如",v:0,color:"#E8F8EF"},
+                {l:"有点紧",icon:"😐",sub:"轻微紧绷感",v:1,color:"#FEF3C7"},
+                {l:"很紧",icon:"😣",sub:"明显受限",v:2,color:"#FEE2E2"},
+              ].map(({l,icon,sub,v,color})=>(
+                <button key={v} onClick={()=>onSubmitStiffness(v)}
+                  style={{flex:1,padding:"12px 8px",borderRadius:14,border:"1.5px solid #E8E8E8",
+                    background:"white",cursor:"pointer",textAlign:"center",fontFamily:"inherit",
+                    boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                  <div style={{fontSize:24,marginBottom:4}}>{icon}</div>
+                  <div style={{fontSize:12,fontWeight:600,color:"#1a1a1a",lineHeight:1.3}}>{l}</div>
+                  <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>{sub}</div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Triggers — 2-col grid */}
         {phase==="day1_triggers"&&(
-          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-            {["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"].map(t=>(
-              <button key={t} onClick={()=>{
-                const ep: Phase = "day1_triggers";
-                addMsg("user", t, ep);
-                setUserData(p=>({...p,triggers:[t],mainTrigger:t==="无"?"":t}));
-                simulateThinking(() => {
-                  if(t==="无"){
-                    addMsg("bot", "明白了，没有特别困扰的动作。");
-                    setTimeout(()=>setPhase("day1_pain"),800);
-                  }else{
-                    addMsg("bot", `收到，我会关注「${t}」这个动作。这个动作时，不适程度是？`);
-                    setTimeout(()=>setPhase("day1_pain"),800);
-                  }
-                });
-              }}
-                className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer active:bg-[#f7fafc] transition-colors text-left">
-                {t}
-              </button>
-            ))}
+          <div style={{alignSelf:"flex-start",width:"90%",animation:"fadeUp 0.25s ease"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              {[
+                {t:"下蹲",icon:"🏋️"},
+                {t:"上楼梯/斜坡",icon:"⬆️"},
+                {t:"下楼梯/斜坡",icon:"⬇️"},
+                {t:"久坐后站起来",icon:"🪑"},
+                {t:"长时间走路",icon:"🚶"},
+                {t:"跑步/运动",icon:"🏃"},
+                {t:"其他",icon:"💭"},
+                {t:"无",icon:"✅"},
+              ].map(({t,icon})=>(
+                <button key={t} onClick={()=>{
+                  addMsg("user", `${icon} ${t}`, "day1_triggers");
+                  setUserData(p=>({...p,triggers:[t],mainTrigger:t==="无"?"":t}));
+                  simulateThinking(()=>{
+                    if(t==="无"){
+                      addMsg("bot","明白了，没有特别困扰的动作。我接着了解不适程度。");
+                      setTimeout(()=>setPhase("day1_pain"),800);
+                    }else{
+                      addMsg("bot",`好的，你在「${t}」时感觉不舒服。这个动作时，不适程度是？`);
+                      setTimeout(()=>setPhase("day1_pain"),800);
+                    }
+                  });
+                }}
+                  style={{padding:"11px 10px",borderRadius:12,border:"1.5px solid #E8E8E8",
+                    background:"white",cursor:"pointer",display:"flex",alignItems:"center",gap:8,
+                    fontSize:13,color:"#333",fontFamily:"inherit",
+                    boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
+                  <span style={{fontSize:18}}>{icon}</span>
+                  <span style={{lineHeight:1.3}}>{t}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Pain — visual scale */}
         {phase==="day1_pain"&&(
-          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-            <p className="text-xs text-[#718096] mb-1">触发动作：{ud.mainTrigger||"未知"}，不适程度是？</p>
-            {["0 — 无不适","1 — 轻微不适（不影响完成）","2 — 中等不适（明显不舒服）","3 — 较重不适（需减慢速度）","4 — 非常不适（难以完成）"].map((label,i)=>(
-              <button key={i} onClick={()=>{
-                addMsg("user", label, "day1_pain");
-                setUserData(p=>({...p,painLevel:i}));
-                day1PainRef.current=i;
-                simulateThinking(()=>{
-                  addMsg("bot", "收到！我会根据你的情况生成初始方案。");
-                  setTimeout(()=>{
-                    setTaskIdx(1);
-                    setPhase("day1_recommend");
-                    addMsg("bot", `根据你的情况，我为你推荐<strong>${LEVELS[Math.max(0,2-Math.floor(i/2))]}</strong>模式开始。`);
-                  },800);
-                });
-              }}
-                className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer active:bg-[#f7fafc] transition-colors text-left">
-                {label}
-              </button>
-            ))}
+          <div style={{alignSelf:"flex-start",width:"90%",animation:"fadeUp 0.25s ease"}}>
+            <div style={{fontSize:12,color:"#9ca3af",marginBottom:8}}>
+              动作：{ud.mainTrigger||"日常动作"}，不适程度？
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {[
+                {i:0,label:"无不适",emoji:"😄",color:"#07C160",bg:"#E8F8EF"},
+                {i:1,label:"轻微不适",emoji:"🙂",color:"#52C41A",bg:"#F6FFED"},
+                {i:2,label:"中等不适",emoji:"😐",color:"#FAAD14",bg:"#FFFBE6"},
+                {i:3,label:"较重不适",emoji:"😟",color:"#FF7A45",bg:"#FFF2E8"},
+                {i:4,label:"非常不适",emoji:"😣",color:"#FF4D4F",bg:"#FFF1F0"},
+              ].map(({i,label,emoji,color,bg})=>(
+                <button key={i} onClick={()=>{
+                  addMsg("user",`${emoji} ${i} — ${label}`,"day1_pain");
+                  setUserData(p=>({...p,painLevel:i}));
+                  day1PainRef.current=i;
+                  simulateThinking(()=>{
+                    addMsg("bot","收到！我会根据你的情况生成初始方案。");
+                    setTimeout(()=>{
+                      setTaskIdx(1);
+                      setPhase("day1_recommend");
+                      addMsg("bot",`根据你的情况，我为你推荐<strong>${LEVELS[Math.max(0,2-Math.floor(i/2))]}</strong>模式开始。`);
+                    },800);
+                  });
+                }}
+                  style={{
+                    display:"flex",alignItems:"center",gap:12,
+                    padding:"11px 14px",borderRadius:12,
+                    border:`1.5px solid ${color}22`,background:bg,
+                    cursor:"pointer",fontFamily:"inherit",
+                    boxShadow:"0 1px 3px rgba(0,0,0,0.05)",
+                  }}>
+                  <span style={{fontSize:22}}>{emoji}</span>
+                  <div style={{flex:1,textAlign:"left"}}>
+                    <span style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{i} — {label}</span>
+                  </div>
+                  {/* Visual bar */}
+                  <div style={{display:"flex",gap:3}}>
+                    {[0,1,2,3,4].map(d=>(
+                      <div key={d} style={{width:6,height:6,borderRadius:3,
+                        background:d<=i?color:"#E8E8E8",transition:"background 0.2s"}}/>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {phase==="day1_manual_level"&&(
@@ -547,47 +739,58 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
             })}
           </div>
         )}
+        {/* Recommendation card — clean, single info block */}
         {phase==="day1_recommend"&&(
-          <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-            <ResultCard>
-              <div className="text-[19px] font-bold text-[#07C160]">🌸 推荐：{LEVELS[lv-1]||"温和"}模式</div>
-              <div className="text-sm text-[#2d3748] mt-1">强度 <strong>{getLevelName(lv)}</strong></div>
-              <div className="flex gap-2 flex-wrap mt-2 text-[13px] text-[#4a5568]">
-                {[`💨 ${prm.pressure} mmHg`,`⏱ 工作${prm.work}s`,`🔄 休息${prm.rest}s`,`🔁 ${prm.cycles}轮`].map(t=>(
-                  <span key={t} className="bg-white px-3 py-1 rounded-full border border-[#e8ecf0]">{t}</span>
+          <div style={{alignSelf:"flex-start",width:"92%",display:"flex",flexDirection:"column",gap:10,animation:"fadeUp 0.25s ease"}}>
+            {/* Plan card */}
+            <div style={{background:"white",borderRadius:16,padding:"16px",boxShadow:"0 2px 8px rgba(0,0,0,0.08)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+                <div style={{width:36,height:36,borderRadius:10,background:"#E8F8EF",
+                  display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>🌿</div>
+                <div>
+                  <div style={{fontSize:16,fontWeight:700,color:"#07C160"}}>推荐方案</div>
+                  <div style={{fontSize:12,color:"#9ca3af"}}>{LEVELS[lv-1]||"温和"}模式 · {getLevelName(lv)}</div>
+                </div>
+              </div>
+              {/* Params grid */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+                {[
+                  {icon:"💨",label:"压力",v:`${prm.pressure} mmHg`},
+                  {icon:"⏱",label:"工作",v:`${prm.work} 秒`},
+                  {icon:"🔄",label:"休息",v:`${prm.rest} 秒`},
+                  {icon:"🔁",label:"循环",v:`${prm.cycles} 次`},
+                ].map(({icon,label,v})=>(
+                  <div key={label} style={{background:"#F7F8FA",borderRadius:10,padding:"8px 10px"}}>
+                    <div style={{fontSize:11,color:"#9ca3af",marginBottom:2}}>{icon} {label}</div>
+                    <div style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{v}</div>
+                  </div>
                 ))}
               </div>
-              <div className="mt-1.5 text-[13px] text-[#4a5568]">📅 每天1-2次，约{Math.floor(total/60)}分{total%60}秒</div>
-            </ResultCard>
-
-            {/* Device usage instructions */}
-            <div className="bg-[#fffbeb] border border-[#fde68a] rounded-2xl p-3 text-sm text-[#92400e]">
-              <div className="font-semibold mb-2">⚠️ 使用须知</div>
-              <div className="space-y-1.5 text-xs leading-relaxed text-[#78350f]">
-                <div>• 带上设备前，请保持使用部位清爽干燥。</div>
-                <div>• 设备开始工作后，请保持静止放松，暂时不要移动。</div>
-                <div>• 你可能会出现吸附感，或皮肤刺激紧的感觉</div>
-                <div>• 使用后皮肤轻微发红属正常现象，不用担心。根据个人差异，可能会在4-48逐渐消退。</div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-[#fde68a] text-xs text-[#92400e] leading-relaxed">
-                ⚠️ 如出现严重不适、持续疼痛或皮肤异常反应，请立即停止使用并及时就诊。
+              <div style={{fontSize:12,color:"#9ca3af",textAlign:"center"}}>
+                📅 每天 1-2 次 · 约 {Math.floor(total/60)} 分 {total%60} 秒
               </div>
             </div>
 
-            <div className="bg-[#f0f9ff] border border-[#bae6fd] rounded-2xl p-3 text-sm text-[#075985]">
-              <div className="font-semibold mb-2">⚙️ 穿戴须知</div>
-              <div className="space-y-1 text-xs leading-relaxed text-[#0c4a6e]">
-                <div>• 使用前请保持使用部位清爽干燥</div>
-                <div>• 设备运行时请保持静止放松</div>
-                <div>• 可能出现吸附感或皮肤紧绷感，属正常现象</div>
-                <div>• 使用后皮肤轻微发红属正常，4-48小时消退</div>
+            {/* Compact tips */}
+            <div style={{background:"#FFFBE6",borderRadius:12,padding:"12px 14px",
+              border:"1px solid #FDE68A"}}>
+              <div style={{fontSize:12,fontWeight:600,color:"#92400E",marginBottom:6}}>使用前请确认</div>
+              <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                {["使用部位清爽干燥","绑带固定舒适","使用中保持静止放松"].map((t,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"#78350F"}}>
+                    <span style={{color:"#F59E0B",flexShrink:0}}>•</span>{t}
+                  </div>
+                ))}
               </div>
             </div>
-            <button onClick={()=>{
-              targetTherapyPhase.current="day1_therapy";
-              setShowDeviceConfirm(true);
-            }} className="w-full mt-1 py-3 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all shadow-[0_4px_16px_rgba(7,193,96,0.35)]">
-              ✅ 开始首次使用
+
+            {/* CTA */}
+            <button onClick={()=>{targetTherapyPhase.current="day1_therapy";setShowDeviceConfirm(true);}}
+              style={{width:"100%",padding:"15px 0",borderRadius:14,
+                background:"linear-gradient(135deg,#07C160,#059945)",
+                color:"white",fontWeight:700,fontSize:16,border:"none",cursor:"pointer",
+                boxShadow:"0 4px 16px rgba(7,193,96,0.4)",letterSpacing:0.3}}>
+              开始首次使用 →
             </button>
           </div>
         )}
@@ -625,79 +828,60 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           );
         })()}
         {phase==="daily_feel"&&(
-          <div className="self-start max-w-[92%] animate-[fadeUp_0.3s_ease]">
-            <BtnRow>
-              <Pill label="😊 好多了" primary onClick={()=>onSubmitDailyFeel("better")}/>
-              <Pill label="😐 还行" onClick={()=>onSubmitDailyFeel("same")}/>
-              <Pill label="😣 还是不舒服" onClick={()=>onSubmitDailyFeel("worse")}/>
-            </BtnRow>
+          <div style={{alignSelf:"flex-start",width:"90%",animation:"fadeUp 0.25s ease"}}>
+            <div style={{display:"flex",gap:8}}>
+              {[
+                {v:"better",emoji:"😊",label:"好多了",sub:"有改善",color:"#07C160",bg:"#E8F8EF"},
+                {v:"same",  emoji:"😐",label:"还行",  sub:"差不多",color:"#6B7280",bg:"#F9FAFB"},
+                {v:"worse", emoji:"😣",label:"不舒服",sub:"有波动",color:"#F59E0B",bg:"#FFFBE6"},
+              ].map(({v,emoji,label,sub,color,bg})=>(
+                <button key={v} onClick={()=>onSubmitDailyFeel(v)}
+                  style={{flex:1,padding:"14px 8px",borderRadius:14,
+                    border:`1.5px solid ${color}33`,background:bg,
+                    cursor:"pointer",textAlign:"center",fontFamily:"inherit",
+                    boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+                  <div style={{fontSize:28,marginBottom:4}}>{emoji}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:"#1a1a1a"}}>{label}</div>
+                  <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>{sub}</div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {phase==="daily_recommend"&&(
-          <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease]">
-            <ResultCard>
-              <div className="text-lg font-bold text-[#07C160]">📌 今日推荐</div>
-              <div className="text-sm mt-1">强度 <strong>{getLevelName(ud.finalLevel)}</strong></div>
-              <div className="text-xs text-[#718096] mt-1">{ud.dailyFeel==="worse"?"感觉变差，已降低一级":"保持当前强度"}</div>
-            </ResultCard>
-            <button onClick={()=>{
-              targetTherapyPhase.current="daily_therapy";
-              setShowDeviceConfirm(true);
-            }} className="w-full mt-3 py-3 rounded-full bg-[#07C160] text-white font-semibold text-sm border-0 cursor-pointer active:bg-[#06AE56] transition-all">
-              ✅ 开始今日训练
+          <div style={{alignSelf:"flex-start",width:"92%",display:"flex",flexDirection:"column",gap:10,animation:"fadeUp 0.25s ease"}}>
+            <div style={{background:"white",borderRadius:16,padding:"16px",boxShadow:"0 2px 8px rgba(0,0,0,0.08)"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                <div style={{fontSize:15,fontWeight:700,color:"#1a1a1a"}}>今日方案</div>
+                <span style={{fontSize:12,padding:"3px 10px",borderRadius:20,
+                  background:ud.dailyFeel==="worse"?"#FEF3C7":"#E8F8EF",
+                  color:ud.dailyFeel==="worse"?"#92400E":"#065f46"}}>
+                  {ud.dailyFeel==="worse"?"已调整↓":"维持"}
+                </span>
+              </div>
+              <div style={{fontSize:22,fontWeight:700,color:"#07C160",marginBottom:4}}>
+                {getLevelName(ud.finalLevel)} <span style={{fontSize:14,fontWeight:400,color:"#9ca3af"}}>{LEVELS[(ud.finalLevel||2)-1]}模式</span>
+              </div>
+              <div style={{fontSize:12,color:"#9ca3af"}}>
+                {prm.pressure}mmHg · 工作{prm.work}s · 休息{prm.rest}s · {prm.cycles}轮
+              </div>
+            </div>
+            <button onClick={()=>{targetTherapyPhase.current="daily_therapy";setShowDeviceConfirm(true);}}
+              style={{width:"100%",padding:"15px 0",borderRadius:14,
+                background:"linear-gradient(135deg,#07C160,#059945)",
+                color:"white",fontWeight:700,fontSize:16,border:"none",cursor:"pointer",
+                boxShadow:"0 4px 16px rgba(7,193,96,0.4)"}}>
+              开始今日训练 →
             </button>
           </div>
         )}
-        {phase==="daily_optimize"&&(()=>{
-          const feel=ud.dailyFeel;
-          const better=feel==="better";
-          const worse=feel==="worse";
-          const emoji=better?"🎉":worse?"⚠️":"👍";
-          const title=better?"看到进步了！":worse?"最近状态有所波动。":"状态稳定。";
-          const body=better?"建议继续保持当前方案。":worse?"请留意活动量变化，如持续不适请及时反馈。":"建议继续完成本阶段计划。";
-          const [summaryTab, setSummaryTab] = React.useState<"today"|"example">("today");
-          return (
-            <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-              {/* Tab switcher */}
-              <div className="flex gap-2 mb-1">
-                <button onClick={()=>setSummaryTab("today")}
-                  className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-all ${summaryTab==="today"?"border-[#07C160] text-[#07C160]":"border-transparent text-[#8e98a3]"}`}>
-                  今日总结
-                </button>
-                <button onClick={()=>setSummaryTab("example")}
-                  className={`flex-1 py-2 text-sm font-semibold border-b-2 transition-all ${summaryTab==="example"?"border-[#07C160] text-[#07C160]":"border-transparent text-[#8e98a3]"}`}>
-                  举例
-                </button>
-              </div>
-
-              {summaryTab === "today" ? (
-                <div className={`rounded-2xl p-4 border-l-4 ${worse?"bg-[#fff7ed] border-[#f97316]":better?"bg-[#f0fdf4] border-[#22c55e]":"bg-[#f0fdf4] border-[#07C160]"}`}>
-                  <div className="text-base font-bold mb-1">{emoji} {title}</div>
-                  <div className="text-sm text-[#374151]">{body}</div>
-                </div>
-              ) : (
-                <div className="rounded-2xl p-4 bg-[#f7fafc] border border-[#e2e8f0] space-y-3">
-                  <div>
-                    <div className="text-xs font-semibold text-[#22c55e] mb-0.5">好多了：</div>
-                    <div className="text-sm text-[#374151]">🎉 看到进步了！建议继续保持当前方案。</div>
-                  </div>
-                  <div className="border-t border-[#e2e8f0] pt-3">
-                    <div className="text-xs font-semibold text-[#718096] mb-0.5">差不多：</div>
-                    <div className="text-sm text-[#374151]">👍 状态稳定。建议继续完成本阶段计划。</div>
-                  </div>
-                  <div className="border-t border-[#e2e8f0] pt-3">
-                    <div className="text-xs font-semibold text-[#f97316] mb-0.5">还是不舒服：</div>
-                    <div className="text-sm text-[#374151]">⚠️ 最近状态有所波动。请留意活动量变化，如持续不适请及时反馈。</div>
-                  </div>
-                </div>
-              )}
-
-              <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#07C160] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#06AE56] transition-all">
-                📅 {currentDay<6?`进入第${currentDay+1}天`:currentDay===6?"进入阶段回顾":"完成"}
-              </button>
-            </div>
-          );
-        })()}
+        {phase==="daily_optimize"&&(
+          <DailyOptimizeSummary
+            feel={ud.dailyFeel}
+            currentDay={currentDay}
+            onNext={onGoToNextDay}
+          />
+        )}
         {phase==="day7_summary"&&(()=>{
           const d7pain=ud.day7Pain;
           const d1pain=day1Pain;
@@ -956,26 +1140,13 @@ export default function App() {
 
   return (
     <div style={{
-      height: "100vh",
-      width: "100vw",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "#EDEDED"
+      height: "100vh", width: "100vw",
+      display: "flex", flexDirection: "column",
+      background: "#F7F8FA",
+      fontFamily: "'Noto Sans SC', 'PingFang SC', 'Helvetica Neue', sans-serif",
+      position: "relative",
+      overflow: "hidden",
     }}>
-      {/* WeChat Mini Program container — 375px standard */}
-      <div style={{
-        width: "375px",
-        height: "812px",
-        maxHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        background: "#F7F8FA",
-        borderRadius: "20px",
-        overflow: "hidden",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.18)"
-      }}>
       {screen === "wechat-login" && (
         <WeChatLogin
           onLogin={(name) => {
@@ -1171,7 +1342,7 @@ export default function App() {
             />
           )}
           {tab === "discover" && <DiscoverPage />}
-          {tab === "profile" && <ProfilePage />}
+          {tab === "profile" && <ProfilePage userName={userData?.name||"用户"} onLogout={()=>setScreen("wechat-login")}/>}
 
           <FloatBall
             deviceState={deviceState}
@@ -1321,7 +1492,6 @@ export default function App() {
           });
         }}
       />
-      </div>
     </div>
   );
 }
