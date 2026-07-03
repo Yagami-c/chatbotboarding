@@ -25,80 +25,81 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
 function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", overflow: "hidden" }}>
-      {/* Compressed brand area — 28-32% of screen height */}
-      <div style={{
-        flex: "0 0 30vh",
-        background: `linear-gradient(160deg, ${COLORS.brandBlue} 0%, #3A7BC8 100%)`,
-        position: "relative", overflow: "hidden",
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-        padding: "24px",
-      }}>
-        {/* Subtle background circle */}
-        <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
 
-        {/* Aiyovita logo */}
+      {/* ── Top half: brand + content compressed into 50vh ── */}
+      <div style={{ height: "50vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+        {/* Brand gradient area */}
         <div style={{
-          width: 240, height: 100, borderRadius: 20,
-          background: "white",
-          boxShadow: DESIGN.shadow.card,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 16, position: "relative", zIndex: 1,
-          overflow: "hidden",
-          padding: "16px 20px",
+          background: `linear-gradient(160deg, ${COLORS.brandBlue} 0%, #3A7BC8 100%)`,
+          paddingTop: 20, paddingBottom: 14,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          position: "relative", overflow: "hidden", flexShrink: 0,
         }}>
-          <img
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 150'%3E%3Cg transform='translate(15,20)'%3E%3Cpath d='M30,15 L35,20 L30,25 M25,20 h10 M22,15 v10 M33,15 v10' stroke='%234A90E2' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M10,35 Q15,28 20,35 T30,35' stroke='%2370C244' stroke-width='2' fill='none'/%3E%3Cellipse cx='12' cy='33' rx='1.5' ry='2' fill='%23DC2626'/%3E%3C/g%3E%3Cg transform='translate(65,35)'%3E%3Ctext x='0' y='30' font-family='Arial,sans-serif' font-size='38' font-weight='700' fill='%234A90E2'%3EAiyovita%3C/text%3E%3Ctext x='0' y='65' font-family='Microsoft YaHei,SimHei,sans-serif' font-size='24' font-weight='700' fill='%234A90E2' letter-spacing='2'%3E光年瑞康%3C/text%3E%3C/g%3E%3C/svg%3E"
-            alt="光年瑞康 Aiyovita"
-            style={{ width: "100%", height: "100%", objectFit: "contain" }}
-          />
+          <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
+
+          <div style={{
+            width: 200, height: 76, borderRadius: 16,
+            background: "white",
+            boxShadow: DESIGN.shadow.card,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            marginBottom: 10, position: "relative", zIndex: 1,
+            overflow: "hidden", padding: "10px 16px",
+          }}>
+            <img
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 150'%3E%3Cg transform='translate(15,20)'%3E%3Cpath d='M30,15 L35,20 L30,25 M25,20 h10 M22,15 v10 M33,15 v10' stroke='%234A90E2' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M10,35 Q15,28 20,35 T30,35' stroke='%2370C244' stroke-width='2' fill='none'/%3E%3Cellipse cx='12' cy='33' rx='1.5' ry='2' fill='%23DC2626'/%3E%3C/g%3E%3Cg transform='translate(65,35)'%3E%3Ctext x='0' y='30' font-family='Arial,sans-serif' font-size='38' font-weight='700' fill='%234A90E2'%3EAiyovita%3C/text%3E%3Ctext x='0' y='65' font-family='Microsoft YaHei,SimHei,sans-serif' font-size='24' font-weight='700' fill='%234A90E2' letter-spacing='2'%3E光年瑞康%3C/text%3E%3C/g%3E%3C/svg%3E"
+              alt="光年瑞康 Aiyovita"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
+          </div>
+
+          <div style={{ color: "white", fontWeight: 700, fontSize: 16, letterSpacing: 0.3, position: "relative", zIndex: 1, marginBottom: 3 }}>
+            科学康养，守护膝关节健康
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, position: "relative", zIndex: 1 }}>
+            让膝盖越来越好
+          </div>
         </div>
 
-        <div style={{ color: "white", fontWeight: 700, fontSize: 18, letterSpacing: 0.3, position: "relative", zIndex: 1, marginBottom: 4 }}>
-          科学康养，守护膝关节健康
-        </div>
-        <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, position: "relative", zIndex: 1 }}>
-          让膝盖越来越好
+        {/* Content fills remaining top-half */}
+        <div style={{ flex: 1, padding: "14px 20px 0", overflow: "hidden" }}>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 6, lineHeight: 1.3 }}>
+            欢迎来到您的专属膝盖管家
+          </h1>
+          <p style={{ fontSize: 13, color: COLORS.neutralGray, lineHeight: 1.5, marginBottom: 12 }}>
+            科学评估、智能训练、专家陪伴&nbsp;&nbsp;每天几分钟，让膝盖越来越好
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              { title: "AI 个性化", desc: "根据你的情况定制方案" },
+              { title: "进度追踪", desc: "可视化康复进展" },
+              { title: "专家研发", desc: "香港理工大学武汉研究院" },
+            ].map(({ title, desc }) => (
+              <div key={title} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  background: COLORS.mistBlue, flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center"
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6L5 9L10 3" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.deepNavy }}>{title}</div>
+                  <div style={{ fontSize: 11, color: COLORS.neutralGray }}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Bottom content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "32px 24px 24px" }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 12, lineHeight: 1.3 }}>
-          欢迎来到您的专属膝盖管家
-        </h1>
-        <p style={{ fontSize: 16, color: COLORS.neutralGray, lineHeight: 1.6, marginBottom: 24 }}>
-          科学评估、智能训练、专家陪伴<br/>
-          每天几分钟，让膝盖越来越好
-        </p>
-
-        {/* Feature list with 2px linear icons */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: "auto" }}>
-          {[
-            { title: "AI 个性化", desc: "根据你的情况定制方案" },
-            { title: "进度追踪", desc: "可视化康复进展" },
-            { title: "专家研发", desc: "香港理工大学武汉研究院" },
-          ].map(({ title, desc }) => (
-            <div key={title} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{
-                width: 24, height: 24, borderRadius: "50%",
-                background: COLORS.mistBlue, flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center"
-              }}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6L5 9L10 3" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.deepNavy }}>{title}</div>
-                <div style={{ fontSize: 12, color: COLORS.neutralGray }}>{desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Single solid primary button */}
+      {/* ── Bottom CTA — starts exactly at 50vh ── */}
+      <div style={{ padding: "20px 20px 28px" }}>
         <button onClick={onNext} style={{
-          width: "100%", height: 48, borderRadius: DESIGN.radius.button,
+          width: "100%", height: 50, borderRadius: DESIGN.radius.button,
           background: COLORS.brandBlue,
           color: "white", fontWeight: 600, fontSize: 17,
           border: "none", cursor: "pointer",
@@ -108,16 +109,15 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
           开始体验 →
         </button>
 
-        {/* Text button for skip */}
         <button onClick={onSkip} style={{
           background: "none", border: "none",
-          color: COLORS.neutralGray, fontSize: 14, cursor: "pointer", padding: "8px 0",
-          fontWeight: 500,
+          color: COLORS.neutralGray, fontSize: 14, cursor: "pointer",
+          padding: "10px 0", fontWeight: 500, width: "100%",
         }}>
           游客体验
         </button>
 
-        <div style={{ marginTop: 20 }}><ProgressDots current={0} total={3}/></div>
+        <div style={{ marginTop: 16 }}><ProgressDots current={0} total={3}/></div>
       </div>
     </div>
   );
