@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { COLORS, DESIGN } from "../design-system";
 
 interface ManualAssessmentProps {
   onBack: () => void;
@@ -24,6 +25,7 @@ const SAFETY_LIST = [
   {v:"肿胀",l:"膝盖明显肿胀/发烫"},
   {v:"伤口",l:"膝盖周围有伤口或皮肤问题"},
   { v: "医生建议", l: "医生叮嘱暂不适合使用此类设备" },
+  { v: "显著受损", l: "膝盖有轻微肿胀或活动受限" },
   {v:"无",l:"以上都没有"},
 ];
 const STEPS = [
@@ -83,9 +85,9 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
       {/* Header */}
       <div className="px-4 pt-12 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={handleBack} className="text-2xl bg-transparent border-0 cursor-pointer text-[#4a5568]">←</button>
+          <button onClick={handleBack} className="text-2xl bg-transparent border-0 cursor-pointer text-[#4a5568]" style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>←</button>
           <div className="flex-1">
-            <div className="font-bold text-[#1a202c]">📋 了解你的情况</div>
+            <div className="font-bold text-[#1a202c]">了解你的情况</div>
             <div className="text-xs text-[#718096]">{STEPS[step].sub}</div>
           </div>
           <div className="text-xs text-[#718096] font-medium">{step+1} / {STEPS.length}</div>
@@ -94,20 +96,24 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
         <div className="flex items-center mb-1">
           {STEPS.map((s, i) => (
             <div key={i} className="flex items-center flex-1">
-              <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold flex-shrink-0 transition-all
-                ${i < step ? "bg-[#1A7AC7] text-white" : i === step ? "bg-[#1A7AC7] text-white ring-2 ring-[#a8f0c6] ring-offset-1" : "bg-[#e2e8f0] text-[#a0aec0]"}`}>
+              <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold flex-shrink-0 transition-all`}
+                style={{
+                  background: i <= step ? COLORS.brandBlue : COLORS.borderGray,
+                  color: i <= step ? "white" : COLORS.textTertiary,
+                  boxShadow: i === step ? `0 0 0 2px ${COLORS.mistBlue}` : "none"
+                }}>
                 {i < step ? "✓" : i + 1}
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-1.5 transition-all duration-300 ${i < step ? "bg-[#1A7AC7]" : "bg-[#e2e8f0]"}`}/>
+                <div className={`flex-1 h-0.5 mx-1.5 transition-all duration-300`} style={{ background: i < step ? COLORS.brandBlue : COLORS.borderGray }}/>
               )}
             </div>
           ))}
         </div>
         <div className="flex">
           {STEPS.map((s, i) => (
-            <div key={i} className={`flex-1 text-center text-[10px] font-medium transition-colors
-              ${i === step ? "text-[#1A7AC7]" : i < step ? "text-[#1A7AC7]" : "text-[#a0aec0]"}`}>
+            <div key={i} className={`flex-1 text-center text-[10px] font-medium transition-colors`}
+              style={{ color: i <= step ? COLORS.brandBlue : COLORS.textTertiary }}>
               {s.label}
             </div>
           ))}
@@ -127,9 +133,15 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
             <div className="flex gap-2">
               {["男","女","其他"].map(g=>(
                 <button key={g} onClick={()=>setGender(g)}
-                  className={`flex-1 py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${gender===g?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                  {g==="男"?"👨 男":g==="女"?"👩 女":"其他"}
+                  style={{
+                    flex: 1, padding: "12px", borderRadius: DESIGN.radius.button,
+                    fontSize: 14, fontWeight: 500, border: `1px solid ${gender===g ? COLORS.brandBlue : COLORS.borderGray}`,
+                    cursor: "pointer", transition: "all 0.2s",
+                    background: gender===g ? COLORS.brandBlue : COLORS.white,
+                    color: gender===g ? "white" : COLORS.textSecondary,
+                    minHeight: 44,
+                  }}>
+                  {g}
                 </button>
               ))}
             </div>
@@ -139,16 +151,28 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
             <div className="grid grid-cols-2 gap-2">
               {["40岁以下","40-60岁","60岁以上"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
-                  className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all
-                    ${ageRange===a?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  style={{
+                    padding: "12px", borderRadius: DESIGN.radius.button,
+                    fontSize: 14, fontWeight: 500, border: `1px solid ${ageRange===a ? COLORS.brandBlue : COLORS.borderGray}`,
+                    cursor: "pointer", transition: "all 0.2s",
+                    background: ageRange===a ? COLORS.brandBlue : COLORS.white,
+                    color: ageRange===a ? "white" : COLORS.textSecondary,
+                    minHeight: 44,
+                  }}>
                   {a}
                 </button>
               ))}
             </div>
           </div>
           <button onClick={handleNext}
-            className={`w-full py-3.5 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-              ${canNext0?"bg-[#1A7AC7] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
+            style={{
+              width: "100%", padding: "14px", borderRadius: DESIGN.radius.button,
+              fontWeight: 600, fontSize: 16, border: 0, cursor: canNext0 ? "pointer" : "not-allowed",
+              transition: "all 0.2s",
+              background: canNext0 ? COLORS.brandBlue : COLORS.borderGray,
+              color: canNext0 ? "white" : COLORS.textTertiary,
+              minHeight: 48,
+            }}>
             下一步 →
           </button>
         </div>
@@ -162,8 +186,14 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
             <div className="grid grid-cols-2 gap-2">
               {DURATIONS.map(d=>(
                 <button key={d} onClick={()=>setDuration(d)}
-                  className={`py-2 rounded-full text-sm font-medium border cursor-pointer transition-all text-center
-                    ${duration===d?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  style={{
+                    padding: "12px 8px", borderRadius: DESIGN.radius.button, textAlign: "center",
+                    fontSize: 14, fontWeight: 500, border: `1px solid ${duration===d ? COLORS.brandBlue : COLORS.borderGray}`,
+                    cursor: "pointer", transition: "all 0.2s",
+                    background: duration===d ? COLORS.brandBlue : COLORS.white,
+                    color: duration===d ? "white" : COLORS.textSecondary,
+                    minHeight: 44,
+                  }}>
                   {d}
                 </button>
               ))}
@@ -172,22 +202,30 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q5. 安全筛查（可多选）</div>
             {SAFETY_LIST.map(({v,l})=>(
-              <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
+              <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]" style={{ minHeight: 44 }}>
                 <input type="checkbox" checked={!!safety[v]}
                   onChange={e=>setSafety(p=>({...p,[v]:e.target.checked}))}
-                  className="accent-[#1A7AC7]"/>
+                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
                 {l}
               </label>
             ))}
           </div>
           <div className="flex gap-3 pb-4">
             <button onClick={handleBack}
-              className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
+              style={{
+                flex: 1, padding: "14px", borderRadius: DESIGN.radius.button,
+                background: COLORS.white, color: COLORS.textSecondary, fontWeight: 500, fontSize: 14,
+                border: `1px solid ${COLORS.borderGray}`, cursor: "pointer", minHeight: 48,
+              }}>
               ← 上一步
             </button>
             <button onClick={handleNext}
-              className={`flex-[2] py-3 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-                ${canNext1?"bg-[#1A7AC7] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
+              style={{
+                flex: 2, padding: "14px", borderRadius: DESIGN.radius.button, fontWeight: 600, fontSize: 16,
+                border: 0, cursor: canNext1 ? "pointer" : "not-allowed", transition: "all 0.2s",
+                background: canNext1 ? COLORS.brandBlue : COLORS.borderGray,
+                color: canNext1 ? "white" : COLORS.textTertiary, minHeight: 48,
+              }}>
               下一步 →
             </button>
           </div>
@@ -200,8 +238,9 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q6. 膝盖紧度？</div>
             {["没有特别感觉","有点紧","很紧"].map(s=>(
-              <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)} className="accent-[#1A7AC7]"/>
+              <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]" style={{ minHeight: 44 }}>
+                <input type="radio" name="stiffness" checked={stiffness===s} onChange={()=>setStiffness(s)}
+                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
                 {s}
               </label>
             ))}
@@ -210,10 +249,10 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
             <div className="font-semibold text-[#1a202c] text-sm mb-2">Q7. 触发动作与疼痛程度</div>
             <div className="text-xs text-[#718096] mb-2">最近什么动作容易不舒服？（可多选）</div>
             {TRIGGERS_LIST.map(v=>(
-              <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
+              <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]" style={{ minHeight: 44 }}>
                 <input type="checkbox" checked={!!triggers[v]}
                   onChange={e=>setTriggers(p=>({...p,[v]:e.target.checked}))}
-                  className="accent-[#1A7AC7]"/>
+                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
                 {v}
               </label>
             ))}
@@ -222,8 +261,14 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
               <div className="flex gap-1.5">
                 {[0,1,2,3,4].map(n=>(
                   <button key={n} onClick={()=>setPainLevel(n)}
-                    className={`flex-1 py-2 rounded-xl text-sm font-bold border cursor-pointer transition-all
-                      ${painLevel===n?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    style={{
+                      flex: 1, padding: "12px 8px", borderRadius: DESIGN.radius.button,
+                      fontSize: 14, fontWeight: 600, border: `1px solid ${painLevel===n ? COLORS.brandBlue : COLORS.borderGray}`,
+                      cursor: "pointer", transition: "all 0.2s",
+                      background: painLevel===n ? COLORS.brandBlue : COLORS.white,
+                      color: painLevel===n ? "white" : COLORS.textSecondary,
+                      minHeight: 44,
+                    }}>
                     {n}
                   </button>
                 ))}
@@ -235,12 +280,20 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
           </div>
           <div className="flex gap-3 pb-4">
             <button onClick={handleBack}
-              className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
+              style={{
+                flex: 1, padding: "14px", borderRadius: DESIGN.radius.button,
+                background: COLORS.white, color: COLORS.textSecondary, fontWeight: 500, fontSize: 14,
+                border: `1px solid ${COLORS.borderGray}`, cursor: "pointer", minHeight: 48,
+              }}>
               ← 上一步
             </button>
             <button onClick={handleSubmit}
-              className={`flex-[2] py-3 rounded-full font-bold text-sm border-0 cursor-pointer transition-all
-                ${canSubmit?"bg-[#1A7AC7] text-white active:bg-[#27AE60]":"bg-[#e2e8f0] text-[#a0aec0] cursor-not-allowed"}`}>
+              style={{
+                flex: 2, padding: "14px", borderRadius: DESIGN.radius.button, fontWeight: 600, fontSize: 16,
+                border: 0, cursor: canSubmit ? "pointer" : "not-allowed", transition: "all 0.2s",
+                background: canSubmit ? COLORS.brandBlue : COLORS.borderGray,
+                color: canSubmit ? "white" : COLORS.textTertiary, minHeight: 48,
+              }}>
               提交并查看方案 →
             </button>
           </div>
@@ -254,17 +307,27 @@ export function ManualAssessment({ onBack, onDone, existingData }: ManualAssessm
             <div className="text-2xl text-center mb-3">⚠️</div>
             <div className="font-bold text-[#1a202c] text-center text-base mb-2">安全提示</div>
             <p className="text-sm text-[#4a5568] text-center mb-3">检测到您存在以下情况：</p>
-            <div className="bg-[#fff7ed] border border-[#fed7aa] rounded-xl p-3 mb-4 text-sm text-[#c2410c] space-y-1">
-              {safetyVals.filter(v=>v!=="无").map(v=><div key={v}>• {SAFETY_LIST.find(s=>s.v===v)?.l||v}</div>)}
+            <div style={{ background: COLORS.mistBlue, border: `1px solid ${COLORS.brandBlue}`, borderRadius: DESIGN.radius.card, padding: "12px 14px", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, color: COLORS.deepNavy }}>
+                {safetyVals.filter(v=>v!=="无").map(v=><div key={v}>• {SAFETY_LIST.find(s=>s.v===v)?.l||v}</div>)}
+              </div>
             </div>
             <p className="text-sm text-[#4a5568] text-center mb-4">建议先休息 1-2 天，或找专业人员确认后再继续。</p>
             <div className="flex gap-3">
               <button onClick={()=>setShowSafetyWarning(false)}
-                className="flex-1 py-2.5 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
+                style={{
+                  flex: 1, padding: "12px", borderRadius: DESIGN.radius.button,
+                  background: COLORS.white, color: COLORS.textSecondary, fontWeight: 500, fontSize: 14,
+                  border: `1px solid ${COLORS.borderGray}`, cursor: "pointer", minHeight: 44,
+                }}>
                 返回修改
               </button>
               <button onClick={submit}
-                className="flex-1 py-2.5 rounded-full bg-[#1A7AC7] text-white font-semibold text-sm border-0 cursor-pointer">
+                style={{
+                  flex: 1, padding: "12px", borderRadius: DESIGN.radius.button,
+                  background: COLORS.brandBlue, color: "white", fontWeight: 600, fontSize: 14,
+                  border: 0, cursor: "pointer", minHeight: 44,
+                }}>
                 仍要继续 →
               </button>
             </div>

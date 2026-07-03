@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { COLORS, DESIGN } from "../design-system";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -230,12 +231,12 @@ function ExerciseCard({ ex, accentColor, lightColor }: {
   const IllusComponent = ILLUS[ex.name];
 
   return (
-    <div style={{ borderBottom: "1px solid #F5F5F5" }}>
+    <div style={{ borderBottom: `1px solid ${COLORS.borderGray}` }}>
       <div onClick={() => setOpen(o => !o)}
-        style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", cursor: "pointer" }}>
+        style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", cursor: "pointer", minHeight: 44 }}>
         {/* Illustration */}
         <div style={{
-          width: 72, height: 88, borderRadius: 14,
+          width: 72, height: 88, borderRadius: DESIGN.radius.button,
           background: lightColor,
           display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0,
@@ -246,11 +247,11 @@ function ExerciseCard({ ex, accentColor, lightColor }: {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: "#191919", marginBottom: 6 }}>{ex.name}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 6 }}>{ex.name}</div>
           {/* Reps pill */}
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 5,
-            background: lightColor, borderRadius: 20,
+            background: lightColor, borderRadius: DESIGN.radius.tag,
             padding: "4px 10px", marginBottom: 6,
           }}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
@@ -261,7 +262,7 @@ function ExerciseCard({ ex, accentColor, lightColor }: {
           </div>
           {/* Description preview */}
           <div style={{
-            fontSize: 12, color: "#6B7280", lineHeight: 1.55,
+            fontSize: 12, color: COLORS.textSecondary, lineHeight: 1.55,
             overflow: "hidden", display: "-webkit-box",
             WebkitLineClamp: open ? undefined : 2,
             WebkitBoxOrient: "vertical" as const,
@@ -275,7 +276,7 @@ function ExerciseCard({ ex, accentColor, lightColor }: {
           flexShrink: 0, transition: "transform 0.2s",
           transform: open ? "rotate(180deg)" : "none",
         }}>
-          <path d="M6 9l6 6 6-6" stroke="#BDBDBD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M6 9l6 6 6-6" stroke={COLORS.neutralGray} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
 
@@ -283,7 +284,7 @@ function ExerciseCard({ ex, accentColor, lightColor }: {
         <div style={{ padding: "0 16px 14px 16px" }}>
           <div style={{
             background: lightColor, borderRadius: 10, padding: "12px 14px",
-            fontSize: 13, color: "#374151", lineHeight: 1.7,
+            fontSize: 13, color: COLORS.textPrimary, lineHeight: 1.7,
           }}>
             {ex.desc}
           </div>
@@ -316,51 +317,54 @@ function DiscoverForum({ onShowWx }: { onShowWx: ()=>void }) {
   };
 
   return (
-    <div style={{ margin:"14px 14px 0", background:"white", borderRadius:16,
-      overflow:"hidden", boxShadow:"0 1px 6px rgba(0,0,0,0.06)", border:"1px solid #F0F0F0" }}>
+    <div style={{ margin:"14px 14px 0", background:"white", borderRadius:DESIGN.radius.card,
+      overflow:"hidden", boxShadow:DESIGN.shadow.card, border:`1px solid ${COLORS.borderGray}` }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 16px 10px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <span style={{ fontSize:16 }}>💬</span>
-          <span style={{ fontSize:15, fontWeight:700, color:"#1E3A5F" }}>社区互动</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLORS.brandBlue} strokeWidth="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ fontSize:15, fontWeight:700, color:COLORS.deepNavy }}>社区互动</span>
         </div>
-        <span style={{ fontSize:12, color:"#1A7AC7", cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
+        <span style={{ fontSize:12, color:COLORS.brandBlue, cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
       </div>
       {FORUM_POSTS_D.map((p, i) => (
-        <div key={p.id} style={{ padding:"11px 16px", borderTop:`1px solid #F5F5F5`,
-          borderBottom: i < FORUM_POSTS_D.length-1 ? "none" : "1px solid #F5F5F5" }}>
+        <div key={p.id} style={{ padding:"11px 16px", borderTop:`1px solid ${COLORS.borderGray}`,
+          borderBottom: i < FORUM_POSTS_D.length-1 ? "none" : `1px solid ${COLORS.borderGray}` }}>
           <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:7 }}>
             <div style={{ width:34, height:34, borderRadius:"50%", background:p.avatarColor,
               display:"flex", alignItems:"center", justifyContent:"center",
               color:"white", fontWeight:700, fontSize:13, flexShrink:0 }}>{p.avatar}</div>
             <div>
-              <div style={{ fontSize:13, fontWeight:600, color:"#1a1a1a" }}>{p.name}</div>
-              <div style={{ fontSize:11, color:"#999" }}>{p.time}</div>
+              <div style={{ fontSize:13, fontWeight:600, color:COLORS.deepNavy }}>{p.name}</div>
+              <div style={{ fontSize:11, color:COLORS.neutralGray }}>{p.time}</div>
             </div>
           </div>
-          <div style={{ fontSize:13, color:"#333", lineHeight:1.55, overflow:"hidden",
+          <div style={{ fontSize:13, color:COLORS.textPrimary, lineHeight:1.55, overflow:"hidden",
             display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical" as const }}>
             {p.content}
           </div>
           <div style={{ display:"flex", gap:16, marginTop:9 }}>
             <button onClick={()=>toggle(p.id)} style={{
               display:"flex", alignItems:"center", gap:5, border:"none",
-              cursor:"pointer", padding:"4px 8px", borderRadius:20,
-              background:liked[p.id]?"rgba(239,68,68,0.08)":"transparent",
+              cursor:"pointer", padding:"4px 8px", borderRadius:DESIGN.radius.tag,
+              background:liked[p.id]?`${COLORS.riskRed}10`:"transparent",
+              minHeight:32,
             }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill={liked[p.id]?"#EF4444":"none"}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill={liked[p.id]?COLORS.riskRed:"none"}>
                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
-                  stroke={liked[p.id]?"#EF4444":"#bbb"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  stroke={liked[p.id]?COLORS.riskRed:COLORS.neutralGray} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span style={{ fontSize:12, color:liked[p.id]?"#EF4444":"#999", fontWeight:liked[p.id]?600:400 }}>
+              <span style={{ fontSize:12, color:liked[p.id]?COLORS.riskRed:COLORS.neutralGray, fontWeight:liked[p.id]?600:400 }}>
                 {counts[p.id]}
               </span>
             </button>
             <div style={{ display:"flex", alignItems:"center", gap:5 }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
-                  stroke="#bbb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  stroke={COLORS.neutralGray} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span style={{ fontSize:12, color:"#999" }}>评论</span>
+              <span style={{ fontSize:12, color:COLORS.neutralGray }}>评论</span>
             </div>
           </div>
         </div>
@@ -368,8 +372,8 @@ function DiscoverForum({ onShowWx }: { onShowWx: ()=>void }) {
       {/* WeChat group CTA */}
       <div onClick={onShowWx} style={{
         display:"flex", alignItems:"center", gap:12, padding:"13px 16px",
-        background:"#EFF6FF", cursor:"pointer" }}>
-        <div style={{ width:38, height:38, borderRadius:"50%", background:"#1A7AC7",
+        background:COLORS.mistBlue, cursor:"pointer", minHeight:64 }}>
+        <div style={{ width:38, height:38, borderRadius:"50%", background:COLORS.brandBlue,
           display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
           <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
             <ellipse cx="7.8" cy="8.5" rx="6" ry="4.5" stroke="white" strokeWidth="1.5" fill="none"/>
@@ -381,26 +385,13 @@ function DiscoverForum({ onShowWx }: { onShowWx: ()=>void }) {
           </svg>
         </div>
         <div style={{ flex:1 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:"#1A7AC7" }}>加入康群微信群</div>
-          <div style={{ fontSize:11, color:"#1E3A5F", marginTop:1 }}>与病友交流康养经验</div>
+          <div style={{ fontSize:13, fontWeight:600, color:COLORS.brandBlue }}>加入康复微信群</div>
+          <div style={{ fontSize:11, color:COLORS.deepNavy, marginTop:1 }}>与病友交流康复经验</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18l6-6-6-6" stroke="#1A7AC7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M9 18l6-6-6-6" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </div>
-    </div>
-  );
-}
-
-// ── Section divider ───────────────────────────────────────────────────────────
-
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <div style={{ display:"flex", alignItems:"center", gap:10, margin:"16px 14px 0" }}>
-      <div style={{ flex:1, height:1, background:"#E8E8E8" }}/>
-      <span style={{ fontSize:11, color:"#9CA3AF", fontWeight:600, letterSpacing:0.5,
-        background:"#F7F8FA", padding:"2px 10px" }}>{label}</span>
-      <div style={{ flex:1, height:1, background:"#E8E8E8" }}/>
     </div>
   );
 }
@@ -409,214 +400,274 @@ export function DiscoverPage() {
   const [openDim, setOpenDim] = useState<number | null>(null);
   const [openSection, setOpenSection] = useState<string | null>("warmup");
   const [showWx, setShowWx] = useState(false);
+  const [activeTab, setActiveTab] = useState<"community" | "education">("community");
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "#F7F8FA" }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: COLORS.lightGray }}>
 
       {/* ── Fixed header ── */}
-      <div style={{ background: "white", borderBottom: "1px solid #F0F0F0",
+      <div style={{ background: "white", borderBottom: `1px solid ${COLORS.borderGray}`,
         padding: "44px 16px 12px", flexShrink: 0 }}>
-        <div style={{ fontSize: 20, fontWeight: 800, color: "#191919" }}>✨ 发现</div>
-        <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 2 }}>快乐生活，「膝膝」相关</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.deepNavy }}>发现</div>
+        <div style={{ fontSize: 13, color: COLORS.neutralGray, marginTop: 2 }}>康复社群 · 专业科普</div>
+
+        {/* Tab switcher */}
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <button
+            onClick={() => setActiveTab("community")}
+            style={{
+              flex: 1, padding: "10px", borderRadius: DESIGN.radius.button,
+              fontSize: 14, fontWeight: 600, border: 0, cursor: "pointer",
+              transition: "all 0.2s",
+              background: activeTab === "community" ? COLORS.brandBlue : "transparent",
+              color: activeTab === "community" ? "white" : COLORS.neutralGray,
+              minHeight: 44,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>康复社群</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab("education")}
+            style={{
+              flex: 1, padding: "10px", borderRadius: DESIGN.radius.button,
+              fontSize: 14, fontWeight: 600, border: 0, cursor: "pointer",
+              transition: "all 0.2s",
+              background: activeTab === "education" ? COLORS.brandBlue : "transparent",
+              color: activeTab === "education" ? "white" : COLORS.neutralGray,
+              minHeight: 44,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>科普内容</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* ── Scrollable body ── */}
       <div style={{ flex: 1, overflowY: "auto" }}>
 
-        {/* ── Community forum (top) ── */}
-        <DiscoverForum onShowWx={()=>setShowWx(true)}/>
+        {/* Community Tab */}
+        {activeTab === "community" && (
+          <>
+            <DiscoverForum onShowWx={()=>setShowWx(true)}/>
 
-        {/* WeChat group modal */}
-        {showWx && (
-          <div style={{ position:"fixed", inset:0, zIndex:900, background:"rgba(0,0,0,0.5)",
-            display:"flex", alignItems:"flex-end" }} onClick={()=>setShowWx(false)}>
-            <div style={{ background:"white", width:"100%", borderRadius:"20px 20px 0 0", padding:"24px 20px 40px" }}
-              onClick={e=>e.stopPropagation()}>
-              <div style={{ width:36, height:4, background:"#e2e8f0", borderRadius:2, margin:"0 auto 20px" }}/>
-              <div style={{ fontSize:17, fontWeight:700, color:"#1a1a1a", textAlign:"center", marginBottom:10 }}>💬 加入微信群</div>
-              <div style={{ fontSize:13, color:"#666", textAlign:"center", marginBottom:20, lineHeight:1.6 }}>
-                加入「哎哟爱膝」康复交流群<br/>与病友交流康复经验，获取专家答疑
+            {/* WeChat group modal */}
+            {showWx && (
+              <div style={{ position:"fixed", inset:0, zIndex:900, background:"rgba(0,0,0,0.5)",
+                display:"flex", alignItems:"flex-end" }} onClick={()=>setShowWx(false)}>
+                <div style={{ background:"white", width:"100%", borderRadius:"20px 20px 0 0", padding:"24px 20px 40px" }}
+                  onClick={e=>e.stopPropagation()}>
+                  <div style={{ width:36, height:4, background:COLORS.borderGray, borderRadius:2, margin:"0 auto 20px" }}/>
+                  <div style={{ fontSize:17, fontWeight:700, color:COLORS.deepNavy, textAlign:"center", marginBottom:10 }}>💬 加入微信群</div>
+                  <div style={{ fontSize:13, color:COLORS.textSecondary, textAlign:"center", marginBottom:20, lineHeight:1.6 }}>
+                    加入「哎哟爱膝」康复交流群<br/>与病友交流康复经验，获取专家答疑
+                  </div>
+                  <div style={{ width:160, height:160, margin:"0 auto 14px", background:COLORS.lightGray,
+                    borderRadius:DESIGN.radius.card, display:"flex", flexDirection:"column", alignItems:"center",
+                    justifyContent:"center", border:`1px solid ${COLORS.borderGray}` }}>
+                    <div style={{ fontSize:36, marginBottom:6 }}>📱</div>
+                    <div style={{ fontSize:11, color:COLORS.neutralGray }}>长按识别加入群聊</div>
+                  </div>
+                  <div style={{ fontSize:13, color:COLORS.brandBlue, textAlign:"center", fontWeight:600 }}>
+                    已有 1,284 位病友在群内交流
+                  </div>
+                </div>
               </div>
-              <div style={{ width:160, height:160, margin:"0 auto 14px", background:"#f5f5f5",
-                borderRadius:12, display:"flex", flexDirection:"column", alignItems:"center",
-                justifyContent:"center", border:"1px solid #e8e8e8" }}>
-                <div style={{ fontSize:36, marginBottom:6 }}>📱</div>
-                <div style={{ fontSize:11, color:"#999" }}>长按识别加入群聊</div>
+            )}
+          </>
+        )}
+
+        {/* Education Tab */}
+        {activeTab === "education" && (
+          <div>
+            {/* Source label - lightweight */}
+            <div style={{
+              margin: "14px 14px 0",
+              background: COLORS.mistBlue,
+              borderRadius: DESIGN.radius.card,
+              padding: "12px 14px",
+              border: `1px solid ${COLORS.brandBlue}33`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: COLORS.brandBlue,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, flexShrink: 0,
+                }}>🎓</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.deepNavy, lineHeight: 1.3 }}>
+                    香港理工大学武汉研究院
+                  </div>
+                  <div style={{ fontSize: 10, color: COLORS.neutralGray, marginTop: 2 }}>
+                    智慧康复与创新老龄健康转化研究中心
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize:13, color:"#1A7AC7", textAlign:"center", fontWeight:600 }}>
-                已有 1,284 位病友在群内交流
+            </div>
+
+            {/* Tip */}
+            <div style={{
+              margin: "10px 14px 0",
+              background: "#FFFBE6", border: "1px solid #FDE68A",
+              borderRadius: DESIGN.radius.card, padding: "10px 14px",
+              display: "flex", gap: 8,
+            }}>
+              <span style={{ flexShrink: 0, fontSize: 13 }}>💡</span>
+              <div style={{ fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
+                <strong>温馨提示：</strong>内容仅用于产品体验与科普参考，不构成医疗建议或诊断依据；如有持续不适请咨询专业人士。
+              </div>
+            </div>
+
+            {/* ── Five dimensions ── */}
+            <div style={{ margin: "16px 14px 0" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLORS.brandBlue} strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.deepNavy }}>练出「强壮膝」</div>
+                  <div style={{ fontSize: 12, color: COLORS.neutralGray, marginTop: 1 }}>五维主动防护体系 · 点击展开详情</div>
+                </div>
+              </div>
+              <p style={{ fontSize: 12, color: COLORS.textSecondary, lineHeight: 1.65, marginBottom: 12 }}>
+                膝盖的耐用，源于科学养护。通过「稳定、激活、支撑、推进、调节」，系统强化膝关节的每一环。
+              </p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {DIMENSIONS.map((d, i) => (
+                  <div
+                    key={d.title}
+                    onClick={() => setOpenDim(openDim === i ? null : i)}
+                    style={{
+                      background: d.color, borderRadius: DESIGN.radius.button, padding: "14px 12px",
+                      cursor: "pointer",
+                      border: `1.5px solid ${openDim === i ? d.border : "transparent"}`,
+                      transition: "all 0.15s",
+                      gridColumn: i === 4 ? "1 / -1" : undefined,
+                      boxShadow: openDim === i ? `0 2px 10px ${d.border}55` : "none",
+                      minHeight: 44,
+                    }}
+                  >
+                    <div style={{ fontSize: 26, marginBottom: 5 }}>{d.icon}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: d.text, marginBottom: 4 }}>{d.title}</div>
+                    {openDim === i
+                      ? <div style={{ fontSize: 12, color: d.text, opacity: 0.82, lineHeight: 1.55 }}>{d.desc}</div>
+                      : <div style={{ fontSize: 11, color: d.text, opacity: 0.5 }}>点击了解 →</div>
+                    }
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Exercise sections ── */}
+            <div style={{ margin: "16px 0 28px" }}>
+              <div style={{ padding: "0 14px 10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLORS.brandBlue} strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="14 2 14 8 20 8" strokeLinecap="round" strokeLinejoin="round"/>
+                    <line x1="16" y1="13" x2="8" y2="13" strokeLinecap="round" strokeLinejoin="round"/>
+                    <line x1="16" y1="17" x2="8" y2="17" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="10 9 9 9 8 9" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.deepNavy }}>跟练动作</div>
+                    <div style={{ fontSize: 12, color: COLORS.neutralGray, marginTop: 2 }}>点击动作名查看完整说明</div>
+                  </div>
+                </div>
+              </div>
+
+              {SECTIONS.map((sec) => {
+                const isOpen = openSection === sec.id;
+                return (
+                  <div key={sec.id} style={{ margin: "0 14px 12px" }}>
+                    {/* Section header — clickable to collapse */}
+                    <div
+                      onClick={() => setOpenSection(isOpen ? null : sec.id)}
+                      style={{
+                        background: sec.lightColor, borderRadius: isOpen ? "14px 14px 0 0" : 14,
+                        padding: "13px 16px", cursor: "pointer",
+                        border: `1.5px solid ${sec.accentColor}33`,
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        minHeight: 44,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: sec.darkColor }}>{sec.title}</div>
+                        {sec.subtitle && (
+                          <div style={{ fontSize: 11, color: sec.accentColor, marginTop: 2 }}>{sec.subtitle}</div>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{
+                          fontSize: 10, fontWeight: 600, color: sec.accentColor,
+                          background: `${sec.accentColor}18`, borderRadius: DESIGN.radius.tag, padding: "3px 9px",
+                        }}>
+                          {sec.exercises.length} 个动作
+                        </span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{
+                          transition: "transform 0.2s",
+                          transform: isOpen ? "rotate(180deg)" : "none",
+                        }}>
+                          <path d="M6 9l6 6 6-6" stroke={sec.accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Exercises list */}
+                    {isOpen && (
+                      <div style={{
+                        background: "white",
+                        borderRadius: "0 0 14px 14px",
+                        overflow: "hidden",
+                        boxShadow: DESIGN.shadow.card,
+                      }}>
+                        {sec.exercises.map((ex) => (
+                          <ExerciseCard
+                            key={ex.name}
+                            ex={ex}
+                            accentColor={sec.accentColor}
+                            lightColor={sec.lightColor}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              margin: "0 14px 36px",
+              background: "white", borderRadius: DESIGN.radius.button, padding: "14px 16px",
+              boxShadow: DESIGN.shadow.card,
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.textPrimary, marginBottom: 6 }}>
+                关于内容来源
+              </div>
+              <div style={{ fontSize: 12, color: COLORS.textSecondary, lineHeight: 1.7 }}>
+                以上内容由<strong style={{ color: COLORS.brandBlue }}>香港理工大学武汉研究院</strong>智慧康复与创新老龄健康转化研究中心提供，系一般性科普信息，供日常参考，不构成任何医疗建议或诊断依据。
               </div>
             </div>
           </div>
         )}
 
-        {/* ── Divider separating community from education ── */}
-        <SectionDivider label="专家科普 · 膝关节保养"/>
-
-        {/* Expert card */}
-        <div style={{
-          margin: "14px 14px 0",
-          background: "linear-gradient(135deg, #1A7AC7 0%, #155FA0 100%)",
-          borderRadius: 20, padding: "18px 18px 16px",
-          position: "relative", overflow: "hidden",
-        }}>
-          <div style={{ position: "absolute", top: -24, right: -24, width: 110, height: 110,
-            borderRadius: "50%", background: "rgba(255,255,255,0.08)", pointerEvents: "none" }} />
-          <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <div style={{
-                width: 46, height: 46, borderRadius: 13,
-                background: "rgba(255,255,255,0.22)", border: "1.5px solid rgba(255,255,255,0.35)",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0,
-              }}>🎓</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "white", lineHeight: 1.3 }}>
-                  香港理工大学武汉研究院
-                </div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.78)", marginTop: 2 }}>
-                  智慧康复与创新老龄健康转化研究中心
-                </div>
-              </div>
-            </div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.88)", lineHeight: 1.65, marginBottom: 8 }}>
-              副主任符少娥教授团队，深耕肌骨关节疼痛的科研与临床，特此分享膝关节保养要点，与您共筑健康。
-            </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "white", letterSpacing: 0.3 }}>
-              主动练，坚持养，拥抱「膝」悦人生！
-            </div>
-          </div>
-        </div>
-
-        {/* Tip */}
-        <div style={{
-          margin: "10px 14px 0",
-          background: "#FFFBE6", border: "1px solid #FDE68A",
-          borderRadius: 12, padding: "10px 14px",
-          display: "flex", gap: 8,
-        }}>
-          <span style={{ flexShrink: 0, fontSize: 13 }}>💡</span>
-          <div style={{ fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
-            <strong>温馨提示：</strong>内容仅用于产品体验与科普参考，不构成医疗建议或诊断依据；如有持续不适请咨询专业人士。
-          </div>
-        </div>
-
-        {/* ── Five dimensions ── */}
-        <div style={{ margin: "16px 14px 0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 22 }}>💪</span>
-            <div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "#191919" }}>练出「强壮膝」</div>
-              <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 1 }}>五维主动防护体系 · 点击展开详情</div>
-            </div>
-          </div>
-          <p style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.65, marginBottom: 12 }}>
-            膝盖的耐用，源于科学养护。通过「稳定、激活、支撑、推进、调节」，系统强化膝关节的每一环。
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            {DIMENSIONS.map((d, i) => (
-              <div
-                key={d.title}
-                onClick={() => setOpenDim(openDim === i ? null : i)}
-                style={{
-                  background: d.color, borderRadius: 14, padding: "14px 12px",
-                  cursor: "pointer",
-                  border: `1.5px solid ${openDim === i ? d.border : "transparent"}`,
-                  transition: "all 0.15s",
-                  gridColumn: i === 4 ? "1 / -1" : undefined,
-                  boxShadow: openDim === i ? `0 2px 10px ${d.border}55` : "none",
-                }}
-              >
-                <div style={{ fontSize: 26, marginBottom: 5 }}>{d.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: d.text, marginBottom: 4 }}>{d.title}</div>
-                {openDim === i
-                  ? <div style={{ fontSize: 12, color: d.text, opacity: 0.82, lineHeight: 1.55 }}>{d.desc}</div>
-                  : <div style={{ fontSize: 11, color: d.text, opacity: 0.5 }}>点击了解 →</div>
-                }
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Exercise sections ── */}
-        <div style={{ margin: "16px 0 28px" }}>
-          <div style={{ padding: "0 14px 10px" }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: "#191919" }}>📋 跟练动作</div>
-            <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>点击动作名查看完整说明</div>
-          </div>
-
-          {SECTIONS.map((sec) => {
-            const isOpen = openSection === sec.id;
-            return (
-              <div key={sec.id} style={{ margin: "0 14px 12px" }}>
-                {/* Section header — clickable to collapse */}
-                <div
-                  onClick={() => setOpenSection(isOpen ? null : sec.id)}
-                  style={{
-                    background: sec.lightColor, borderRadius: isOpen ? "14px 14px 0 0" : 14,
-                    padding: "13px 16px", cursor: "pointer",
-                    border: `1.5px solid ${sec.accentColor}33`,
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: sec.darkColor }}>{sec.title}</div>
-                    {sec.subtitle && (
-                      <div style={{ fontSize: 11, color: sec.accentColor, marginTop: 2 }}>{sec.subtitle}</div>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{
-                      fontSize: 10, fontWeight: 600, color: sec.accentColor,
-                      background: `${sec.accentColor}18`, borderRadius: 20, padding: "3px 9px",
-                    }}>
-                      {sec.exercises.length} 个动作
-                    </span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{
-                      transition: "transform 0.2s",
-                      transform: isOpen ? "rotate(180deg)" : "none",
-                    }}>
-                      <path d="M6 9l6 6 6-6" stroke={sec.accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Exercises list */}
-                {isOpen && (
-                  <div style={{
-                    background: "white",
-                    borderRadius: "0 0 14px 14px",
-                    overflow: "hidden",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                  }}>
-                    {sec.exercises.map((ex) => (
-                      <ExerciseCard
-                        key={ex.name}
-                        ex={ex}
-                        accentColor={sec.accentColor}
-                        lightColor={sec.lightColor}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Footer */}
-        <div style={{
-          margin: "0 14px 36px",
-          background: "white", borderRadius: 14, padding: "14px 16px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-        }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>
-            关于内容来源
-          </div>
-          <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.7 }}>
-            以上内容由<strong style={{ color: "#1A7AC7" }}>香港理工大学武汉研究院</strong>智慧康复与创新老龄健康转化研究中心提供，系一般性科普信息，供日常参考，不构成任何医疗建议或诊断依据。
-          </div>
-        </div>
       </div>
     </div>
   );

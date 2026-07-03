@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LEVEL_PARAMS, LEVELS, LEVEL_DESCS, getLevelName, formatTime, DeviceState } from "../types";
 import { NotificationsPage } from "./NotificationsPage";
+import { COLORS, DESIGN } from "../design-system";
 
 export interface AssessmentResult {
   name: string; gender: string; ageRange: string; duration: string;
@@ -30,15 +31,15 @@ const SAFETY_LIST = [
   { v: "肿胀", l: "膝盖明显肿胀/发烫" },
   { v: "伤口", l: "膝盖周围有伤口或皮肤问题" },
   { v: "医生建议", l: "医生叮嘱暂不适合使用此类设备" },
-  { v: "显著受损", l: "膝盖有轻微脱臼或活动受限" },
+  { v: "显著受损", l: "膝盖有轻微肿胀或活动受限" },
   { v: "无", l: "以上都没有" },
 ];
 const TRIGGERS_LIST = ["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"];
 const WEAR_STEPS = [
-  { icon: "🪑", title: "舒适坐姿", desc: "坐在稳固的椅子上，膝盖自然弯曲。" },
-  { icon: "🦵", title: "套上设备", desc: "将套圈套在膝关节上方，调整到舒适位置。" },
-  { icon: "🔧", title: "调节松紧", desc: "绑带不要太紧，保持舒适即可。" },
-  { icon: "✅", title: "放松享受", desc: "使用时放松腿部，让设备帮你养护。" },
+  { title: "舒适坐姿", desc: "坐在稳固的椅子上，膝盖自然弯曲。" },
+  { title: "套上设备", desc: "将套圈套在膝关节上方，调整到舒适位置。" },
+  { title: "调节松紧", desc: "绑带不要太紧，保持舒适即可。" },
+  { title: "放松享受", desc: "使用时放松腿部，让设备帮你养护。" },
 ];
 
 function FlowHeader({ step, total, title, onBack, backDisabled }: {
@@ -48,15 +49,18 @@ function FlowHeader({ step, total, title, onBack, backDisabled }: {
     <div className="px-4 pt-10 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
       <div className="flex items-center gap-3 mb-3">
         <button onClick={onBack} disabled={backDisabled}
-          className={`text-xl bg-transparent border-0 cursor-pointer transition-colors
-            ${backDisabled ? "text-[#d0d0d0] cursor-not-allowed" : "text-[#4a5568]"}`}>←</button>
+          style={{
+            width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 20, background: "transparent", border: 0, cursor: backDisabled ? "not-allowed" : "pointer",
+            color: backDisabled ? COLORS.borderGray : COLORS.textSecondary, transition: "colors 0.2s"
+          }}>←</button>
         <div className="flex-1 font-bold text-[#1a202c] text-sm">{title}</div>
         <span className="text-xs text-[#718096] font-medium">{step + 1} / {total}</span>
       </div>
       <div className="flex gap-1.5">
         {Array.from({ length: total }).map((_, i) => (
           <div key={i} className="h-1.5 rounded-full transition-all duration-300"
-            style={{ flex: i === step ? 2 : 1, background: i <= step ? "#1A7AC7" : "#e2e8f0" }} />
+            style={{ flex: i === step ? 2 : 1, background: i <= step ? COLORS.brandBlue : COLORS.borderGray }} />
         ))}
       </div>
     </div>
@@ -125,7 +129,7 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {!showResult && <FlowHeader step={step} total={3} title={`📋 ${TITLES[step]}`} onBack={handleBack} />}
+      {!showResult && <FlowHeader step={step} total={3} title={TITLES[step]} onBack={handleBack} />}
 
       {showResult ? (
         // Result screen
@@ -138,19 +142,26 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
             <div className="bg-white rounded-2xl p-5 border border-[#e2e8f0] text-center">
-              <div className="text-4xl mb-3">✨</div>
               <div className="font-bold text-[#1a202c] text-lg mb-2">评估完成</div>
               <div className="text-sm text-[#718096] mb-4">根据你的情况，为你推荐以下强度：</div>
               <div className="bg-[#EFF6FF] rounded-xl p-4 mb-3">
-                <div className="text-2xl font-bold text-[#1A7AC7] mb-1">{LEVELS[recommendedLevel-1]}</div>
-                <div className="text-xs text-[#2563EB]">{LEVEL_DESCS[recommendedLevel]}</div>
+                <div className="text-2xl font-bold mb-1" style={{ color: COLORS.brandBlue }}>{LEVELS[recommendedLevel-1]}</div>
+                <div className="text-xs" style={{ color: COLORS.brandBlue }}>{LEVEL_DESCS[recommendedLevel]}</div>
               </div>
               <div className="text-xs text-[#718096] leading-relaxed">
                 建议从此强度开始，后续可根据使用感受调整。
               </div>
             </div>
             <button onClick={handleConfirmResult}
-              className="w-full py-3.5 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer active:bg-[#27AE60] transition-all">
+              style={{
+                minHeight: 48,
+                background: COLORS.brandBlue,
+                color: 'white'
+              }}
+              className="w-full py-3.5 rounded-full font-bold text-sm border-0 cursor-pointer transition-all"
+              onMouseDown={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseUp={(e) => e.currentTarget.style.opacity = '1'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
               确认并开启设备 →
             </button>
           </div>
@@ -163,8 +174,13 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
             <div className="flex gap-2">
               {["男","女"].map(g=>(
                 <button key={g} onClick={()=>setGender(g)}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all
-                    ${gender===g?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  style={{
+                    minHeight: 44,
+                    background: gender===g ? COLORS.brandBlue : '#f7fafc',
+                    color: gender===g ? 'white' : '#4a5568',
+                    borderColor: gender===g ? COLORS.brandBlue : '#e2e8f0'
+                  }}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all">
                   {g}
                 </button>
               ))}
@@ -175,15 +191,21 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
             <div className="flex gap-2 flex-wrap">
               {["18-30","31-45","46-60","60+"].map(a=>(
                 <button key={a} onClick={()=>setAgeRange(a)}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all
-                    ${ageRange===a?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  style={{
+                    minHeight: 44,
+                    background: ageRange===a ? COLORS.brandBlue : '#f7fafc',
+                    color: ageRange===a ? 'white' : '#4a5568',
+                    borderColor: ageRange===a ? COLORS.brandBlue : '#e2e8f0'
+                  }}
+                  className="flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all">
                   {a}
                 </button>
               ))}
             </div>
           </div>
           <button onClick={()=>{ if(!name.trim()||!gender||!ageRange){alert("请完整填写基本信息");return;} setStep(1); }}
-            className="w-full py-3.5 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer active:bg-[#27AE60] transition-all">
+            style={{ minHeight: 48, background: COLORS.brandBlue }}
+            className="w-full py-3.5 rounded-full text-white font-bold text-sm border-0 cursor-pointer transition-all">
             下一步 →
           </button>
         </>}
@@ -194,8 +216,13 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
             <div className="flex gap-2 flex-wrap">
               {["不到1周","1-4周","1-6个月","超过半年"].map(d=>(
                 <button key={d} onClick={()=>setDuration(d)}
-                  className={`flex-1 min-w-[calc(50%-4px)] py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all
-                    ${duration===d?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  style={{
+                    minHeight: 44,
+                    background: duration===d ? COLORS.brandBlue : '#f7fafc',
+                    color: duration===d ? 'white' : '#4a5568',
+                    borderColor: duration===d ? COLORS.brandBlue : '#e2e8f0'
+                  }}
+                  className="flex-1 min-w-[calc(50%-4px)] py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all">
                   {d}
                 </button>
               ))}
@@ -208,15 +235,16 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
               <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
                 <input type="checkbox" checked={!!safety[s]}
                   onChange={e=>setSafety(p=>({...p,[s]:e.target.checked}))}
-                  className="accent-[#1A7AC7]"/>
+                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
                 {s}
               </label>
             ))}
           </div>
           <div className="flex gap-3 pb-4">
-            <button onClick={()=>setStep(0)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
+            <button onClick={()=>setStep(0)} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
             <button onClick={()=>{ if(!duration||safetyVals.length===0){alert("请完整填写");return;} setStep(2); }}
-              className="flex-[2] py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">下一步 →</button>
+              style={{ minHeight: 44, background: COLORS.brandBlue }}
+              className="flex-[2] py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">下一步 →</button>
           </div>
         </>}
 
@@ -226,8 +254,13 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
             <div className="flex flex-col gap-2">
               {["没有特别感觉","有点紧","感觉僵硬"].map(st=>(
                 <button key={st} onClick={()=>setStiffness(st)}
-                  className={`w-full py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all text-left px-3
-                    ${stiffness===st?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                  style={{
+                    minHeight: 44,
+                    background: stiffness===st ? COLORS.brandBlue : '#f7fafc',
+                    color: stiffness===st ? 'white' : '#4a5568',
+                    borderColor: stiffness===st ? COLORS.brandBlue : '#e2e8f0'
+                  }}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all text-left px-3">
                   {st}
                 </button>
               ))}
@@ -239,17 +272,22 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
               <label key={t} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
                 <input type="checkbox" checked={!!triggers[t]}
                   onChange={e=>setTriggers(p=>({...p,[t]:e.target.checked}))}
-                  className="accent-[#1A7AC7]"/>
+                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
                 {t}
               </label>
             ))}
-            <div className="mt-3 pt-3 border-t border-[#e2e8f0]">
+            <div className="mt-3 pt-3 border-[#e2e8f0]" style={{ borderTopWidth: 1, borderTopStyle: 'solid' }}>
               <div className="text-xs text-[#718096] mb-2">不适程度（0=无 · 4=非常）：</div>
               <div className="flex gap-1.5">
                 {[0,1,2,3,4].map(n=>(
                   <button key={n} onClick={()=>setPainLevel(n)}
-                    className={`flex-1 py-2 rounded-xl text-sm font-bold border cursor-pointer transition-all
-                      ${painLevel===n?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                    style={{
+                      minHeight: 44,
+                      background: painLevel===n ? COLORS.brandBlue : '#f7fafc',
+                      color: painLevel===n ? 'white' : '#4a5568',
+                      borderColor: painLevel===n ? COLORS.brandBlue : '#e2e8f0'
+                    }}
+                    className="flex-1 py-2 rounded-xl text-sm font-bold border cursor-pointer transition-all">
                     {n}
                   </button>
                 ))}
@@ -257,9 +295,10 @@ function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillG
             </div>
           </div>
           <div className="flex gap-3 pb-4">
-            <button onClick={()=>setStep(1)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
+            <button onClick={()=>setStep(1)} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
             <button onClick={()=>{ if(!stiffness||triggerVals.length===0||painLevel===null){alert("请完整填写");return;} handleSubmit(); }}
-              className="flex-[2] py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">提交查看方案 →</button>
+              style={{ minHeight: 44, background: COLORS.brandBlue }}
+              className="flex-[2] py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">提交查看方案 →</button>
           </div>
         </>}
       </div>
@@ -303,7 +342,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <FlowHeader step={step} total={3} title={`⚡ ${TITLES[step]}`} onBack={handleBack} backDisabled={step === 2 && running} />
+      <FlowHeader step={step} total={3} title={TITLES[step]} onBack={handleBack} backDisabled={step === 2 && running} />
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
 
         {step === 0 && <>
@@ -311,14 +350,24 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
             <div className="text-sm font-semibold text-[#1a202c] mb-3">选择强度模式</div>
             <div className="flex gap-2 mb-3">
               <button onClick={()=>setCustomMode(false)}
-                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
-                  ${!customMode?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                📋 设定模式
+                style={{
+                  minHeight: 44,
+                  background: !customMode ? COLORS.brandBlue : '#f7fafc',
+                  color: !customMode ? 'white' : '#4a5568',
+                  borderColor: !customMode ? COLORS.brandBlue : '#e2e8f0'
+                }}
+                className="flex-1 py-2 rounded-xl text-xs font-semibold border transition-all">
+                设定模式
               </button>
               <button onClick={()=>setCustomMode(true)}
-                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
-                  ${customMode?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
-                ⚙️ 自定义模式
+                style={{
+                  minHeight: 44,
+                  background: customMode ? COLORS.brandBlue : '#f7fafc',
+                  color: customMode ? 'white' : '#4a5568',
+                  borderColor: customMode ? COLORS.brandBlue : '#e2e8f0'
+                }}
+                className="flex-1 py-2 rounded-xl text-xs font-semibold border transition-all">
+                自定义模式
               </button>
             </div>
 
@@ -327,8 +376,13 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
                 <div className="flex gap-1.5 mb-3">
                   {[1,2,3,4,5,6].map(l=>(
                     <button key={l} onClick={()=>setLevel(l)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all
-                        ${level===l?"bg-[#1A7AC7] text-white border-[#1A7AC7]":"bg-[#f7fafc] text-[#4a5568] border-[#e2e8f0]"}`}>
+                      style={{
+                        minHeight: 44,
+                        background: level===l ? COLORS.brandBlue : '#f7fafc',
+                        color: level===l ? 'white' : '#4a5568',
+                        borderColor: level===l ? COLORS.brandBlue : '#e2e8f0'
+                      }}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all">
                       L{l}
                     </button>
                   ))}
@@ -337,20 +391,20 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
                   <div className="font-semibold text-[#1E3A5F]">{getLevelName(level)} · {LEVELS[level-1]}</div>
                   <div className="text-xs mt-1 text-[#2563EB]">{LEVEL_DESCS[level]}</div>
                   <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
-                    <span>💨 {prm.pressure} mmHg</span><span>⏱ {prm.work}s 工作</span>
-                    <span>🔄 {prm.rest}s 休息</span><span>🔁 {prm.cycles} 轮</span>
-                    <span>⏳ 约 {Math.floor(totalTime/60)}分{totalTime%60}秒</span>
+                    <span>{prm.pressure} mmHg</span><span>{prm.work}s 工作</span>
+                    <span>{prm.rest}s 休息</span><span>{prm.cycles} 轮</span>
+                    <span>约 {Math.floor(totalTime/60)}分{totalTime%60}秒</span>
                   </div>
                 </div>
               </>
             ) : (
               <div className="bg-[#fef3c7] rounded-xl p-3 space-y-3">
-                <div className="font-semibold text-sm text-[#92400e]">⚙️ 自定义参数</div>
+                <div className="font-semibold text-sm text-[#92400e]">自定义参数</div>
                 {[
-                  {label:"💨 负压强度 (mmHg)",min:80,max:220,step:5,val:customPressure,set:setCustomPressure},
-                  {label:"⏱ 作用时间 (秒)",min:10,max:60,step:5,val:customWork,set:setCustomWork,unit:"s"},
-                  {label:"🔄 休息间隔 (秒)",min:5,max:30,step:5,val:customRest,set:setCustomRest,unit:"s"},
-                  {label:"🔁 循环轮数",min:3,max:10,step:1,val:customCycles,set:setCustomCycles,unit:" 轮"},
+                  {label:"负压强度 (mmHg)",min:80,max:220,step:5,val:customPressure,set:setCustomPressure},
+                  {label:"作用时间 (秒)",min:10,max:60,step:5,val:customWork,set:setCustomWork,unit:"s"},
+                  {label:"休息间隔 (秒)",min:5,max:30,step:5,val:customRest,set:setCustomRest,unit:"s"},
+                  {label:"循环轮数",min:3,max:10,step:1,val:customCycles,set:setCustomCycles,unit:" 轮"},
                 ].map(({label,min,max,step:s,val,set,unit})=>(
                   <div key={label}>
                     <label className="flex justify-between text-xs text-[#4a5568] mb-1">
@@ -359,9 +413,11 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
                     </label>
                     <input type="range" min={min} max={max} step={s} value={val}
                       onChange={e=>set(Number(e.target.value))}
+                      style={{ accentColor: COLORS.brandBlue }}
                       className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
                         [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1A7AC7] [&::-webkit-slider-thumb]:cursor-pointer"/>
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
+                    />
                   </div>
                 ))}
                 <div className="pt-2 border-t border-[#fde68a] text-xs text-[#92400e]">
@@ -371,7 +427,8 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
             )}
           </div>
           <button onClick={()=>setStep(1)}
-            className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
+            style={{ minHeight: 44, background: COLORS.brandBlue }}
+            className="w-full py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">
             下一步：穿戴准备 →
           </button>
         </>}
@@ -380,9 +437,9 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-4">
             <div className="font-semibold text-[#1E3A5F] text-sm">💡 穿戴指引</div>
           </div>
-          {WEAR_STEPS.map(({icon,title,desc},i)=>(
+          {WEAR_STEPS.map(({title,desc},i)=>(
             <div key={i} className="bg-white rounded-2xl p-4 border border-[#e2e8f0] flex gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center text-lg flex-shrink-0">{icon}</div>
+              <div className="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center text-lg flex-shrink-0">{i+1}</div>
               <div>
                 <div className="text-sm font-semibold text-[#1a202c]">步骤 {i+1}：{title}</div>
                 <div className="text-xs text-[#718096] mt-0.5 leading-relaxed">{desc}</div>
@@ -390,9 +447,10 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
             </div>
           ))}
           <div className="flex gap-3 pb-4">
-            <button onClick={()=>setStep(0)} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
+            <button onClick={()=>setStep(0)} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
             <button onClick={()=>{ onStart(customMode ? -1 : level, customMode ? {pressure:customPressure,work:customWork,rest:customRest,cycles:customCycles} : undefined); setStep(2); }}
-              className="flex-[2] py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
+              style={{ minHeight: 44, background: COLORS.brandBlue }}
+              className="flex-[2] py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">
               已准备好，开始使用 →
             </button>
           </div>
@@ -401,11 +459,10 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
         {step === 2 && <>
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🦵</span>
               <div className="flex-1">
                 <div className="text-sm font-semibold text-[#1a202c]">智能膝关节康养仪 PAD</div>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={`w-2 h-2 rounded-full ${running?"bg-[#1A7AC7] animate-pulse":done?"bg-[#fbbf24]":"bg-[#1A7AC7]"}`}/>
+                  <span className={`w-2 h-2 rounded-full ${running?"animate-pulse":done?"bg-[#fbbf24]":""}`} style={{ backgroundColor: running ? COLORS.brandBlue : done ? '#fbbf24' : COLORS.brandBlue }}/>
                   <span className="text-xs text-[#718096]">{running?(deviceState==="paused"?"已暂停":"运行中"):done?"已完成":"启动中..."}</span>
                 </div>
               </div>
@@ -420,7 +477,7 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
               <span>使用进度</span><span>{formatTime(runTotal - hwRemaining)} / {formatTime(runTotal)}</span>
             </div>
             <div className="h-3 bg-[#e2e8f0] rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-gradient-to-r from-[#1A7AC7] to-[#1570B8] rounded-full transition-all duration-300" style={{width:`${progress}%`}}/>
+              <div className="h-full rounded-full transition-all duration-300" style={{width:`${progress}%`, background: `linear-gradient(to right, ${COLORS.brandBlue}, #1570B8)`}}/>
             </div>
             <div className="flex justify-between text-xs text-[#718096]">
               <span>轮数：{hwCycle} / {hwTotalCycles}</span><span>{progress}%</span>
@@ -429,34 +486,36 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0] flex gap-2">
             {running && <>
               <button onClick={onTogglePause}
-                className={`flex-1 py-3 rounded-full font-bold text-sm border-0 cursor-pointer ${deviceState==="paused"?"bg-[#1A7AC7] text-white":"bg-[#F39C12] text-white"}`}>
+                style={{ minHeight: 44, background: deviceState==="paused" ? COLORS.brandBlue : COLORS.brandBlue }}
+                className="flex-1 py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">
                 {deviceState==="paused"?"▶ 继续":"⏸ 暂停"}
               </button>
-              <button onClick={onStop} className="flex-1 py-3 rounded-full bg-[#E74C3C] text-white font-bold text-sm border-0 cursor-pointer">⏹ 结束</button>
+              <button onClick={onStop} style={{ minHeight: 44, background: COLORS.riskRed }} className="flex-1 py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">⏹ 结束</button>
             </>}
-            {done && <button onClick={onReset} className="flex-1 py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">🔄 重新开始</button>}
+            {done && <button onClick={onReset} style={{ minHeight: 44, background: COLORS.brandBlue }} className="flex-1 py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">🔄 重新开始</button>}
           </div>
           {running && (
             <button onClick={onMinimize}
-              className="w-full py-3 rounded-full bg-[#EFF6FF] text-[#1A7AC7] font-semibold text-sm border border-[#1A7AC7] cursor-pointer">
+              style={{ minHeight: 44, borderColor: COLORS.brandBlue, color: COLORS.brandBlue }}
+              className="w-full py-3 rounded-full bg-[#EFF6FF] font-semibold text-sm border cursor-pointer">
               ⬇ 收起 · 设备继续运行
             </button>
           )}
           {done && (
             <>
               <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-3.5 text-sm text-[#1E3A5F]">
-                <div className="font-semibold mb-1">🎉 使用完成！</div>
+                <div className="font-semibold mb-1">使用完成！</div>
                 <div className="text-xs">可到「训练」tab 跟练配套运动，或去「发现」tab 了解科普知识。</div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => { onCancel(); /* TODO: switch to training tab */ }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
-                  🏃 训练
+                <button onClick={() => { onCancel(); /* TODO: switch to training tab */ }} style={{ minHeight: 44, borderColor: '#BAE6FD', color: COLORS.brandBlue }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] font-semibold text-sm border cursor-pointer active:bg-[#E0F2FE] transition-all">
+                  训练
                 </button>
-                <button onClick={() => { onCancel(); /* TODO: switch to discover tab */ }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
-                  📖 科普
+                <button onClick={() => { onCancel(); /* TODO: switch to discover tab */ }} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                  科普
                 </button>
               </div>
-              <button onClick={onCancel} className="w-full py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
+              <button onClick={onCancel} style={{ minHeight: 44 }} className="w-full py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">
                 ← 返回首页
               </button>
             </>
@@ -580,14 +639,14 @@ function ForumSection_UNUSED() {
                 {/* Like */}
                 <button onClick={() => toggleLike(p.id)}
                   style={{ display:"flex", alignItems:"center", gap:5, border:"none",
-                    cursor:"pointer", padding:"4px 8px", borderRadius:20,
-                    background: isLiked ? "rgba(239,68,68,0.08)" : "transparent",
-                    transition:"all 0.2s" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill={isLiked?"#EF4444":"none"}>
+                    cursor:"pointer", padding:"4px 8px", borderRadius:DESIGN.radius.tag,
+                    background: isLiked ? `${COLORS.riskRed}10` : "transparent",
+                    transition:"all 0.2s", minHeight: 32 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill={isLiked?COLORS.riskRed:"none"}>
                     <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
-                      stroke={isLiked?"#EF4444":"#bbb"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      stroke={isLiked?COLORS.riskRed:COLORS.neutralGray} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: 13, color: isLiked ? "#EF4444" : "#999",
+                  <span style={{ fontSize: 13, color: isLiked ? COLORS.riskRed : COLORS.neutralGray,
                     fontWeight: isLiked ? 600 : 400, transition:"color 0.2s" }}>
                     {count}
                   </span>
@@ -595,13 +654,13 @@ function ForumSection_UNUSED() {
                 {/* Comment */}
                 <button onClick={() => setOpenCommentId(p.id)}
                   style={{ display:"flex", alignItems:"center", gap:5, border:"none",
-                    cursor:"pointer", padding:"4px 8px", borderRadius:20,
-                    background:"transparent" }}>
+                    cursor:"pointer", padding:"4px 8px", borderRadius:DESIGN.radius.tag,
+                    background:"transparent", minHeight: 32 }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
-                      stroke="#bbb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      stroke={COLORS.neutralGray} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span style={{ fontSize: 13, color: "#999" }}>{commentCount}</span>
+                  <span style={{ fontSize: 13, color: COLORS.neutralGray }}>{commentCount}</span>
                 </button>
               </div>
             </div>
@@ -611,8 +670,8 @@ function ForumSection_UNUSED() {
         {/* WeChat group CTA */}
         <div onClick={() => setShowWxModal(true)}
           style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px",
-            background: "#EFF6FF", cursor: "pointer" }}>
-          <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#1A7AC7",
+            background: COLORS.mistBlue, cursor: "pointer", minHeight: 64 }}>
+          <div style={{ width: 42, height: 42, borderRadius: "50%", background: COLORS.brandBlue,
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <ellipse cx="7.8" cy="8.5" rx="6" ry="4.5" stroke="white" strokeWidth="1.5" fill="none"/>
@@ -624,8 +683,8 @@ function ForumSection_UNUSED() {
             </svg>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: "#1A7AC7" }}>加入康群微信群</div>
-            <div style={{ fontSize: 12, color: "#1E3A5F", marginTop: 2 }}>与病友交流康养经验</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.brandBlue }}>加入康复微信群</div>
+            <div style={{ fontSize: 12, color: COLORS.deepNavy, marginTop: 2 }}>与病友交流康复经验</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M9 18l6-6-6-6" stroke="#1A7AC7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -869,12 +928,12 @@ export function HomePage({
       <div className="px-4 pt-4 pb-4 space-y-3">
         <div className="bg-[#fff4f0] rounded-2xl p-5 shadow-sm border border-[#ffe4d9]">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-xl">📋</span>
             <span className="font-bold text-[#1a202c] text-base">先了解一下膝盖情况</span>
           </div>
           <p className="text-[#4a5568] text-sm leading-relaxed mb-3">7 道题，约 2 分钟，推荐个性化 PAD 方案。</p>
           <button onClick={()=>setSubView("assessment")}
-            className="w-full py-3 rounded-xl bg-[#2D5BFF] text-white font-bold text-sm border-0 cursor-pointer active:bg-[#1e40af] transition-colors">
+            style={{ minHeight: 44, background: '#2D5BFF' }}
+            className="w-full py-3 rounded-xl text-white font-bold text-sm border-0 cursor-pointer active:bg-[#1e40af] transition-colors">
             开始分析
           </button>
         </div>
@@ -884,14 +943,15 @@ export function HomePage({
           </div>
           <p className="text-[#4a5568] text-sm leading-relaxed mb-3">无需了解即可体验，完成了解后获得个性化方案。</p>
           <button onClick={()=>setSubView("device")}
-            className="w-full py-3 rounded-xl bg-[#2D5BFF] text-white font-bold text-sm border-0 cursor-pointer active:bg-[#1e40af] transition-colors">
+            style={{ minHeight: 44, background: '#2D5BFF' }}
+            className="w-full py-3 rounded-xl text-white font-bold text-sm border-0 cursor-pointer active:bg-[#1e40af] transition-colors">
             开启设备
           </button>
         </div>
         {/* Stats row */}
         <div className="bg-white rounded-2xl px-5 py-4 flex gap-8 shadow-sm border border-[#DBEAFE]">
           <div>
-            <div className="text-2xl font-bold text-[#1A7AC7]">{streak}</div>
+            <div className="text-2xl font-bold" style={{ color: COLORS.brandBlue }}>{streak}</div>
             <div className="text-xs text-[#718096] mt-0.5">连续打卡</div>
           </div>
           <div>
@@ -921,12 +981,11 @@ function RecentRecords() {
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
         padding:"14px 16px 10px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-          <span style={{ fontSize:16 }}>📋</span>
           <span style={{ fontSize:15, fontWeight:700, color:"#1a1a1a" }}>康养记录</span>
           <span style={{ fontSize:11, color:"#9CA3AF", background:"#F3F4F6",
             borderRadius:20, padding:"2px 8px" }}>近3次</span>
         </div>
-        <span style={{ fontSize:12, color:"#1A7AC7", cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
+        <span style={{ fontSize:12, color: COLORS.brandBlue, cursor:"pointer", fontWeight:500 }}>查看全部 →</span>
       </div>
       {records.map((r, i) => (
         <div key={r.date} style={{

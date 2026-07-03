@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
+import { COLORS, DESIGN } from "../design-system";
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
+// ── Legacy alias for gradual migration ──────────────────────────────────────
 const G = {
-  primary:  "#1A7AC7",
-  dark:     "#155FA0",
-  light:    "#E8F8F0",
-  bg:       "#F4FBF7",
-  text1:    "#1E3A5F",
-  text2:    "#1E3A5F",
-  text3:    "#8AAA9A",
-  border:   "#F0F5F2",
-  arrow:    "#C5D5CD",
-  danger:   "#FA5151",
+  primary:  COLORS.brandBlue,
+  dark:     "#3A7BC8",
+  light:    COLORS.mistBlue,
+  bg:       COLORS.lightGray,
+  text1:    COLORS.deepNavy,
+  text2:    COLORS.textPrimary,
+  text3:    COLORS.neutralGray,
+  border:   COLORS.borderGray,
+  arrow:    COLORS.neutralGray,
+  danger:   COLORS.riskRed,
 };
 
 interface ProfilePageProps {
@@ -905,7 +906,7 @@ export function ProfilePage({ userName="用户", onLogout }: ProfilePageProps) {
   return (
     <div style={{flex:1,overflowY:"auto",background:G.bg}}>
 
-      {/* ── Green header card ─── */}
+      {/* ── Header card ─── */}
       <div style={{
         background:`linear-gradient(135deg,${G.primary} 0%,${G.dark} 100%)`,
         padding:"48px 20px 0",
@@ -933,45 +934,64 @@ export function ProfilePage({ userName="用户", onLogout }: ProfilePageProps) {
           </div>
           <button style={{
             fontSize:13,color:"white",background:"rgba(255,255,255,0.2)",
-            border:"none",borderRadius:20,padding:"6px 14px",cursor:"pointer",
-            display:"flex",alignItems:"center",gap:4,
+            border:"none",borderRadius:DESIGN.radius.tag,padding:"6px 14px",cursor:"pointer",
+            display:"flex",alignItems:"center",gap:4,minHeight:32,
           }}>
-            编辑资料 <span style={{fontSize:12}}>→</span>
+            编辑资料
           </button>
+        </div>
+
+        {/* Progress card - prioritized */}
+        <div style={{
+          background:"rgba(255,255,255,0.15)",backdropFilter:"blur(10px)",
+          borderRadius:DESIGN.radius.card,padding:"14px 16px",marginBottom:16,
+          border:"1px solid rgba(255,255,255,0.2)",
+        }}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+            <div style={{fontSize:14,fontWeight:600,color:"white"}}>康复进度</div>
+            <div style={{fontSize:12,color:"rgba(255,255,255,0.8)"}}>第 12 天</div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{flex:1,height:6,borderRadius:3,background:"rgba(255,255,255,0.25)",overflow:"hidden"}}>
+              <div style={{width:"40%",height:"100%",background:"white",borderRadius:3}}/>
+            </div>
+            <div style={{fontSize:13,fontWeight:600,color:"white"}}>40%</div>
+          </div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.75)",marginTop:8}}>
+            已完成 4/10 次训练 · 继续加油！
+          </div>
         </div>
 
         {/* Stats row */}
         <div style={{
-          display:"grid",gridTemplateColumns:"1fr 1fr 1fr",
-          borderTop:"1px solid rgba(255,255,255,0.2)",
-          paddingTop:14,paddingBottom:18,
+          display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,paddingBottom:18,
         }}>
           {[
-            {v:"400",l:"可用积分"},
-            {v:"12",l:"训练天数"},
-            {v:"5",l:"评估报告"},
-          ].map(({v,l},i,a)=>(
+            {v:"400",l:"可用积分",icon:"⭐"},
+            {v:"12",l:"训练天数",icon:"📅"},
+            {v:"5",l:"评估报告",icon:"📊"},
+          ].map(({v,l,icon})=>(
             <div key={l} style={{
-              textAlign:"center",
-              borderRight:i<a.length-1?"1px solid rgba(255,255,255,0.2)":"none",
-              padding:"0 4px",cursor:"pointer",
+              background:"rgba(255,255,255,0.12)",backdropFilter:"blur(8px)",
+              borderRadius:DESIGN.radius.button,padding:"10px 8px",textAlign:"center",cursor:"pointer",
+              border:"1px solid rgba(255,255,255,0.15)",
             }}>
-              <div style={{fontSize:22,fontWeight:700,color:"white",lineHeight:1}}>{v}</div>
-              <div style={{fontSize:12,color:"rgba(255,255,255,0.75)",marginTop:4}}>{l}</div>
+              <div style={{fontSize:18,marginBottom:2}}>{icon}</div>
+              <div style={{fontSize:18,fontWeight:700,color:"white",lineHeight:1}}>{v}</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.75)",marginTop:3}}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{paddingTop:16}}>
-        {/* ── Group 1: Device + Plan + Points ── */}
+        {/* ── Group 1: Device + Points ── */}
         <Card>
           <MenuCell
-            icon="🔗" iconBg="#DBEAFE" label="设备管理"
-            right={<span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:7,height:7,borderRadius:"50%",background:G.primary,display:"inline-block"}}/>已连接</span>}
+            icon="🔗" iconBg={COLORS.mistBlue} label="设备管理"
+            right={<span style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:7,height:7,borderRadius:"50%",background:COLORS.brandBlue,display:"inline-block"}}/>已连接</span>}
             onClick={()=>setSub("device")}
           />
-          {/* 康养记录已移至首页 */}
           <MenuCell icon="⭐" iconBg="#FEF3C7" label="积分中心" right="400 积分" onClick={()=>setSub("points")} showArrow/>
         </Card>
 
@@ -984,9 +1004,9 @@ export function ProfilePage({ userName="用户", onLogout }: ProfilePageProps) {
         {/* ── Logout ── */}
         <div style={{padding:"0 16px 32px"}}>
           <button onClick={()=>setShowLogout(true)} style={{
-            width:"100%",padding:"14px",borderRadius:10,border:"none",cursor:"pointer",
-            background:"white",color:G.danger,fontSize:15,fontWeight:400,
-            boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
+            width:"100%",padding:"14px",borderRadius:DESIGN.radius.button,border:"none",cursor:"pointer",
+            background:"white",color:COLORS.riskRed,fontSize:15,fontWeight:400,
+            boxShadow:DESIGN.shadow.card,minHeight:48,
           }}>
             退出登录
           </button>

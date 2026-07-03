@@ -10,6 +10,7 @@ import { Day7Intro } from "./components/Day7Intro";
 import { TrainingPage } from "./components/TrainingPage";
 import { DiscoverPage } from "./components/DiscoverPage";
 import { ProfilePage } from "./components/ProfilePage";
+import { COLORS, DESIGN } from "./design-system";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -103,7 +104,7 @@ function SafetySurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
     <div>
       <p className="text-sm text-[#4a5568] mb-3">请问目前是否有以下情况？（可多选）</p>
       <FormCard>
-        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"显著受损",l:"膝盖有轻微脱臼或活动受限"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
+        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"显著受损",l:"膝盖有轻微肿胀或活动受限"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
           <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
             <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))}/>{l}
           </label>
@@ -489,44 +490,53 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         </div>
       )}
 
-      {/* ── Header ── */}
-      <div style={{background:"white",borderBottom:"1px solid #F0F0F0",padding:"44px 16px 10px",flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {/* 小瑞 avatar */}
-            <div style={{width:40,height:40,borderRadius:"50%",
-              background:"linear-gradient(135deg,#1A7AC7,#155FA0)",
+      {/* ── Header ── Compressed to single line */}
+      <div style={{
+        background:"white", borderBottom:`1px solid ${COLORS.borderGray}`,
+        padding:"48px 16px 12px", flexShrink:0
+      }}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+          {/* Avatar + Name + Day badge in one line */}
+          <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:1}}>
+            <div style={{
+              width:40,height:40,borderRadius:"50%",
+              background:`linear-gradient(135deg,${COLORS.brandBlue},#3A7BC8)`,
               display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
-              boxShadow:"0 3px 10px rgba(7,193,96,0.35)"}}>
+              boxShadow:DESIGN.shadow.card
+            }}>
               <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
                 <circle cx="16" cy="10" r="5" fill="white" opacity="0.9"/>
                 <path d="M8 24c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-                <circle cx="13" cy="10" r="1.2" fill="#1A7AC7"/><circle cx="19" cy="10" r="1.2" fill="#1A7AC7"/>
-                <path d="M13 13 Q16 15 19 13" stroke="#1A7AC7" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+                <circle cx="13" cy="10" r="1.2" fill={COLORS.brandBlue}/><circle cx="19" cy="10" r="1.2" fill={COLORS.brandBlue}/>
+                <path d="M13 13 Q16 15 19 13" stroke={COLORS.brandBlue} strokeWidth="1.2" strokeLinecap="round" fill="none"/>
               </svg>
             </div>
-            <div>
-              <div style={{fontSize:15,fontWeight:700,color:"#1a202c",lineHeight:1.2}}>
-                小瑞 <span style={{color:"#1A7AC7",fontSize:13,fontWeight:500}}>AI 训练助手</span>
-              </div>
-              <div style={{fontSize:11,color:"#1A7AC7",display:"flex",alignItems:"center",gap:4,marginTop:2}}>
-                <span style={{width:6,height:6,borderRadius:"50%",background:"#1A7AC7",display:"inline-block"}}/>
-                在线
-                <span style={{background:"#1A7AC7",color:"white",padding:"1px 8px",borderRadius:20,fontSize:10,fontWeight:600,marginLeft:4}}>
-                  第{currentDay}天
-                </span>
+            <div style={{minWidth:0,flex:1}}>
+              <div style={{
+                fontSize:15,fontWeight:700,color:COLORS.deepNavy,lineHeight:1.3,
+                display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"
+              }}>
+                <span>小瑞</span>
+                <span style={{
+                  background:COLORS.brandBlue,color:"white",
+                  padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:600
+                }}>第{currentDay}天</span>
               </div>
             </div>
           </div>
           {/* Smart mode toggle */}
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:11,color:"#9ca3af"}}>{smartMode?"智能":"手动"}</span>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            <span style={{fontSize:11,color:COLORS.neutralGray,fontWeight:500}}>{smartMode?"智能":"手动"}</span>
             <button onClick={onToggleSmartMode}
-              style={{width:44,height:24,borderRadius:12,border:"none",cursor:"pointer",position:"relative",
-                background:smartMode?"#1A7AC7":"#d1d5db",transition:"background 0.2s",flexShrink:0}}>
-              <span style={{position:"absolute",top:2,left:smartMode?22:2,width:20,height:20,
+              style={{
+                width:44,height:24,borderRadius:12,border:"none",cursor:"pointer",position:"relative",
+                background:smartMode?COLORS.brandBlue:"#d1d5db",transition:"background 0.2s"
+              }}>
+              <span style={{
+                position:"absolute",top:2,left:smartMode?22:2,width:20,height:20,
                 borderRadius:"50%",background:"white",transition:"left 0.2s",
-                boxShadow:"0 1px 4px rgba(0,0,0,0.2)"}}/>
+                boxShadow:"0 1px 4px rgba(0,0,0,0.2)"
+              }}/>
             </button>
           </div>
         </div>
@@ -537,7 +547,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
       {/* ── Chat area ── */}
       <div ref={messagesRef}
         style={{flex:1,overflowY:"auto",padding:"16px 14px 8px",display:"flex",flexDirection:"column",gap:12,
-          background:"#F0F2F5"}}
+          background:COLORS.lightGray}}
         className="[&::-webkit-scrollbar]:w-[2px] [&::-webkit-scrollbar-thumb]:bg-[#c8c8c8] [&::-webkit-scrollbar-thumb]:rounded-full">
 
         {msgs.map((m,idx)=>(
@@ -548,23 +558,26 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               <div style={{display:"flex",alignItems:"flex-end",gap:8,maxWidth:"88%"}}>
                 <BotAvatar/>
                 <div style={{
-                  background:"white",borderRadius:"18px 18px 18px 4px",
-                  padding:"10px 14px",fontSize:14,lineHeight:1.55,color:"#1a202c",
-                  boxShadow:"0 1px 4px rgba(0,0,0,0.08)",
+                  background:"white",borderRadius:DESIGN.radius.card,
+                  padding:"10px 14px",fontSize:14,lineHeight:1.55,color:COLORS.deepNavy,
+                  boxShadow:DESIGN.shadow.card,
                   animation:"fadeUp 0.25s ease",
                 }} dangerouslySetInnerHTML={{__html:m.html}}/>
               </div>
             ):(
               <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,maxWidth:"80%"}}>
                 <div style={{
-                  background:"#1A7AC7",borderRadius:"18px 18px 4px 18px",
+                  background:COLORS.brandBlue,borderRadius:DESIGN.radius.card,
                   padding:"10px 14px",fontSize:14,lineHeight:1.55,color:"white",
                   animation:"fadeUp 0.25s ease",
                 }} dangerouslySetInnerHTML={{__html:m.html}}/>
                 {m.editPhase&&(
                   <button onClick={()=>{setMsgs(prev=>prev.slice(0,idx));setPhase(m.editPhase!);}}
-                    style={{fontSize:11,color:"#9ca3af",background:"transparent",border:"1px solid #e2e8f0",
-                      borderRadius:20,padding:"2px 10px",cursor:"pointer"}}>
+                    style={{
+                      fontSize:11,color:COLORS.neutralGray,background:"transparent",
+                      border:`1px solid ${COLORS.borderGray}`,
+                      borderRadius:20,padding:"2px 10px",cursor:"pointer"
+                    }}>
                     ✏️ 修改
                   </button>
                 )}
@@ -577,8 +590,10 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         {thinking&&(
           <div style={{display:"flex",alignItems:"flex-end",gap:8}}>
             <BotAvatar/>
-            <div style={{background:"white",borderRadius:"18px 18px 18px 4px",padding:"12px 16px",
-              boxShadow:"0 1px 4px rgba(0,0,0,0.08)"}}>
+            <div style={{
+              background:"white",borderRadius:DESIGN.radius.card,padding:"12px 16px",
+              boxShadow:DESIGN.shadow.card
+            }}>
               <ThinkingDots/>
             </div>
           </div>
@@ -595,8 +610,12 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 setSurveyStep("new_user");
               }
             }}
-              className="bg-[#1A7AC7] text-white px-4 py-3 rounded-xl text-sm font-semibold border-0 cursor-pointer active:bg-[#1570B8] transition-colors">
-              📋 开始
+              style={{
+                background:COLORS.brandBlue,color:"white",padding:"12px 16px",
+                borderRadius:DESIGN.radius.button,fontSize:14,fontWeight:600,
+                border:0,cursor:"pointer",minHeight:44
+              }}>
+              开始
             </button>
             <button onClick={() => {
               addMsg("user", "直接开始用");
@@ -605,8 +624,13 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 setTimeout(() => setPhase("day1_manual_level"), 600);
               });
             }}
-              className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-3 rounded-xl text-sm font-semibold cursor-pointer active:bg-[#f7fafc] transition-colors">
-              ⚡ 直接开始用
+              style={{
+                background:"white",border:`1px solid ${COLORS.borderGray}`,
+                color:COLORS.textSecondary,padding:"12px 16px",
+                borderRadius:DESIGN.radius.button,fontSize:14,fontWeight:600,
+                cursor:"pointer",minHeight:44
+              }}>
+              直接开始用
             </button>
           </div>
         )}
@@ -615,13 +639,15 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         {phase==="day1_duration"&&(
           <div style={{alignSelf:"flex-start",maxWidth:"88%",animation:"fadeUp 0.25s ease"}}>
             <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
-              {[{l:"不到3个月",icon:"🕐"},{l:"3个月以上",icon:"📅"},{l:"没有特别不适",icon:"✨"}].map(({l,icon})=>(
+              {["不到3个月","3个月以上","没有特别不适"].map((l)=>(
                 <button key={l} onClick={()=>onSubmitDuration(l)}
-                  style={{padding:"9px 16px",borderRadius:20,border:"1.5px solid #E8E8E8",
-                    background:"white",color:"#333",fontSize:14,cursor:"pointer",
-                    display:"flex",alignItems:"center",gap:6,fontFamily:"inherit",
-                    boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
-                  <span>{icon}</span>{l}
+                  style={{
+                    padding:"9px 16px",borderRadius:DESIGN.radius.tag,
+                    border:`1.5px solid ${COLORS.borderGray}`,
+                    background:"white",color:COLORS.textPrimary,fontSize:14,cursor:"pointer",
+                    fontFamily:"inherit",boxShadow:DESIGN.shadow.card,minHeight:44
+                  }}>
+                  {l}
                 </button>
               ))}
             </div>
@@ -633,17 +659,19 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <div style={{alignSelf:"flex-start",width:"88%",animation:"fadeUp 0.25s ease"}}>
             <div style={{display:"flex",gap:8}}>
               {[
-                {l:"没有特别感觉",icon:"😊",sub:"关节活动自如",v:0,color:"#DBEAFE"},
-                {l:"有点紧",icon:"😐",sub:"轻微紧绷感",v:1,color:"#FEF3C7"},
-                {l:"很紧",icon:"😣",sub:"明显受限",v:2,color:"#FEE2E2"},
-              ].map(({l,icon,sub,v,color})=>(
+                {l:"没有特别感觉",sub:"关节活动自如",v:0,color:COLORS.mistBlue},
+                {l:"有点紧",sub:"轻微紧绷感",v:1,color:"#FEF3C7"},
+                {l:"很紧",sub:"明显受限",v:2,color:"#FEE2E2"},
+              ].map(({l,sub,v,color})=>(
                 <button key={v} onClick={()=>onSubmitStiffness(v)}
-                  style={{flex:1,padding:"12px 8px",borderRadius:14,border:"1.5px solid #E8E8E8",
-                    background:"white",cursor:"pointer",textAlign:"center",fontFamily:"inherit",
-                    boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
-                  <div style={{fontSize:24,marginBottom:4}}>{icon}</div>
-                  <div style={{fontSize:12,fontWeight:600,color:"#1a1a1a",lineHeight:1.3}}>{l}</div>
-                  <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>{sub}</div>
+                  style={{
+                    flex:1,padding:"12px 8px",borderRadius:DESIGN.radius.button,
+                    border:`1.5px solid ${COLORS.borderGray}`,
+                    background:"white",cursor:"pointer",textAlign:"center",
+                    fontFamily:"inherit",boxShadow:DESIGN.shadow.card,minHeight:44
+                  }}>
+                  <div style={{fontSize:12,fontWeight:600,color:COLORS.deepNavy,lineHeight:1.3}}>{l}</div>
+                  <div style={{fontSize:11,color:COLORS.neutralGray,marginTop:2}}>{sub}</div>
                 </button>
               ))}
             </div>
@@ -655,17 +683,10 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <div style={{alignSelf:"flex-start",width:"90%",animation:"fadeUp 0.25s ease"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
               {[
-                {t:"下蹲",icon:"🏋️"},
-                {t:"上楼梯/斜坡",icon:"⬆️"},
-                {t:"下楼梯/斜坡",icon:"⬇️"},
-                {t:"久坐后站起来",icon:"🪑"},
-                {t:"长时间走路",icon:"🚶"},
-                {t:"跑步/运动",icon:"🏃"},
-                {t:"其他",icon:"💭"},
-                {t:"无",icon:"✅"},
-              ].map(({t,icon})=>(
+                "下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"
+              ].map((t)=>(
                 <button key={t} onClick={()=>{
-                  addMsg("user", `${icon} ${t}`, "day1_triggers");
+                  addMsg("user", t, "day1_triggers");
                   setUserData(p=>({...p,triggers:[t],mainTrigger:t==="无"?"":t}));
                   simulateThinking(()=>{
                     if(t==="无"){
@@ -677,12 +698,14 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                     }
                   });
                 }}
-                  style={{padding:"11px 10px",borderRadius:12,border:"1.5px solid #E8E8E8",
-                    background:"white",cursor:"pointer",display:"flex",alignItems:"center",gap:8,
-                    fontSize:13,color:"#333",fontFamily:"inherit",
-                    boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
-                  <span style={{fontSize:18}}>{icon}</span>
-                  <span style={{lineHeight:1.3}}>{t}</span>
+                  style={{
+                    padding:"12px 8px",borderRadius:DESIGN.radius.button,
+                    border:`1px solid ${COLORS.borderGray}`,
+                    background:"white",color:COLORS.textPrimary,fontSize:13,fontWeight:500,
+                    cursor:"pointer",textAlign:"center",fontFamily:"inherit",
+                    boxShadow:DESIGN.shadow.card,minHeight:44
+                  }}>
+                  {t}
                 </button>
               ))}
             </div>
@@ -692,19 +715,19 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
         {/* Pain — visual scale */}
         {phase==="day1_pain"&&(
           <div style={{alignSelf:"flex-start",width:"90%",animation:"fadeUp 0.25s ease"}}>
-            <div style={{fontSize:12,color:"#9ca3af",marginBottom:8}}>
+            <div style={{fontSize:12,color:COLORS.neutralGray,marginBottom:8}}>
               动作：{ud.mainTrigger||"日常动作"}，不适程度？
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
               {[
-                {i:0,label:"无不适",emoji:"😄",color:"#1A7AC7",bg:"#DBEAFE"},
-                {i:1,label:"轻微不适",emoji:"🙂",color:"#52C41A",bg:"#F6FFED"},
-                {i:2,label:"中等不适",emoji:"😐",color:"#FAAD14",bg:"#FFFBE6"},
-                {i:3,label:"较重不适",emoji:"😟",color:"#FF7A45",bg:"#FFF2E8"},
-                {i:4,label:"非常不适",emoji:"😣",color:"#FF4D4F",bg:"#FFF1F0"},
-              ].map(({i,label,emoji,color,bg})=>(
+                {i:0,label:"无不适",color:COLORS.brandBlue,bg:COLORS.mistBlue},
+                {i:1,label:"轻微不适",color:COLORS.successGreen,bg:"#F6FFED"},
+                {i:2,label:"中等不适",color:"#FAAD14",bg:"#FFFBE6"},
+                {i:3,label:"较重不适",color:"#FF7A45",bg:"#FFF2E8"},
+                {i:4,label:"非常不适",color:COLORS.riskRed,bg:"#FFF1F0"},
+              ].map(({i,label,color,bg})=>(
                 <button key={i} onClick={()=>{
-                  addMsg("user",`${emoji} ${i} — ${label}`,"day1_pain");
+                  addMsg("user",`${i} — ${label}`,"day1_pain");
                   const base = ud.baseLevel ?? 2;
                   const delta = i === 0 ? -1 : i <= 2 ? 0 : 1;
                   const computed = Math.max(1, Math.min(6, base + delta));
@@ -721,20 +744,19 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 }}
                   style={{
                     display:"flex",alignItems:"center",gap:12,
-                    padding:"11px 14px",borderRadius:12,
+                    padding:"11px 14px",borderRadius:DESIGN.radius.button,
                     border:`1.5px solid ${color}22`,background:bg,
                     cursor:"pointer",fontFamily:"inherit",
-                    boxShadow:"0 1px 3px rgba(0,0,0,0.05)",
+                    boxShadow:DESIGN.shadow.card,minHeight:44
                   }}>
-                  <span style={{fontSize:22}}>{emoji}</span>
                   <div style={{flex:1,textAlign:"left"}}>
-                    <span style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{i} — {label}</span>
+                    <span style={{fontSize:14,fontWeight:600,color:COLORS.deepNavy}}>{i} — {label}</span>
                   </div>
                   {/* Visual bar */}
                   <div style={{display:"flex",gap:3}}>
                     {[0,1,2,3,4].map(d=>(
                       <div key={d} style={{width:6,height:6,borderRadius:3,
-                        background:d<=i?color:"#E8E8E8",transition:"background 0.2s"}}/>
+                        background:d<=i?color:COLORS.borderGray,transition:"background 0.2s"}}/>
                     ))}
                   </div>
                 </button>
@@ -861,18 +883,17 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <div style={{alignSelf:"flex-start",width:"90%",animation:"fadeUp 0.25s ease"}}>
             <div style={{display:"flex",gap:8}}>
               {[
-                {v:"better",emoji:"😊",label:"好多了",sub:"有改善",color:"#1A7AC7",bg:"#DBEAFE"},
-                {v:"same",  emoji:"😐",label:"还行",  sub:"差不多",color:"#6B7280",bg:"#F9FAFB"},
-                {v:"worse", emoji:"😣",label:"不舒服",sub:"有波动",color:"#F59E0B",bg:"#FFFBE6"},
-              ].map(({v,emoji,label,sub,color,bg})=>(
+                {v:"better",label:"好多了",sub:"有改善",color:COLORS.brandBlue,bg:COLORS.mistBlue},
+                {v:"same",  label:"还行",  sub:"差不多",color:COLORS.neutralGray,bg:COLORS.lightGray},
+                {v:"worse", label:"不舒服",sub:"有波动",color:"#F59E0B",bg:"#FFFBE6"},
+              ].map(({v,label,sub,color,bg})=>(
                 <button key={v} onClick={()=>onSubmitDailyFeel(v)}
-                  style={{flex:1,padding:"14px 8px",borderRadius:14,
+                  style={{flex:1,padding:"14px 8px",borderRadius:DESIGN.radius.button,
                     border:`1.5px solid ${color}33`,background:bg,
                     cursor:"pointer",textAlign:"center",fontFamily:"inherit",
-                    boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
-                  <div style={{fontSize:28,marginBottom:4}}>{emoji}</div>
-                  <div style={{fontSize:13,fontWeight:600,color:"#1a1a1a"}}>{label}</div>
-                  <div style={{fontSize:11,color:"#9ca3af",marginTop:2}}>{sub}</div>
+                    boxShadow:DESIGN.shadow.card,minHeight:44}}>
+                  <div style={{fontSize:14,fontWeight:600,color:COLORS.deepNavy,marginBottom:2}}>{label}</div>
+                  <div style={{fontSize:11,color:COLORS.neutralGray,marginTop:2}}>{sub}</div>
                 </button>
               ))}
             </div>

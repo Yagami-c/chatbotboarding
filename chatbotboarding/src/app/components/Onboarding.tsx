@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { COLORS, DESIGN } from "../design-system";
 
 interface OnboardingProps {
   onDone: (smartMode: boolean, next: "assessment" | "quick-training" | "home") => void;
@@ -12,7 +13,7 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
         <div key={i} style={{
           height: 4, borderRadius: 4,
           width: i === current ? 24 : 8,
-          background: i === current ? "#1A7AC7" : "#E0E0E0",
+          background: i === current ? COLORS.brandBlue : "#E0E0E0",
           transition: "all 0.3s ease",
         }} />
       ))}
@@ -24,93 +25,96 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
 function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", overflow: "hidden" }}>
-      {/* Illustrated hero — full top half */}
+      {/* Compressed brand area — 28-32% of screen height */}
       <div style={{
-        flex: "0 0 55%",
-        background: "linear-gradient(160deg, #1A7AC7 0%, #1570B8 55%, #04783D 100%)",
+        flex: "0 0 30vh",
+        background: `linear-gradient(160deg, ${COLORS.brandBlue} 0%, #3A7BC8 100%)`,
         position: "relative", overflow: "hidden",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        padding: "24px",
       }}>
-        {/* Background circles */}
-        <div style={{position:"absolute",top:-60,right:-60,width:220,height:220,borderRadius:"50%",background:"rgba(255,255,255,0.07)"}}/>
-        <div style={{position:"absolute",bottom:-40,left:-40,width:160,height:160,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
-        <div style={{position:"absolute",top:40,left:20,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
+        {/* Subtle background circle */}
+        <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
 
-        {/* App icon */}
+        {/* Aiyovita logo */}
         <div style={{
-          width: 90, height: 90, borderRadius: 26,
+          width: 200, height: 90, borderRadius: 20,
           background: "white",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.1), inset 0 2px 0 rgba(255,255,255,0.9)",
+          boxShadow: DESIGN.shadow.card,
           display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 20, position: "relative", zIndex: 1,
+          marginBottom: 16, position: "relative", zIndex: 1,
+          overflow: "hidden",
+          padding: "12px 16px",
         }}>
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-            <path d="M28 7L5 24h6v19a3 3 0 003 3h28a3 3 0 003-3V24h6L28 7z" fill="#1A7AC7"/>
-            <path d="M28 7L5 24h6v5L28 17l17 12v-5h6L28 7z" fill="#1570B8" opacity="0.5"/>
-            <path d="M28 40s-9-5.5-9-12a6.5 6.5 0 0113 0 6.5 6.5 0 0113 0C45 34.5 28 40 28 40z" fill="white"/>
-            <rect x="23" y="33" width="10" height="12" rx="5" fill="#E8FBF0"/>
-          </svg>
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 150'%3E%3Cg transform='translate(20,25)'%3E%3Cpath d='M45,10 L55,20 L45,30 M35,20 h20 M30,10 v20 M50,10 v20' stroke='%234A90E2' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M15,45 Q25,35 35,45 T55,45' stroke='%2370C244' stroke-width='2.5' fill='none'/%3E%3Cellipse cx='18' cy='42' rx='2' ry='2.5' fill='%23DC2626'/%3E%3C/g%3E%3Cg transform='translate(90,35)'%3E%3Ctext x='0' y='35' font-family='Arial,sans-serif' font-size='42' font-weight='700' fill='%234A90E2'%3EAiyovita%3C/text%3E%3Ctext x='0' y='75' font-family='Microsoft YaHei,SimHei,sans-serif' font-size='28' font-weight='700' fill='%234A90E2' letter-spacing='2'%3E光年瑞康%3C/text%3E%3C/g%3E%3C/svg%3E"
+            alt="光年瑞康 Aiyovita"
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
         </div>
 
-        <div style={{ color: "white", fontWeight: 800, fontSize: 24, letterSpacing: 0.5, position: "relative", zIndex: 1 }}>
-          哎哟爱膝之家
+        <div style={{ color: "white", fontWeight: 700, fontSize: 20, letterSpacing: 0.3, position: "relative", zIndex: 1, marginBottom: 4 }}>
+          让膝盖越来越好
         </div>
-        <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 6, position: "relative", zIndex: 1 }}>
-          AI 驱动 · 香港理工大学武汉研究院
-        </div>
-
-        {/* Wave separator */}
-        <div style={{ position: "absolute", bottom: -1, left: 0, right: 0 }}>
-          <svg viewBox="0 0 375 40" preserveAspectRatio="none" style={{ width: "100%", height: 40, display: "block" }}>
-            <path d="M0 40 Q93 0 187 20 Q281 40 375 10 L375 40 Z" fill="white"/>
-          </svg>
+        <div style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, position: "relative", zIndex: 1 }}>
+          让膝盖越来越好
         </div>
       </div>
 
       {/* Bottom content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "28px 28px 36px" }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#191919", marginBottom: 12, lineHeight: 1.3 }}>
-          欢迎来到<br/>您的专属膝盖管家
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "32px 24px 24px" }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 12, lineHeight: 1.3 }}>
+          欢迎来到您的专属膝盖管家
         </h1>
-        <p style={{ fontSize: 14, color: "#666", lineHeight: 1.7, marginBottom: "auto" }}>
-          科学评估、智能训练、专家陪伴——<br/>
-          每天几分钟，让膝盖越来越好。
+        <p style={{ fontSize: 16, color: COLORS.neutralGray, lineHeight: 1.6, marginBottom: 24 }}>
+          科学评估、智能训练、专家陪伴<br/>
+          每天几分钟，让膝盖越来越好
         </p>
 
-        {/* Feature pills */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "20px 0" }}>
+        {/* Feature list with 2px linear icons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: "auto" }}>
           {[
-            { icon: "🤖", text: "AI 个性化" },
-            { icon: "📊", text: "进度追踪" },
-            { icon: "🔬", text: "专家研发" },
-            { icon: "🦵", text: "智能设备" },
-          ].map(({ icon, text }) => (
-            <div key={text} style={{
-              display: "flex", alignItems: "center", gap: 5,
-              background: "#EFF6FF", border: "1px solid #BFDBFE",
-              borderRadius: 20, padding: "5px 12px",
-              fontSize: 12, color: "#065F46", fontWeight: 500,
-            }}>
-              <span>{icon}</span><span>{text}</span>
+            { title: "AI 个性化", desc: "根据你的情况定制方案" },
+            { title: "进度追踪", desc: "可视化康复进展" },
+            { title: "专家研发", desc: "香港理工大学武汉研究院" },
+          ].map(({ title, desc }) => (
+            <div key={title} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{
+                width: 24, height: 24, borderRadius: "50%",
+                background: COLORS.mistBlue, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6L5 9L10 3" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.deepNavy }}>{title}</div>
+                <div style={{ fontSize: 12, color: COLORS.neutralGray }}>{desc}</div>
+              </div>
             </div>
           ))}
         </div>
 
+        {/* Single solid primary button */}
         <button onClick={onNext} style={{
-          width: "100%", padding: "16px", borderRadius: 14,
-          background: "linear-gradient(135deg, #1A7AC7, #155FA0)",
-          color: "white", fontWeight: 700, fontSize: 17,
+          width: "100%", height: 48, borderRadius: DESIGN.radius.button,
+          background: COLORS.brandBlue,
+          color: "white", fontWeight: 600, fontSize: 17,
           border: "none", cursor: "pointer",
-          boxShadow: "0 6px 20px rgba(7,193,96,0.4)",
-          letterSpacing: 0.3,
+          boxShadow: DESIGN.shadow.button,
+          marginBottom: 12,
         }}>
           开始体验 →
         </button>
+
+        {/* Text button for skip */}
         <button onClick={onSkip} style={{
-          marginTop: 12, background: "none", border: "none",
-          color: "#BDBDBD", fontSize: 13, cursor: "pointer", padding: "4px 0",
+          background: "none", border: "none",
+          color: COLORS.neutralGray, fontSize: 14, cursor: "pointer", padding: "8px 0",
+          fontWeight: 500,
         }}>
-          跳过引导
+          游客体验
         </button>
 
         <div style={{ marginTop: 20 }}><ProgressDots current={0} total={3}/></div>
@@ -129,63 +133,91 @@ function Step2({
   onSkip: () => void;
 }) {
   const features = [
-    { icon: "📅", title: "每日评估", desc: "追踪你的膝盖状态变化", color: "#EEF4FF" },
-    { icon: "🔔", title: "训练提醒", desc: "按时推送，不落一次", color: "#FEF3C7" },
-    { icon: "📈", title: "强度优化", desc: "实时调整训练方案", color: "#DBEAFE" },
-    { icon: "💡", title: "科普推送", desc: "专家知识随时获取", color: "#F3E8FF" },
+    { title: "每日评估", desc: "追踪你的膝盖状态变化" },
+    { title: "训练提醒", desc: "按时推送，不落一次" },
+    { title: "强度优化", desc: "实时调整训练方案" },
+    { title: "科普推送", desc: "专家知识随时获取" },
   ];
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", padding: "0 0 32px" }}>
-      {/* Header */}
+      {/* Header with AI icon */}
       <div style={{
         padding: "52px 24px 24px",
-        background: "linear-gradient(160deg, #EFF6FF, white)",
-        borderBottom: "1px solid #F0F0F0",
+        background: COLORS.mistBlue,
+        borderBottom: `1px solid ${COLORS.borderGray}`,
       }}>
-        <div style={{ fontSize: 44, marginBottom: 12, textAlign: "center" }}>🤖</div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#191919", textAlign: "center", marginBottom: 6 }}>
+        <div style={{
+          width: 64, height: 64, borderRadius: "50%",
+          background: "white",
+          boxShadow: DESIGN.shadow.card,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 16px"
+        }}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="12" r="5" stroke={COLORS.brandBlue} strokeWidth="2"/>
+            <path d="M8 24c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round"/>
+            <path d="M16 6v2M10 8l1.5 1.5M6 14h2M10 20l1.5-1.5" stroke={COLORS.neutralGray} strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, textAlign: "center", marginBottom: 6 }}>
           开启智能模式
         </h2>
-        <p style={{ fontSize: 13, color: "#666", textAlign: "center", lineHeight: 1.6 }}>
+        <p style={{ fontSize: 14, color: COLORS.neutralGray, textAlign: "center", lineHeight: 1.6 }}>
           让小瑞全程陪伴你的康复之旅
         </p>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px 0" }}>
-        {/* Feature grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-          {features.map(({ icon, title, desc, color }) => (
+        {/* Feature list with white cards and blue-gray linear icons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+          {features.map(({ title, desc }) => (
             <div key={title} style={{
-              background: color, borderRadius: 14, padding: "14px 12px",
-              opacity: smartMode ? 1 : 0.5, transition: "opacity 0.2s",
+              background: "white",
+              border: `1px solid ${COLORS.borderGray}`,
+              borderRadius: DESIGN.radius.card,
+              padding: "14px 16px",
+              display: "flex", alignItems: "center", gap: 12,
             }}>
-              <div style={{ fontSize: 26, marginBottom: 6 }}>{icon}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#191919", marginBottom: 3 }}>{title}</div>
-              <div style={{ fontSize: 11, color: "#666", lineHeight: 1.4 }}>{desc}</div>
+              <div style={{
+                width: 40, height: 40, borderRadius: "50%",
+                background: COLORS.mistBlue,
+                flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="8" stroke={COLORS.brandBlue} strokeWidth="2"/>
+                  <path d="M7 10l2 2 4-4" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.deepNavy, marginBottom: 2 }}>{title}</div>
+                <div style={{ fontSize: 12, color: COLORS.neutralGray, lineHeight: 1.4 }}>{desc}</div>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Toggle row */}
+        {/* Toggle - default OFF before confirmation */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: smartMode ? "#EFF6FF" : "#F7F8FA",
-          border: `1.5px solid ${smartMode ? "#BFDBFE" : "#E8E8E8"}`,
-          borderRadius: 14, padding: "14px 16px",
+          background: smartMode ? COLORS.mistBlue : COLORS.lightGray,
+          border: `1px solid ${smartMode ? COLORS.brandBlue : COLORS.borderGray}`,
+          borderRadius: DESIGN.radius.button,
+          padding: "14px 16px",
           transition: "all 0.25s", marginBottom: 16,
         }}>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: "#191919" }}>
-              {smartMode ? "✅ 智能模式已开启" : "智能模式"}
+            <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.deepNavy }}>
+              智能模式
             </div>
-            <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: COLORS.neutralGray, marginTop: 2 }}>
               {smartMode ? "小瑞将全程主动引导你" : "开启后小瑞将主动引导你"}
             </div>
           </div>
           <button onClick={() => setSmartMode(!smartMode)} style={{
             width: 48, height: 28, borderRadius: 14, border: "none",
-            background: smartMode ? "#1A7AC7" : "#D1D5DB",
+            background: smartMode ? COLORS.brandBlue : "#D1D5DB",
             cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0,
           }}>
             <span style={{
@@ -196,26 +228,26 @@ function Step2({
           </button>
         </div>
 
-        <p style={{ fontSize: 11, color: "#BDBDBD", textAlign: "center", marginBottom: 20 }}>
-          💡 可在「我的 - 设置」中随时切换
+        <p style={{ fontSize: 12, color: COLORS.neutralGray, textAlign: "center", marginBottom: 20 }}>
+          可在「我的 - 设置」中随时切换
         </p>
       </div>
 
       <div style={{ padding: "0 20px" }}>
         <button onClick={onConfirm} style={{
-          width: "100%", padding: "15px", borderRadius: 14,
-          background: "linear-gradient(135deg, #1A7AC7, #155FA0)",
-          color: "white", fontWeight: 700, fontSize: 16,
+          width: "100%", height: 48, borderRadius: DESIGN.radius.button,
+          background: COLORS.brandBlue,
+          color: "white", fontWeight: 600, fontSize: 16,
           border: "none", cursor: "pointer",
-          boxShadow: "0 5px 18px rgba(7,193,96,0.38)",
+          boxShadow: DESIGN.shadow.button,
         }}>
-          确认
+          开启智能模式
         </button>
         <button onClick={onSkip} style={{
           width: "100%", marginTop: 10, padding: "12px", background: "none",
-          border: "none", color: "#BDBDBD", fontSize: 13, cursor: "pointer",
+          border: "none", color: COLORS.neutralGray, fontSize: 14, cursor: "pointer", fontWeight: 500,
         }}>
-          暂不开启 →
+          稍后设置
         </button>
         <div style={{ marginTop: 16 }}><ProgressDots current={1} total={3}/></div>
       </div>
@@ -236,9 +268,18 @@ function Step3({
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white" }}>
       {/* Header */}
       <div style={{ padding: "52px 24px 20px", textAlign: "center" }}>
-        <div style={{ fontSize: 44, marginBottom: 10 }}>🚀</div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#191919", marginBottom: 6 }}>准备好了吗？</h2>
-        <p style={{ fontSize: 13, color: "#666", lineHeight: 1.6 }}>
+        <div style={{
+          width: 64, height: 64, borderRadius: "50%",
+          background: COLORS.mistBlue,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 16px"
+        }}>
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M8 16l6 6 10-10" stroke={COLORS.brandBlue} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 6 }}>准备好了吗？</h2>
+        <p style={{ fontSize: 14, color: COLORS.neutralGray, lineHeight: 1.6 }}>
           选择你想要的开始方式
         </p>
       </div>
@@ -246,24 +287,33 @@ function Step3({
       <div style={{ flex: 1, padding: "0 20px", display: "flex", flexDirection: "column", gap: 14 }}>
         {/* Card 1: Assessment (recommended) */}
         <button onClick={onAssess} style={{
-          width: "100%", background: "linear-gradient(135deg, #1A7AC7, #155FA0)",
-          borderRadius: 18, padding: "22px 20px",
+          width: "100%", background: COLORS.brandBlue,
+          borderRadius: DESIGN.radius.card, padding: "20px",
           border: "none", cursor: "pointer", textAlign: "left",
           position: "relative", overflow: "hidden",
-          boxShadow: "0 6px 20px rgba(7,193,96,0.35)",
+          boxShadow: DESIGN.shadow.button,
         }}>
           <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100,
             borderRadius: "50%", background: "rgba(255,255,255,0.1)" }}/>
           <div style={{ position: "relative" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: 28 }}>📋</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: "50%",
+                background: "rgba(255,255,255,0.2)",
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <rect x="3" y="3" width="12" height="12" rx="2" stroke="white" strokeWidth="2"/>
+                  <path d="M6 9h6M9 6v6" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "white" }}>先做个评估</div>
-                <span style={{ fontSize: 10, background: "rgba(255,255,255,0.25)", color: "white",
-                  borderRadius: 20, padding: "2px 8px", fontWeight: 600 }}>推荐</span>
+                <div style={{ fontSize: 16, fontWeight: 600, color: "white" }}>先做个评估</div>
+                <span style={{ fontSize: 11, background: "rgba(255,255,255,0.25)", color: "white",
+                  borderRadius: 20, padding: "2px 8px", fontWeight: 500 }}>推荐</span>
               </div>
             </div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", lineHeight: 1.5 }}>
               7 个问题 · 约 2 分钟<br/>获取你的专属 PAD 训练方案
             </div>
           </div>
@@ -272,15 +322,23 @@ function Step3({
         {/* Card 2: Quick training */}
         <button onClick={onQuick} style={{
           width: "100%", background: "white",
-          borderRadius: 18, padding: "22px 20px",
-          border: "1.5px solid #E8E8E8", cursor: "pointer", textAlign: "left",
-          position: "relative", overflow: "hidden",
+          borderRadius: DESIGN.radius.card, padding: "20px",
+          border: `1px solid ${COLORS.borderGray}`, cursor: "pointer", textAlign: "left",
         }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ fontSize: 28 }}>⚡</span>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: "50%",
+              background: COLORS.mistBlue,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0
+            }}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M6 3l9 6-9 6V3z" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#191919", marginBottom: 6 }}>直接开启设备</div>
-              <div style={{ fontSize: 12, color: "#666", lineHeight: 1.5 }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.deepNavy, marginBottom: 6 }}>直接开启设备</div>
+              <div style={{ fontSize: 13, color: COLORS.neutralGray, lineHeight: 1.5 }}>
                 跳过评估，立刻体验训练<br/>
                 完成评估后可获得个性化方案
               </div>
@@ -290,20 +348,19 @@ function Step3({
 
         {/* Tip */}
         <div style={{
-          background: "#FFFBE6", border: "1px solid #FDE68A",
-          borderRadius: 12, padding: "12px 14px",
-          fontSize: 12, color: "#92400E", lineHeight: 1.5,
-          display: "flex", gap: 8,
+          background: COLORS.mistBlue, border: `1px solid ${COLORS.brandBlue}`,
+          borderRadius: DESIGN.radius.card, padding: "14px 16px",
+          fontSize: 13, color: COLORS.deepNavy, lineHeight: 1.5,
         }}>
-          <span style={{ flexShrink: 0 }}>💡</span>
-          <span>建议先评估，效果提升 40%。评估结果将永久保存，随时可查。</span>
+          <div style={{ fontWeight: 600, marginBottom: 4, color: COLORS.brandBlue }}>推荐先评估</div>
+          <div>效果提升 40%。评估结果将永久保存，随时可查。</div>
         </div>
       </div>
 
       <div style={{ padding: "16px 20px 36px" }}>
         <button onClick={onSkip} style={{
           width: "100%", background: "none", border: "none",
-          color: "#BDBDBD", fontSize: 13, cursor: "pointer", padding: "8px",
+          color: COLORS.neutralGray, fontSize: 14, cursor: "pointer", padding: "8px", fontWeight: 500,
         }}>
           跳过，稍后再说
         </button>
@@ -316,7 +373,7 @@ function Step3({
 // ── Main Onboarding ────────────────────────────────────────────────────────────
 export function Onboarding({ onDone }: OnboardingProps) {
   const [step, setStep] = useState(1);
-  const [smartMode, setSmartMode] = useState(true);
+  const [smartMode, setSmartMode] = useState(false); // Default OFF before confirmation
 
   const skip = () => onDone(false, "home");
 
