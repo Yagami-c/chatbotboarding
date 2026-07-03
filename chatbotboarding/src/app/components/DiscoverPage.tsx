@@ -400,7 +400,7 @@ export function DiscoverPage() {
   const [openDim, setOpenDim] = useState<number | null>(null);
   const [openSection, setOpenSection] = useState<string | null>("warmup");
   const [showWx, setShowWx] = useState(false);
-  const [activeTab, setActiveTab] = useState<"community" | "education">("community");
+  const [activeTab, setActiveTab] = useState<"community" | "education">("education");
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: COLORS.lightGray }}>
@@ -409,10 +409,29 @@ export function DiscoverPage() {
       <div style={{ background: "white", borderBottom: `1px solid ${COLORS.borderGray}`,
         padding: "44px 16px 12px", flexShrink: 0 }}>
         <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.deepNavy }}>发现</div>
-        <div style={{ fontSize: 13, color: COLORS.neutralGray, marginTop: 2 }}>康复社群 · 专业科普</div>
+        <div style={{ fontSize: 13, color: COLORS.neutralGray, marginTop: 2 }}>专业科普 · 康复社群</div>
 
         {/* Tab switcher */}
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <button
+            onClick={() => setActiveTab("education")}
+            style={{
+              flex: 1, padding: "10px", borderRadius: DESIGN.radius.button,
+              fontSize: 14, fontWeight: 600, border: 0, cursor: "pointer",
+              transition: "all 0.2s",
+              background: activeTab === "education" ? COLORS.brandBlue : "transparent",
+              color: activeTab === "education" ? "white" : COLORS.neutralGray,
+              minHeight: 44,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>科普内容</span>
+            </div>
+          </button>
           <button
             onClick={() => setActiveTab("community")}
             style={{
@@ -432,25 +451,6 @@ export function DiscoverPage() {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <span>康复社群</span>
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab("education")}
-            style={{
-              flex: 1, padding: "10px", borderRadius: DESIGN.radius.button,
-              fontSize: 14, fontWeight: 600, border: 0, cursor: "pointer",
-              transition: "all 0.2s",
-              background: activeTab === "education" ? COLORS.brandBlue : "transparent",
-              color: activeTab === "education" ? "white" : COLORS.neutralGray,
-              minHeight: 44,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>科普内容</span>
             </div>
           </button>
         </div>
