@@ -48,72 +48,71 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#EDEDED", position: "relative" }}>
 
-      {/* ── Top brand area ─────────────────────────────────── */}
-      <div style={{
-        background: "linear-gradient(175deg, #1A7AC7 0%, #1570B8 55%, #155FA0 100%)",
-        paddingTop: 60, paddingBottom: 44,
-        display: "flex", flexDirection: "column", alignItems: "center",
-        position: "relative", overflow: "hidden",
-      }}>
-        {/* subtle radial overlay */}
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 60% 20%, rgba(255,255,255,0.12) 0%, transparent 65%)",pointerEvents:"none"}}/>
+      {/* ── Top half: brand + features (compressed into 50vh) ── */}
+      <div style={{ height: "50vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-        {/* App icon — 3D-feel rounded square */}
+        {/* Brand area */}
         <div style={{
-          width: 78, height: 78, borderRadius: 20,
-          background: "white",
-          boxShadow: "0 8px 28px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: 16, position: "relative", zIndex: 1,
+          background: "linear-gradient(175deg, #1A7AC7 0%, #1570B8 55%, #155FA0 100%)",
+          paddingTop: 28, paddingBottom: 16,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          position: "relative", overflow: "hidden", flexShrink: 0,
         }}>
-          <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-            {/* house body */}
-            <path d="M25 8L6 23h5v16a2.5 2.5 0 002.5 2.5h23A2.5 2.5 0 0039 39V23h5L25 8z" fill="#1A7AC7"/>
-            {/* roof sheen */}
-            <path d="M25 8L6 23h5v4L25 15l14 12v-4h5L25 8z" fill="#1570B8" opacity="0.5"/>
-            {/* heart */}
-            <path d="M25 36s-8-5-8-10.5a5 5 0 0110 0 5 5 0 0110 0C37 31 25 36 25 36z" fill="white"/>
-            {/* door */}
-            <rect x="21" y="30" width="8" height="10" rx="4" fill="#E8FBF0"/>
-          </svg>
+          <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 60% 20%, rgba(255,255,255,0.12) 0%, transparent 65%)",pointerEvents:"none"}}/>
+
+          <div style={{
+            width: 62, height: 62, borderRadius: 16,
+            background: "white",
+            boxShadow: "0 8px 28px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.8)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            marginBottom: 10, position: "relative", zIndex: 1,
+          }}>
+            <svg width="40" height="40" viewBox="0 0 50 50" fill="none">
+              <path d="M25 8L6 23h5v16a2.5 2.5 0 002.5 2.5h23A2.5 2.5 0 0039 39V23h5L25 8z" fill="#1A7AC7"/>
+              <path d="M25 8L6 23h5v4L25 15l14 12v-4h5L25 8z" fill="#1570B8" opacity="0.5"/>
+              <path d="M25 36s-8-5-8-10.5a5 5 0 0110 0 5 5 0 0110 0C37 31 25 36 25 36z" fill="white"/>
+              <rect x="21" y="30" width="8" height="10" rx="4" fill="#E8FBF0"/>
+            </svg>
+          </div>
+
+          <div style={{ color: "white", fontWeight: 700, fontSize: 18, letterSpacing: 0.3, position: "relative", zIndex: 1 }}>
+            哎哟爱膝之家
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 4, position: "relative", zIndex: 1 }}>
+            AI 膝盖训练助手
+          </div>
         </div>
 
-        <div style={{ color: "white", fontWeight: 700, fontSize: 20, letterSpacing: 0.3, position: "relative", zIndex: 1 }}>
-          哎哟爱膝之家
+        {/* Features list */}
+        <div style={{ flex: 1, padding: "12px 16px 0", display: "flex", alignItems: "center" }}>
+          <div style={{ background: "white", borderRadius: 14, overflow: "hidden",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.06)", width: "100%" }}>
+            {[
+              { icon: "🏥", color: "#DBEAFE", title: "AI 个性化方案", sub: "根据你的情况智能推荐" },
+              { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡，看见成长" },
+              { icon: "🔬", color: "#FFF5E8", title: "专家团队研发", sub: "香港理工大学研究成果" },
+            ].map(({ icon, color, title, sub }, i, arr) => (
+              <div key={title} style={{
+                display: "flex", alignItems: "center", gap: 14,
+                padding: "11px 16px",
+                borderBottom: i < arr.length - 1 ? "1px solid #F5F5F5" : "none",
+              }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                  {icon}
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#191919" }}>{title}</div>
+                  <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 5, position: "relative", zIndex: 1 }}>
-          AI 膝盖训练助手
-        </div>
+
       </div>
 
-      {/* ── Features list ──────────────────────────────────── */}
-      <div style={{ padding: "20px 16px", flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "10vh" }}>
-        <div style={{ background: "white", borderRadius: 14, overflow: "hidden", marginBottom: 12,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.06)", width: "100%" }}>
-          {[
-            { icon: "🏥", color: "#DBEAFE", title: "AI 个性化方案", sub: "根据你的情况智能推荐" },
-            { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡，看见成长" },
-            { icon: "🔬", color: "#FFF5E8", title: "专家团队研发", sub: "香港理工大学研究成果" },
-          ].map(({ icon, color, title, sub }, i, arr) => (
-            <div key={title} style={{
-              display: "flex", alignItems: "center", gap: 14,
-              padding: "14px 16px",
-              borderBottom: i < arr.length - 1 ? "1px solid #F5F5F5" : "none",
-            }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
-                {icon}
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "#191919" }}>{title}</div>
-                <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Bottom CTA ─────────────────────────────────────── */}
-      <div style={{ padding: "0 16px 32px" }}>
+      {/* ── Bottom CTA — starts exactly at 50vh ────────────── */}
+      <div style={{ padding: "24px 16px 32px" }}>
         {/* WeChat login button — authentic green pill */}
         <button onClick={handleWeChatTap} style={{
           width: "100%", height: 50, borderRadius: 10,
