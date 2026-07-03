@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { LEVEL_PARAMS, LEVELS, LEVEL_DESCS, getLevelName, formatTime, DeviceState } from "../types";
 import { NotificationsPage } from "./NotificationsPage";
+import { ManualAssessment, AssessmentResult as ManualAssessmentResult } from "./ManualAssessment";
 import { COLORS, DESIGN } from "../design-system";
 
 export interface AssessmentResult {
-  name: string; gender: string; ageRange: string; duration: string;
+  name: string; gender: string; ageRange: string;
+  recommendedLevel: number;
+  baseLevel: number;
+  painAdjust: number;
   safety: string[]; stiffness: string; triggers: string[]; painLevel: number;
 }
 
@@ -26,286 +30,12 @@ function getGreeting() {
   return h < 12 ? "上午好" : h < 18 ? "下午好" : "晚上好";
 }
 
-const SAFETY_LIST = [
-  { v: "受伤", l: "最近2周内有明显膝盖受伤" },
-  { v: "肿胀", l: "膝盖明显肿胀/发烫" },
-  { v: "伤口", l: "膝盖周围有伤口或皮肤问题" },
-  { v: "医生建议", l: "医生叮嘱暂不适合使用此类设备" },
-  { v: "显著受损", l: "膝盖有轻微肿胀或活动受限" },
-  { v: "无", l: "以上都没有" },
-];
-const TRIGGERS_LIST = ["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","无"];
 const WEAR_STEPS = [
   { title: "舒适坐姿", desc: "坐在稳固的椅子上，膝盖自然弯曲。" },
   { title: "套上设备", desc: "将套圈套在膝关节上方，调整到舒适位置。" },
   { title: "调节松紧", desc: "绑带不要太紧，保持舒适即可。" },
   { title: "放松享受", desc: "使用时放松腿部，让设备帮你养护。" },
 ];
-
-function FlowHeader({ step, total, title, onBack, backDisabled }: {
-  step: number; total: number; title: string; onBack: () => void; backDisabled?: boolean;
-}) {
-  return (
-    <div className="px-4 pt-10 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
-      <div className="flex items-center gap-3 mb-3">
-        <button onClick={onBack} disabled={backDisabled}
-          style={{
-            width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 20, background: "transparent", border: 0, cursor: backDisabled ? "not-allowed" : "pointer",
-            color: backDisabled ? COLORS.borderGray : COLORS.textSecondary, transition: "colors 0.2s"
-          }}>←</button>
-        <div className="flex-1 font-bold text-[#1a202c] text-sm">{title}</div>
-        <span className="text-xs text-[#718096] font-medium">{step + 1} / {total}</span>
-      </div>
-      <div className="flex gap-1.5">
-        {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className="h-1.5 rounded-full transition-all duration-300"
-            style={{ flex: i === step ? 2 : 1, background: i <= step ? COLORS.brandBlue : COLORS.borderGray }} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Assessment Flow ────────────────────────────────────────────────────────────
-
-function AssessmentFlow({ onDone, onCancel, onStartDevice, prefillName, prefillGender, prefillAgeRange }: {
-  onDone: (r: AssessmentResult) => void;
-  onCancel: () => void;
-  onStartDevice: (level: number) => void;
-  prefillName?: string;
-  prefillGender?: string;
-  prefillAgeRange?: string;
-}) {
-  // If user already has basic info, start from step 1 (knee condition)
-  const hasBasicInfo = !!(prefillName && prefillGender && prefillAgeRange);
-  const [step, setStep] = useState(hasBasicInfo ? 1 : 0);
-  const [name, setName] = useState(prefillName || "");
-  const [gender, setGender] = useState(prefillGender || "");
-  const [ageRange, setAgeRange] = useState(prefillAgeRange || "");
-  const [duration, setDuration] = useState("");
-  const [safety, setSafety] = useState<Record<string,boolean>>({});
-  const [stiffness, setStiffness] = useState("");
-  const [triggers, setTriggers] = useState<Record<string,boolean>>({});
-  const [painLevel, setPainLevel] = useState<number|null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [recommendedLevel, setRecommendedLevel] = useState(2);
-
-  const safetyVals = Object.entries(safety).filter(([,v])=>v).map(([k])=>k);
-  const triggerVals = Object.entries(triggers).filter(([,v])=>v).map(([k])=>k);
-  const TITLES = ["基本信息","膝盖情况","症状详情"];
-
-  const handleBack = () => {
-    if (showResult) { setShowResult(false); return; }
-    if (step === 0 || (step === 1 && hasBasicInfo)) onCancel();
-    else setStep(s => s - 1);
-  };
-
-  const handleSubmit = () => {
-    const hasRisk = ["受伤","肿胀","伤口","医生建议"].some(r => safetyVals.includes(r));
-    if (hasRisk && !window.confirm("有些情况需要先确认安全，建议找专业人员聊聊后再使用。要继续吗？")) return;
-
-    // Calculate recommended level based on stiffness and pain
-    const baseLevel = stiffness === "没有特别感觉" ? 2 : stiffness === "有点紧" ? 3 : 4;
-    const delta = painLevel === 0 ? -1 : painLevel! <= 2 ? 0 : 1;
-    const computed = Math.max(1, Math.min(6, baseLevel + delta));
-    setRecommendedLevel(computed);
-    setShowResult(true);
-  };
-
-  const handleConfirmResult = () => {
-    onDone({
-      name: name.trim(),
-      gender,
-      ageRange,
-      duration,
-      safety: safetyVals,
-      stiffness,
-      triggers: triggerVals,
-      painLevel: painLevel!
-    });
-    onStartDevice(recommendedLevel);
-  };
-
-  return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {!showResult && <FlowHeader step={step} total={3} title={TITLES[step]} onBack={handleBack} />}
-
-      {showResult ? (
-        // Result screen
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-4 pt-10 pb-3 bg-white border-b border-[#e2e8f0] flex-shrink-0">
-            <div className="flex items-center gap-3 mb-3">
-              <button onClick={handleBack} className="text-xl bg-transparent border-0 cursor-pointer transition-colors text-[#4a5568]">←</button>
-              <div className="flex-1 font-bold text-[#1a202c] text-sm">评估结果</div>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
-            <div className="bg-white rounded-2xl p-5 border border-[#e2e8f0] text-center">
-              <div className="font-bold text-[#1a202c] text-lg mb-2">评估完成</div>
-              <div className="text-sm text-[#718096] mb-4">根据你的情况，为你推荐以下强度：</div>
-              <div className="bg-[#EFF6FF] rounded-xl p-4 mb-3">
-                <div className="text-2xl font-bold mb-1" style={{ color: COLORS.brandBlue }}>{LEVELS[recommendedLevel-1]}</div>
-                <div className="text-xs" style={{ color: COLORS.brandBlue }}>{LEVEL_DESCS[recommendedLevel]}</div>
-              </div>
-              <div className="text-xs text-[#718096] leading-relaxed">
-                建议从此强度开始，后续可根据使用感受调整。
-              </div>
-            </div>
-            <button onClick={handleConfirmResult}
-              style={{
-                minHeight: 48,
-                background: COLORS.brandBlue,
-                color: 'white'
-              }}
-              className="w-full py-3.5 rounded-full font-bold text-sm border-0 cursor-pointer transition-all"
-              onMouseDown={(e) => e.currentTarget.style.opacity = '0.8'}
-              onMouseUp={(e) => e.currentTarget.style.opacity = '1'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}>
-              确认并开启设备 →
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[#f0f6ff]">
-        {step === 0 && <>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">性别</div>
-            <div className="flex gap-2">
-              {["男","女"].map(g=>(
-                <button key={g} onClick={()=>setGender(g)}
-                  style={{
-                    minHeight: 44,
-                    background: gender===g ? COLORS.brandBlue : '#f7fafc',
-                    color: gender===g ? 'white' : '#4a5568',
-                    borderColor: gender===g ? COLORS.brandBlue : '#e2e8f0'
-                  }}
-                  className="flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all">
-                  {g}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">年龄段</div>
-            <div className="flex gap-2 flex-wrap">
-              {["40岁以下","40-60岁","60岁以上"].map(a=>(
-                <button key={a} onClick={()=>setAgeRange(a)}
-                  style={{
-                    minHeight: 44,
-                    background: ageRange===a ? COLORS.brandBlue : '#f7fafc',
-                    color: ageRange===a ? 'white' : '#4a5568',
-                    borderColor: ageRange===a ? COLORS.brandBlue : '#e2e8f0'
-                  }}
-                  className="flex-1 py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all">
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button onClick={()=>{ if(!name.trim()||!gender||!ageRange){alert("请完整填写基本信息");return;} setStep(1); }}
-            style={{ minHeight: 48, background: COLORS.brandBlue }}
-            className="w-full py-3.5 rounded-full text-white font-bold text-sm border-0 cursor-pointer transition-all">
-            下一步 →
-          </button>
-        </>}
-
-        {step === 1 && <>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">持续多久了？</div>
-            <div className="flex gap-2 flex-wrap">
-              {["不到1周","1-4周","1-6个月","超过半年"].map(d=>(
-                <button key={d} onClick={()=>setDuration(d)}
-                  style={{
-                    minHeight: 44,
-                    background: duration===d ? COLORS.brandBlue : '#f7fafc',
-                    color: duration===d ? 'white' : '#4a5568',
-                    borderColor: duration===d ? COLORS.brandBlue : '#e2e8f0'
-                  }}
-                  className="flex-1 min-w-[calc(50%-4px)] py-2 rounded-xl text-sm font-semibold border cursor-pointer transition-all">
-                  {d}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">使用前确认（可多选）</div>
-            <div className="text-xs text-[#718096] mb-3">选择适合你的选项，若无请跳过：</div>
-            {["膝盖没有受伤","没有明显肿胀","没有开放伤口","医生建议过可以用","以上都不是"].map(s=>(
-              <label key={s} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="checkbox" checked={!!safety[s]}
-                  onChange={e=>setSafety(p=>({...p,[s]:e.target.checked}))}
-                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
-                {s}
-              </label>
-            ))}
-          </div>
-          <div className="flex gap-3 pb-4">
-            <button onClick={()=>setStep(0)} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
-            <button onClick={()=>{ if(!duration||safetyVals.length===0){alert("请完整填写");return;} setStep(2); }}
-              style={{ minHeight: 44, background: COLORS.brandBlue }}
-              className="flex-[2] py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">下一步 →</button>
-          </div>
-        </>}
-
-        {step === 2 && <>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">膝盖感觉？</div>
-            <div className="flex flex-col gap-2">
-              {["没有特别感觉","有点紧","感觉僵硬"].map(st=>(
-                <button key={st} onClick={()=>setStiffness(st)}
-                  style={{
-                    minHeight: 44,
-                    background: stiffness===st ? COLORS.brandBlue : '#f7fafc',
-                    color: stiffness===st ? 'white' : '#4a5568',
-                    borderColor: stiffness===st ? COLORS.brandBlue : '#e2e8f0'
-                  }}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all text-left px-3">
-                  {st}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-4 border border-[#e2e8f0]">
-            <div className="text-sm font-semibold text-[#1a202c] mb-2">什么时候不舒服？（可多选）</div>
-            {["上下楼梯","走路久了","蹲下起立","长时间坐着","天气变化"].map(t=>(
-              <label key={t} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-                <input type="checkbox" checked={!!triggers[t]}
-                  onChange={e=>setTriggers(p=>({...p,[t]:e.target.checked}))}
-                  style={{ accentColor: COLORS.brandBlue, width: 20, height: 20 }}/>
-                {t}
-              </label>
-            ))}
-            <div className="mt-3 pt-3 border-[#e2e8f0]" style={{ borderTopWidth: 1, borderTopStyle: 'solid' }}>
-              <div className="text-xs text-[#718096] mb-2">不适程度（0=无 · 4=非常）：</div>
-              <div className="flex gap-1.5">
-                {[0,1,2,3,4].map(n=>(
-                  <button key={n} onClick={()=>setPainLevel(n)}
-                    style={{
-                      minHeight: 44,
-                      background: painLevel===n ? COLORS.brandBlue : '#f7fafc',
-                      color: painLevel===n ? 'white' : '#4a5568',
-                      borderColor: painLevel===n ? COLORS.brandBlue : '#e2e8f0'
-                    }}
-                    className="flex-1 py-2 rounded-xl text-sm font-bold border cursor-pointer transition-all">
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3 pb-4">
-            <button onClick={()=>setStep(1)} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#f7fafc] text-[#4a5568] font-medium text-sm border border-[#e2e8f0] cursor-pointer">← 上一步</button>
-            <button onClick={()=>{ if(!stiffness||triggerVals.length===0||painLevel===null){alert("请完整填写");return;} handleSubmit(); }}
-              style={{ minHeight: 44, background: COLORS.brandBlue }}
-              className="flex-[2] py-3 rounded-full text-white font-bold text-sm border-0 cursor-pointer">提交查看方案 →</button>
-          </div>
-        </>}
-      </div>
-      )}
-    </div>
-  );
-}
 
 // ── Device Flow ────────────────────────────────────────────────────────────────
 
@@ -886,13 +616,18 @@ export function HomePage({
     return <NotificationsPage onBack={() => setSubView("main")} />;
   }
   if (subView === "assessment") {
-    return <AssessmentFlow
-      onDone={(r) => { onAssessmentDone(r); }}
-      onCancel={() => setSubView("main")}
-      onStartDevice={(level) => { setPresetLevel(level); setSubView("device"); }}
-      prefillName={userName}
-      prefillGender={userGender}
-      prefillAgeRange={userAgeRange}
+    return <ManualAssessment
+      onBack={() => setSubView("main")}
+      onDone={(r) => {
+        onAssessmentDone(r);
+        setPresetLevel(r.recommendedLevel);
+        setSubView("device");
+      }}
+      existingData={{
+        name: userName,
+        gender: userGender,
+        ageRange: userAgeRange
+      }}
     />;
   }
   if (subView === "device") {
