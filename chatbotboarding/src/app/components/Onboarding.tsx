@@ -73,7 +73,7 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
           <div style={{ display: "flex", gap: 8 }}>
             {[
               { icon: "🧠", title: "动态 AI 引擎", desc: "实时分析·持续优化" },
-              { icon: "📈", title: "量化康复进度", desc: "数据可视·清晰追踪" },
+              { icon: "📈", title: "量化康养进度", desc: "数据可视·清晰追踪" },
               { icon: "⚡", title: "每日智能调参", desc: "强度自适应·精准加载" },
             ].map(({ icon, title, desc }) => (
               <div key={title} style={{
@@ -161,7 +161,7 @@ function Step2({
           开启智能模式
         </h2>
         <p style={{ fontSize: 14, color: COLORS.neutralGray, textAlign: "center", lineHeight: 1.6 }}>
-          让小瑞全程陪伴你的康复之旅
+          让小瑞全程陪伴你的康养之旅
         </p>
       </div>
 
