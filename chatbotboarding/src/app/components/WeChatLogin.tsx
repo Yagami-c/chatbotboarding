@@ -85,25 +85,24 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
 
         {/* Features list */}
         <div style={{ flex: 1, padding: "12px 16px 0", display: "flex", alignItems: "center" }}>
-          <div style={{ background: "white", borderRadius: 14, overflow: "hidden",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)", width: "100%" }}>
+          <div style={{ display: "flex", gap: 8, width: "100%" }}>
             {[
-              { icon: "🏥", color: "#DBEAFE", title: "AI 个性化方案", sub: "根据你的情况智能推荐" },
-              { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡，看见成长" },
-              { icon: "🔬", color: "#FFF5E8", title: "专家团队研发", sub: "香港理工大学研究成果" },
-            ].map(({ icon, color, title, sub }, i, arr) => (
+              { icon: "🏥", color: "#DBEAFE", title: "AI 个性化", sub: "智能推荐方案" },
+              { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡成长" },
+              { icon: "🔬", color: "#FFF5E8", title: "专家研发", sub: "港理工成果" },
+            ].map(({ icon, color, title, sub }) => (
               <div key={title} style={{
-                display: "flex", alignItems: "center", gap: 14,
-                padding: "11px 16px",
-                borderBottom: i < arr.length - 1 ? "1px solid #F5F5F5" : "none",
+                flex: 1, background: "white", borderRadius: 14,
+                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                padding: "12px 8px",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                textAlign: "center",
               }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
                   {icon}
                 </div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#191919" }}>{title}</div>
-                  <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>{sub}</div>
-                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#191919" }}>{title}</div>
+                <div style={{ fontSize: 11, color: "#999", lineHeight: 1.3 }}>{sub}</div>
               </div>
             ))}
           </div>

@@ -643,8 +643,8 @@ export function BottomNav({active,onChange}:{active:Tab;onChange:(t:Tab)=>void})
               }}>
               {/* Raised pill */}
               <div style={{
-                marginTop: -18,
-                width: 56, height: 56,
+                marginTop: -22,
+                width: 64, height: 64,
                 borderRadius: "50%",
                 background: a
                   ? "linear-gradient(145deg,#2A8FE0 0%,#1468B0 100%)"
@@ -657,7 +657,7 @@ export function BottomNav({active,onChange}:{active:Tab;onChange:(t:Tab)=>void})
                 transform: a ? "translateY(-2px)" : "translateY(0)",
               }}>
                 {/* Inline avatar — white on active, blue on inactive */}
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
                   {(() => {
                     const c = a ? "white" : "#1A7AC7";
                     const fill = a ? "rgba(255,255,255,0.15)" : "rgba(26,122,199,0.08)";
