@@ -87,9 +87,9 @@ export function WeChatLogin({ onLogin, onSkip }: WeChatLoginProps) {
         <div style={{ flex: 1, padding: "12px 16px 0", display: "flex", alignItems: "center" }}>
           <div style={{ display: "flex", gap: 8, width: "100%" }}>
             {[
-              { icon: "🏥", color: "#DBEAFE", title: "AI 个性化", sub: "智能推荐方案" },
-              { icon: "📊", color: "#EEF4FF", title: "进度追踪", sub: "每天打卡成长" },
-              { icon: "🔬", color: "#FFF5E8", title: "专家研发", sub: "港理工成果" },
+              { icon: "🏛", color: "#DBEAFE", title: "港理工认证", sub: "临床研究成果转化" },
+              { icon: "🩺", color: "#F0FDF4", title: "医研级方案", sub: "骨科专家团队研发" },
+              { icon: "🔒", color: "#FFF5E8", title: "数据安全", sub: "隐私合规·本地存储" },
             ].map(({ icon, color, title, sub }) => (
               <div key={title} style={{
                 flex: 1, background: "white", borderRadius: 14,

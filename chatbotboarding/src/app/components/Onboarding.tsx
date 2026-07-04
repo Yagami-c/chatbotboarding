@@ -72,9 +72,9 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
 
           <div style={{ display: "flex", gap: 8 }}>
             {[
-              { icon: "🤖", title: "AI 个性化", desc: "定制方案" },
-              { icon: "📊", title: "进度追踪", desc: "可视化进展" },
-              { icon: "🔬", title: "专家研发", desc: "港理工成果" },
+              { icon: "🧠", title: "动态 AI 引擎", desc: "实时分析·持续优化" },
+              { icon: "📈", title: "量化康复进度", desc: "数据可视·清晰追踪" },
+              { icon: "⚡", title: "每日智能调参", desc: "强度自适应·精准加载" },
             ].map(({ icon, title, desc }) => (
               <div key={title} style={{
                 flex: 1,
