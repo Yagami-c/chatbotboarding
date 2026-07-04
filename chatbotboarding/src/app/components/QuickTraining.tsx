@@ -222,9 +222,12 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
                     </label>
                     <input type="range" min={min} max={max} step={step} value={val}
                       onChange={(e)=>set(Number(e.target.value))}
-                      className="w-full h-2 bg-[#e2e8f0] rounded-full appearance-none cursor-pointer
-                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
-                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1A7AC7] [&::-webkit-slider-thumb]:cursor-pointer"/>
+                      style={{background:`linear-gradient(to right,#1A7AC7 0%,#1A7AC7 ${((val-min)/(max-min))*100}%,#e2e8f0 ${((val-min)/(max-min))*100}%,#e2e8f0 100%)`}}
+                      className="w-full h-2 rounded-full appearance-none cursor-pointer
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1A7AC7] [&::-webkit-slider-thumb]:cursor-pointer
+                        [&::-webkit-slider-thumb]:shadow-[0_1px_6px_rgba(26,122,199,0.5)]
+                        [&::-moz-range-progress]:bg-[#1A7AC7] [&::-moz-range-track]:bg-[#e2e8f0] [&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-full"/>
                   </div>
                 ))}
                 <div className="pt-2 border-t border-[#fde68a] text-xs text-[#92400e]">
