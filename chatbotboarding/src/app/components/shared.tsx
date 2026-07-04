@@ -482,11 +482,11 @@ function btnStyle(bg:string,color="white"): React.CSSProperties {
 
 // Tab color palette
 const TAB_COLORS = {
-  home:      { active: "#FF6B35", light: "rgba(255,107,53,0.12)"  },
-  training:  { active: "#3B82F6", light: "rgba(59,130,246,0.12)"  },
-  assistant: { active: "#1A7AC7", light: "rgba(7,193,96,0.12)"    },
-  discover:  { active: "#F59E0B", light: "rgba(245,158,11,0.12)"  },
-  profile:   { active: "#8B5CF6", light: "rgba(139,92,246,0.12)"  },
+  home:      { active: "#1A7AC7", light: "rgba(26,122,199,0.10)" },
+  training:  { active: "#1A7AC7", light: "rgba(26,122,199,0.10)" },
+  assistant: { active: "#1A7AC7", light: "rgba(26,122,199,0.10)" },
+  discover:  { active: "#1A7AC7", light: "rgba(26,122,199,0.10)" },
+  profile:   { active: "#1A7AC7", light: "rgba(26,122,199,0.10)" },
 };
 
 const NAV: {tab:Tab; label:string; icon:(a:boolean)=>React.ReactNode}[] = [
@@ -624,24 +624,80 @@ export function BottomNav({active,onChange}:{active:Tab;onChange:(t:Tab)=>void})
       borderTop: `1px solid ${WX.border}`,
       flexShrink: 0,
       paddingBottom: "max(env(safe-area-inset-bottom,0px),6px)",
+      position: "relative",
     }}>
       {NAV.map(({tab,label,icon})=>{
         const a = active===tab;
         const col = TAB_COLORS[tab].active;
         const isCenter = tab==="assistant";
+
+        if (isCenter) {
+          return (
+            <button key={tab} onClick={()=>onChange(tab)}
+              style={{
+                flex:1, display:"flex", flexDirection:"column", alignItems:"center",
+                justifyContent:"flex-start",
+                border:"none", cursor:"pointer", background:"transparent",
+                paddingBottom: 6, paddingTop: 0,
+                position:"relative",
+              }}>
+              {/* Raised pill */}
+              <div style={{
+                marginTop: -18,
+                width: 56, height: 56,
+                borderRadius: "50%",
+                background: a
+                  ? "linear-gradient(145deg,#2A8FE0 0%,#1468B0 100%)"
+                  : "linear-gradient(145deg,#f0f4f8 0%,#d8e4f0 100%)",
+                boxShadow: a
+                  ? "0 6px 18px rgba(26,122,199,0.45), 0 2px 6px rgba(26,122,199,0.3), inset 0 1px 0 rgba(255,255,255,0.3)"
+                  : "0 4px 12px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.8)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                transition:"all 0.2s ease",
+                transform: a ? "translateY(-2px)" : "translateY(0)",
+              }}>
+                {/* Inline avatar — white on active, blue on inactive */}
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  {(() => {
+                    const c = a ? "white" : "#1A7AC7";
+                    const fill = a ? "rgba(255,255,255,0.15)" : "rgba(26,122,199,0.08)";
+                    return <>
+                      <circle cx="12" cy="8" r="4" stroke={c} strokeWidth="1.8" fill={fill}/>
+                      <path d="M8.5 6.5h7" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+                      <line x1="12" y1="5" x2="12" y2="7.5" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+                      <line x1="10.5" y1="6.25" x2="13.5" y2="6.25" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+                      <path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke={c} strokeWidth="1.8" strokeLinecap="round" fill={fill}/>
+                      <path d="M9 13 Q8 15 9 16" stroke={c} strokeWidth="1.3" strokeLinecap="round" fill="none"/>
+                      <circle cx="9" cy="16" r="1" stroke={c} strokeWidth="1.2" fill="none"/>
+                    </>;
+                  })()}
+                </svg>
+              </div>
+              <span style={{
+                fontSize: 10,
+                fontWeight: a ? 700 : 400,
+                color: a ? col : "#BDBDBD",
+                marginTop: 4,
+                transition:"color 0.18s",
+              }}>
+                {label}
+              </span>
+            </button>
+          );
+        }
+
         return (
           <button key={tab} onClick={()=>onChange(tab)}
             style={{
               flex:1, display:"flex", flexDirection:"column", alignItems:"center",
               justifyContent:"center",
-              gap: isCenter ? 2 : 4,
-              paddingTop: isCenter ? 6 : 8,
-              paddingBottom: isCenter ? 6 : 8,
+              gap: 4,
+              paddingTop: 8,
+              paddingBottom: 8,
               border:"none", cursor:"pointer",
               background: a ? TAB_COLORS[tab].light : "transparent",
               borderTop: `2.5px solid ${a ? col : "transparent"}`,
               transition:"all 0.18s ease",
-              position:"relative",
             }}>
             {icon(a)}
             <span style={{

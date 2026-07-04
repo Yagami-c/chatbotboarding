@@ -70,26 +70,23 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
             科学评估、智能训练、专家陪伴&nbsp;&nbsp;每天几分钟，让膝盖越来越好
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8 }}>
             {[
-              { title: "AI 个性化", desc: "根据你的情况定制方案" },
-              { title: "进度追踪", desc: "可视化康复进展" },
-              { title: "专家研发", desc: "香港理工大学武汉研究院" },
-            ].map(({ title, desc }) => (
-              <div key={title} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 22, height: 22, borderRadius: "50%",
-                  background: COLORS.mistBlue, flexShrink: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center"
-                }}>
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6L5 9L10 3" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.deepNavy }}>{title}</div>
-                  <div style={{ fontSize: 11, color: COLORS.neutralGray }}>{desc}</div>
-                </div>
+              { icon: "🤖", title: "AI 个性化", desc: "定制方案" },
+              { icon: "📊", title: "进度追踪", desc: "可视化进展" },
+              { icon: "🔬", title: "专家研发", desc: "港理工成果" },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} style={{
+                flex: 1,
+                background: COLORS.mistBlue,
+                borderRadius: 12,
+                padding: "10px 8px",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                textAlign: "center",
+              }}>
+                <div style={{ fontSize: 20 }}>{icon}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.deepNavy }}>{title}</div>
+                <div style={{ fontSize: 10, color: COLORS.neutralGray, lineHeight: 1.3 }}>{desc}</div>
               </div>
             ))}
           </div>
