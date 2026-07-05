@@ -199,10 +199,8 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
                   <div className="font-semibold">{getLevelName(level)} · {LEVELS[level-1]}</div>
                   <div className="text-xs mt-1 text-[#2563EB]">{LEVEL_DESCS[level]}</div>
                   <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
-                    <span>💨 {prm.pressure} mmHg</span>
-                    <span>⏱ {prm.work}s 工作</span>
-                    <span>🔄 {prm.rest}s 休息</span>
-                    <span>🔁 {prm.cycles} 轮</span>
+                    <span>🎯 {LEVELS[level-1]}模式</span>
+                    <span>⏱ 约 {Math.floor((prm.cycles*(prm.work+prm.rest))/60)} 分钟</span>
                   </div>
                 </div>
               </>
@@ -314,7 +312,7 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
                 style={{width:`${progress}%`}}/>
             </div>
             <div className="flex justify-between text-xs text-[#718096]">
-              <span>当前轮数：{cycle} / {prm.cycles}</span>
+              <span>进度：{cycle} / {prm.cycles} 轮</span>
               <span>{progress}%</span>
             </div>
           </div>
