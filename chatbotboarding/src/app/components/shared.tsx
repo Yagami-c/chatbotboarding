@@ -418,13 +418,12 @@ export function FloatBall({deviceState,hwLevel,hwCycle,hwTotalCycles,hwRemaining
               <div style={{fontSize:11,color:WX.text2,marginTop:2,lineHeight:1.4}}>{LEVEL_DESCS[hwLevel]}</div>
             </div>
 
-            {/* Params 2×2 grid */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+            {/* Params — hide raw values, show level/time/cycles only */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
               {[
-                {l:"负压强度",v:`${prm.pressure} mmHg`},
-                {l:"作用时间",v:`${prm.work} s`},
-                {l:"休息间隔",v:`${prm.rest} s`},
-                {l:"循环轮数",v:deviceState==="idle"?`0/${prm.cycles}`:`${hwCycle}/${hwTotalCycles}`},
+                {l:"强度",v:getLevelName(hwLevel)},
+                {l:"总时长",v:formatTime(hwTotal)},
+                {l:"轮数",v:deviceState==="idle"?`0/${prm.cycles}`:`${hwCycle}/${hwTotalCycles}`},
               ].map(({l,v})=>(
                 <div key={l} style={{background:WX.bg,border:`1px solid ${WX.border}`,borderRadius:8,padding:"8px 6px",textAlign:"center"}}>
                   <div style={{fontSize:10,color:WX.text3,marginBottom:2}}>{l}</div>
