@@ -370,7 +370,7 @@ function Step3({
 // ── Main Onboarding ────────────────────────────────────────────────────────────
 export function Onboarding({ onDone }: OnboardingProps) {
   const [step, setStep] = useState(1);
-  const [smartMode, setSmartMode] = useState(false); // Default OFF before confirmation
+  const [smartMode, setSmartMode] = useState(true); // Default ON
 
   const skip = () => onDone(false, "home");
 

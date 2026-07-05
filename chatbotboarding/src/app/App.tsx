@@ -781,7 +781,6 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 }}
                   className="bg-white border border-[#e8ecf0] text-[#2d3748] px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer active:bg-[#f7fafc] transition-colors text-left">
                   <span className="font-semibold">{getLevelName(lv)} · {name}</span>
-                  <span className="ml-2 text-xs text-[#718096]">{p.pressure}mmHg · {p.work}s/{p.rest}s · {p.cycles}轮</span>
                 </button>
               );
             })}
@@ -800,19 +799,16 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                   <div style={{fontSize:12,color:"#9ca3af"}}>{LEVELS[lv-1]||"温和"}模式 · {getLevelName(lv)}</div>
                 </div>
               </div>
-              {/* Params grid */}
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
-                {[
-                  {icon:"💨",label:"压力",v:`${prm.pressure} mmHg`},
-                  {icon:"⏱",label:"工作",v:`${prm.work} 秒`},
-                  {icon:"🔄",label:"休息",v:`${prm.rest} 秒`},
-                  {icon:"🔁",label:"循环",v:`${prm.cycles} 次`},
-                ].map(({icon,label,v})=>(
-                  <div key={label} style={{background:"#F7F8FA",borderRadius:10,padding:"8px 10px"}}>
-                    <div style={{fontSize:11,color:"#9ca3af",marginBottom:2}}>{icon} {label}</div>
-                    <div style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{v}</div>
-                  </div>
-                ))}
+              {/* Params — show mode and total time only */}
+              <div style={{display:"flex",gap:8,marginBottom:12}}>
+                <div style={{flex:1,background:"#F7F8FA",borderRadius:10,padding:"8px 10px"}}>
+                  <div style={{fontSize:11,color:"#9ca3af",marginBottom:2}}>🎯 模式</div>
+                  <div style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{LEVELS[lv-1]||"温和"}</div>
+                </div>
+                <div style={{flex:1,background:"#F7F8FA",borderRadius:10,padding:"8px 10px"}}>
+                  <div style={{fontSize:11,color:"#9ca3af",marginBottom:2}}>⏱ 总时长</div>
+                  <div style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{Math.floor(total/60)}分{total%60}秒</div>
+                </div>
               </div>
               <div style={{fontSize:12,color:"#9ca3af",textAlign:"center"}}>
                 📅 每天 1-2 次 · 约 {Math.floor(total/60)} 分 {total%60} 秒
@@ -914,7 +910,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
                 {getLevelName(ud.finalLevel)} <span style={{fontSize:14,fontWeight:400,color:"#9ca3af"}}>{LEVELS[(ud.finalLevel||2)-1]}模式</span>
               </div>
               <div style={{fontSize:12,color:"#9ca3af"}}>
-                {prm.pressure}mmHg · 工作{prm.work}s · 休息{prm.rest}s · {prm.cycles}轮
+                {LEVELS[(ud.finalLevel||2)-1]}模式 · 约 {Math.floor((prm.cycles*(prm.work+prm.rest))/60)} 分钟
               </div>
             </div>
             <button onClick={()=>{targetTherapyPhase.current="daily_therapy";setShowDeviceConfirm(true);}}
