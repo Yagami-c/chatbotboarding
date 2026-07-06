@@ -3,6 +3,7 @@ import { AppScreen, Tab, UserData, Msg, Task, Phase, SurveyStep, HwState, Device
 import { FloatBall, BtnRow, Pill, FormCard, FormGroup, StyledInput, SubmitBtn, ResultCard, InfoBox, ThinkingDots, Stars, BottomNav } from "./components/shared";
 import { WeChatLogin } from "./components/WeChatLogin";
 import { Onboarding } from "./components/Onboarding";
+import { askDeepSeek, ChatMessage } from "./deepseek";
 import { HomePage } from "./components/HomePage";
 import { ManualAssessment } from "./components/ManualAssessment";
 import { QuickTraining } from "./components/QuickTraining";
@@ -389,7 +390,7 @@ function DailyOptimizeSummary({feel,currentDay,onNext,onGoTraining,onGoDiscover}
 function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messagesRef,
   onSubmitDuration,onSubmitStiffness,onGoToNextDay,onSubmitDailyFeel,onReset,
   day1PainRef,onStartAssessment,onStartTraining,smartMode,onToggleSmartMode,
-  addMsg,simulateThinking,setPhase,setUserData,setSurveyStep,setTaskIdx,setMsgs,setTab,onStartDevice,deviceState}:{
+  addMsg,simulateThinking,askBot,setPhase,setUserData,setSurveyStep,setTaskIdx,setMsgs,setTab,onStartDevice,deviceState}:{
   msgs:Msg[];phase:Phase;tasks:Task[];taskIdx:number;currentDay:number;ud:UserData;
   thinking:boolean;messagesRef:React.RefObject<HTMLDivElement|null>;
   onSubmitDuration:(d:string)=>void;onSubmitStiffness:(l:number)=>void;
@@ -399,6 +400,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
   smartMode:boolean;onToggleSmartMode:()=>void;
   addMsg:(role:"bot"|"user",html:string,editPhase?:Phase)=>void;
   simulateThinking:(cb:()=>void)=>void;
+  askBot:(userText:string,fallback:string,afterCb?:()=>void)=>Promise<void>;
   setPhase:(p:Phase)=>void;
   setUserData:React.Dispatch<React.SetStateAction<UserData>>;
   setSurveyStep:React.Dispatch<React.SetStateAction<SurveyStep|null>>;
@@ -1013,9 +1015,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           if(!text)return;
           addMsg("user",text);
           input.value="";
-          simulateThinking(()=>{
-            addMsg("bot","我理解了，让我为你记录下来。如果有其他问题随时告诉我！");
-          });
+          askBot(text,"我理解了，让我为你记录下来。如果有其他问题随时告诉我！");
         }} className="flex gap-2 items-center">
           <input
             type="text"
@@ -1076,6 +1076,8 @@ export default function App() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const msgId = useRef(0);
   const day1PainRef = useRef<number>(0);
+  const isEarlyStopRef = useRef(false);
+  const chatHistoryRef = useRef<ChatMessage[]>([]);
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -1085,7 +1087,7 @@ export default function App() {
 
   // 监听设备训练完成
   useEffect(() => {
-    if (hwRemaining === 0 && hwTotal > 0 && hwState === "running" && tab === "assistant") {
+    if (hwRemaining === 0 && hwTotal > 0 && hwState === "running" && tab === "assistant" && !isEarlyStopRef.current) {
       setHwState("idle");
       setDeviceState("idle");
 
@@ -1188,6 +1190,23 @@ export default function App() {
     }, delay);
   };
 
+  // Ask DeepSeek and post the reply as a bot message. Falls back to fallback string on error.
+  const askBot = async (userText: string, fallback: string, afterCb?: () => void) => {
+    chatHistoryRef.current = [...chatHistoryRef.current, { role: "user", content: userText }];
+    setThinking(true);
+    try {
+      const reply = await askDeepSeek(chatHistoryRef.current);
+      chatHistoryRef.current = [...chatHistoryRef.current, { role: "assistant", content: reply }];
+      setThinking(false);
+      addMsg("bot", reply);
+    } catch {
+      chatHistoryRef.current = [...chatHistoryRef.current, { role: "assistant", content: fallback }];
+      setThinking(false);
+      addMsg("bot", fallback);
+    }
+    afterCb?.();
+  };
+
   const handleConnect = () => {
     if (deviceState === "disconnected") setDeviceState("idle");
   };
@@ -1217,6 +1236,7 @@ export default function App() {
 
   const handleStop = () => {
     if (tab === "assistant" && hwState === "running" && (phase === "day1_therapy" || phase === "daily_therapy")) {
+      isEarlyStopRef.current = true;
       setShowStopModal(true);
     }
     setHwState("stopped");
@@ -1332,6 +1352,7 @@ export default function App() {
               smartMode={smartMode}
               addMsg={addMsg}
               simulateThinking={simulateThinking}
+              askBot={askBot}
               setPhase={setPhase}
               onToggleSmartMode={() => {
                 const newMode = !smartMode;
@@ -1631,6 +1652,7 @@ export default function App() {
         open={showStopModal}
         onClose={(reasons) => {
           setShowStopModal(false);
+          isEarlyStopRef.current = false;
           addMsg("user", reasons.join("、"));
           const hasEncouragementReasons = reasons.some(r => ["忘记了", "没时间", "效果不明显"].includes(r));
           simulateThinking(() => {
