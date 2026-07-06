@@ -174,9 +174,8 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
                   <div className="font-semibold text-[#1E3A5F]">{getLevelName(level)} · {LEVELS[level-1]}</div>
                   <div className="text-xs mt-1 text-[#2563EB]">{LEVEL_DESCS[level]}</div>
                   <div className="flex gap-3 mt-2 text-xs text-[#4a5568] flex-wrap">
-                    <span>{prm.pressure} mmHg</span><span>{prm.work}s 工作</span>
-                    <span>{prm.rest}s 休息</span><span>{prm.cycles} 轮</span>
-                    <span>约 {Math.floor(totalTime/60)}分{totalTime%60}秒</span>
+                    <span>🎯 {LEVELS[level-1]}模式</span>
+                    <span>⏱ 约 {Math.floor(totalTime/60)} 分钟</span>
                   </div>
                 </div>
               </>
