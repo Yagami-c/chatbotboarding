@@ -12,6 +12,23 @@ import { TrainingPage } from "./components/TrainingPage";
 import { DiscoverPage } from "./components/DiscoverPage";
 import { ProfilePage } from "./components/ProfilePage";
 import { COLORS, DESIGN } from "./design-system";
+import gif转身摸臀 from "../assets/gifs/转身摸臀.gif";
+import gif后踢臀部 from "../assets/gifs/后踢臀部.gif";
+import gif提膝碰肘 from "../assets/gifs/提膝碰肘.gif";
+import gif螃蟹步   from "../assets/gifs/螃蟹步.gif";
+import gif臀部找椅 from "../assets/gifs/臀部找椅.gif";
+import gif站立提踵 from "../assets/gifs/站立提踵.gif";
+import gif快步走   from "../assets/gifs/快步走.gif";
+import gif拉伸臀部 from "../assets/gifs/拉伸臀部.gif";
+import gif拉伸大腿后侧 from "../assets/gifs/拉伸大腿后侧.gif";
+import gif拉伸躯干 from "../assets/gifs/拉伸躯干.gif";
+
+const EXERCISE_GIF: Record<string, string> = {
+  "转身摸臀": gif转身摸臀, "后踢臀部": gif后踢臀部, "提膝碰肘": gif提膝碰肘,
+  "螃蟹步": gif螃蟹步, "臀部找椅": gif臀部找椅, "站立提踵": gif站立提踵,
+  "快步走": gif快步走, "拉伸臀部": gif拉伸臀部, "拉伸大腿后侧": gif拉伸大腿后侧,
+  "拉伸躯干": gif拉伸躯干,
+};
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -329,9 +346,86 @@ function SurveyModal({open,onClose,step,userData,onSubmit}:{
   );
 }
 
+// ── Trigger → training recommendation map ────────────────────────────────────
+
+const ALL_EXERCISES: Record<string, { sets: string; desc: string }> = {
+  "转身摸臀":    { sets:"左右各 10 次",          desc:"双脚与肩同宽，上身挺直，向后转身用手摸对侧臀部，左右交替。" },
+  "后踢臀部":    { sets:"左右各 10 次",          desc:"双脚与肩同宽，双手叉腰，脚跟向后踢臀部，左右交替。" },
+  "提膝碰肘":    { sets:"左右各 8 次 × 3 循环", desc:"吐气收腹提膝碰对侧肘，保持身体面向正前方，做完一侧再换边。" },
+  "螃蟹步":      { sets:"左右各 4 步 × 2 组",   desc:"微蹲保持姿势，横向移步，左右各走 4 步为一组。" },
+  "臀部找椅":    { sets:"8 次 × 3 循环",         desc:"站在椅前，臀部向后轻触椅缘后缓慢起身，膝盖不超过脚尖。" },
+  "站立提踵":    { sets:"8 次 × 3 循环",         desc:"双手扶椅，脚尖踮到最高再缓慢放下。" },
+  "快步走":      { sets:"快走 100 步",            desc:"以最自然的状态快速走 100 步，步伐轻盈。" },
+  "拉伸臀部":    { sets:"左右各 20 秒 × 2 组",   desc:"坐位，脚踝搭在对侧大腿上，上身挺直前倾，感受臀部拉紧。" },
+  "拉伸大腿后侧":{ sets:"左右各 20 秒 × 2 组",   desc:"坐位，伸直腿勾脚尖，上身挺直前倾，感受大腿后侧拉紧。" },
+  "拉伸躯干":    { sets:"左右各 20 秒 × 2 组",   desc:"坐位，身体向一侧转到最大范围，感受躯干拉紧，保持 20 秒。" },
+};
+
+const TRIGGER_TRAINING: Record<string, { label: string; exercises: string[] }> = {
+  "下蹲":         { label: "臀腿强化",  exercises: ["臀部找椅", "螃蟹步", "拉伸臀部"] },
+  "上楼梯/斜坡":  { label: "股四头肌",  exercises: ["站立提踵", "臀部找椅", "拉伸大腿后侧"] },
+  "下楼梯/斜坡":  { label: "离心控制",  exercises: ["螃蟹步", "臀部找椅", "拉伸大腿后侧"] },
+  "久坐后站起来": { label: "热身激活",  exercises: ["转身摸臀", "后踢臀部", "拉伸躯干"] },
+  "长时间走路":   { label: "放松恢复",  exercises: ["快步走", "拉伸臀部", "拉伸大腿后侧"] },
+  "跑步/运动":    { label: "强化+放松", exercises: ["提膝碰肘", "螃蟹步", "拉伸躯干"] },
+};
+const DEFAULT_TRAINING = { label: "综合训练", exercises: ["转身摸臀", "臀部找椅", "拉伸臀部"] };
+
+function TrainingRecommendCard({ mainTrigger }: { mainTrigger: string }) {
+  const rec = TRIGGER_TRAINING[mainTrigger] ?? DEFAULT_TRAINING;
+  const [expanded, setExpanded] = useState<string | null>(null);
+  return (
+    <div className="rounded-2xl bg-white border border-[#BFDBFE] overflow-hidden">
+      <div className="px-4 py-2.5 bg-[#EFF6FF]">
+        <div className="text-sm font-bold text-[#1A7AC7]">🏃 今日训练推荐</div>
+        <div className="text-xs text-[#6B7280] mt-0.5">
+          {mainTrigger ? `针对「${mainTrigger}」· ${rec.label}` : rec.label}
+        </div>
+      </div>
+      <div className="divide-y divide-[#EFF6FF]">
+        {rec.exercises.map((name, i) => {
+          const ex = ALL_EXERCISES[name];
+          const open = expanded === name;
+          return (
+            <div key={name} onClick={() => setExpanded(open ? null : name)}
+              className="px-4 py-3 cursor-pointer active:bg-[#F8FAFC] transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#DBEAFE] text-[#1E40AF] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className="text-sm font-semibold text-[#1a202c]">{name}</div>
+                    <div className="text-xs text-[#9CA3AF]">{ex?.sets}</div>
+                  </div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "none", flexShrink: 0 }}>
+                  <path d="M6 9l6 6 6-6" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              {open && (
+                <div className="mt-2 rounded-xl overflow-hidden bg-[#F0F9FF]">
+                  {EXERCISE_GIF[name] && (
+                    <img src={EXERCISE_GIF[name]} alt={name}
+                      className="w-full object-cover" style={{ maxHeight: 200 }} />
+                  )}
+                  <div className="px-3 py-2 text-xs text-[#4B5563] leading-relaxed">
+                    {ex?.desc}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── DailyOptimizeSummary — extracted to avoid hook-in-conditional violation ────
-function DailyOptimizeSummary({feel,currentDay,onNext,onGoTraining,onGoDiscover}:{
-  feel:string;currentDay:number;onNext:()=>void;onGoTraining?:()=>void;onGoDiscover?:()=>void;
+function DailyOptimizeSummary({feel,currentDay,mainTrigger,onNext,onGoTraining,onGoDiscover}:{
+  feel:string;currentDay:number;mainTrigger?:string;onNext:()=>void;onGoTraining?:()=>void;onGoDiscover?:()=>void;
 }) {
   const [tab,setTab]=useState<"today"|"example">("today");
   const better=feel==="better", worse=feel==="worse";
@@ -362,20 +456,14 @@ function DailyOptimizeSummary({feel,currentDay,onNext,onGoTraining,onGoDiscover}
         </div>
       )}
 
-      {/* 快捷导航按钮 */}
-      {(onGoTraining || onGoDiscover) && (
-        <div className="flex gap-2">
-          {onGoTraining && (
-            <button onClick={onGoTraining} className="flex-1 py-2.5 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
-              🏃 训练
-            </button>
-          )}
-          {onGoDiscover && (
-            <button onClick={onGoDiscover} className="flex-1 py-2.5 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
-              📖 科普
-            </button>
-          )}
-        </div>
+      {/* 个性化训练推荐 */}
+      <TrainingRecommendCard mainTrigger={mainTrigger ?? ""} />
+
+      {/* 科普快捷入口 */}
+      {onGoDiscover && (
+        <button onClick={onGoDiscover} className="w-full py-2.5 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+          📖 科普
+        </button>
       )}
 
       <button onClick={onNext} className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#1570B8] transition-all">
@@ -866,14 +954,10 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#1570B8] transition-all">
                 📅 进入第2天
               </button>
-              <div className="flex gap-2">
-                <button onClick={()=>setTab("training")} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
-                  🏃 训练
-                </button>
-                <button onClick={()=>setTab("discover")} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
-                  📖 科普
-                </button>
-              </div>
+              <TrainingRecommendCard mainTrigger={ud.mainTrigger ?? ""} />
+              <button onClick={()=>setTab("discover")} className="w-full py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                📖 科普
+              </button>
             </div>
           );
         })()}
@@ -928,6 +1012,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <DailyOptimizeSummary
             feel={ud.dailyFeel}
             currentDay={currentDay}
+            mainTrigger={ud.mainTrigger}
             onNext={onGoToNextDay}
             onGoTraining={() => setTab("training")}
             onGoDiscover={() => setTab("discover")}
