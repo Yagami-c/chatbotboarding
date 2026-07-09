@@ -25,7 +25,7 @@ const SAFETY_LIST = [
   {v:"肿胀",l:"膝盖明显肿胀/发炎", risk: true},
   {v:"伤口",l:"膝盖周围有伤口或皮肤问题", risk: true},
   {v:"医生建议",l:"医生建议避免使用此类设备", risk: true},
-  {v:"轻微受限",l:"膝盖有轻微肿胀或活动受限", risk: false, directL1: true},
+  {v:"轻微受限",l:"2-4周前有过膝关节受伤，目前仍有轻微肿胀", risk: false, directL1: true},
   {v:"无",l:"以上都没有", risk: false},
 ];
 

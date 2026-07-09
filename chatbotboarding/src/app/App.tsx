@@ -122,7 +122,7 @@ function SafetySurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
     <div>
       <p className="text-sm text-[#4a5568] mb-3">请问目前是否有以下情况？（可多选）</p>
       <FormCard>
-        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"显著受损",l:"膝盖有轻微肿胀或活动受限"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
+        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"显著受损",l:"2-4周前有过膝关节受伤，目前仍有轻微肿胀"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
           <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
             <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))}/>{l}
           </label>
@@ -371,19 +371,33 @@ const TRIGGER_TRAINING: Record<string, { label: string; exercises: string[] }> =
 };
 const DEFAULT_TRAINING = { label: "综合训练", exercises: ["转身摸臀", "臀部找椅", "拉伸臀部"] };
 
-function TrainingRecommendCard({ mainTrigger }: { mainTrigger: string }) {
-  const rec = TRIGGER_TRAINING[mainTrigger] ?? DEFAULT_TRAINING;
+function TrainingRecommendCard({ stiffness }: { stiffness: number | null }) {
+  const [exercises] = useState<string[]>(() => {
+    const stretches = ["拉伸臀部", "拉伸大腿后侧", "拉伸躯干"];
+    const randStretch = () => stretches[Math.floor(Math.random() * stretches.length)];
+    if (stiffness === 1 || stiffness === 2) {
+      const groups = [["快步走", randStretch()], ["转身摸臀", randStretch()]];
+      return groups[Math.floor(Math.random() * groups.length)];
+    }
+    const pairs = [
+      ["后踢臀部", "拉伸大腿后侧"],
+      ["臀部找椅", "拉伸臀部"],
+      ["站立提踵", "拉伸大腿后侧"],
+      ["螃蟹步", "拉伸臀部"],
+      ["提膝碰肘", "拉伸躯干"],
+    ];
+    return pairs[Math.floor(Math.random() * pairs.length)];
+  });
+  const label = (stiffness === 1 || stiffness === 2) ? "拉伸放松" : "强化训练";
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
     <div className="rounded-2xl bg-white border border-[#BFDBFE] overflow-hidden">
       <div className="px-4 py-2.5 bg-[#EFF6FF]">
         <div className="text-sm font-bold text-[#1A7AC7]">🏃 今日训练推荐</div>
-        <div className="text-xs text-[#6B7280] mt-0.5">
-          {mainTrigger ? `针对「${mainTrigger}」· ${rec.label}` : rec.label}
-        </div>
+        <div className="text-xs text-[#6B7280] mt-0.5">{label}</div>
       </div>
       <div className="divide-y divide-[#EFF6FF]">
-        {rec.exercises.map((name, i) => {
+        {exercises.map((name, i) => {
           const ex = ALL_EXERCISES[name];
           const open = expanded === name;
           return (
@@ -424,8 +438,8 @@ function TrainingRecommendCard({ mainTrigger }: { mainTrigger: string }) {
 }
 
 // ── DailyOptimizeSummary — extracted to avoid hook-in-conditional violation ────
-function DailyOptimizeSummary({feel,currentDay,mainTrigger,onNext,onGoTraining,onGoDiscover}:{
-  feel:string;currentDay:number;mainTrigger?:string;onNext:()=>void;onGoTraining?:()=>void;onGoDiscover?:()=>void;
+function DailyOptimizeSummary({feel,currentDay,stiffness,onNext,onGoTraining,onGoDiscover}:{
+  feel:string;currentDay:number;stiffness?:number|null;onNext:()=>void;onGoTraining?:()=>void;onGoDiscover?:()=>void;
 }) {
   const [tab,setTab]=useState<"today"|"example">("today");
   const better=feel==="better", worse=feel==="worse";
@@ -457,7 +471,7 @@ function DailyOptimizeSummary({feel,currentDay,mainTrigger,onNext,onGoTraining,o
       )}
 
       {/* 个性化训练推荐 */}
-      <TrainingRecommendCard mainTrigger={mainTrigger ?? ""} />
+      <TrainingRecommendCard stiffness={stiffness ?? null} />
 
       {/* 科普快捷入口 */}
       {onGoDiscover && (
@@ -614,20 +628,39 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               </div>
             </div>
           </div>
-          {/* Smart mode toggle */}
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            <span style={{fontSize:11,color:COLORS.neutralGray,fontWeight:500}}>{smartMode?"智能":"手动"}</span>
-            <button onClick={onToggleSmartMode}
-              style={{
-                width:44,height:24,borderRadius:12,border:"none",cursor:"pointer",position:"relative",
-                background:smartMode?COLORS.brandBlue:"#d1d5db",transition:"background 0.2s"
-              }}>
-              <span style={{
-                position:"absolute",top:2,left:smartMode?22:2,width:20,height:20,
-                borderRadius:"50%",background:"white",transition:"left 0.2s",
-                boxShadow:"0 1px 4px rgba(0,0,0,0.2)"
-              }}/>
-            </button>
+          {/* Smart mode toggle + 开始评估 */}
+          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6,flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:11,color:COLORS.neutralGray,fontWeight:500}}>{smartMode?"智能":"手动"}</span>
+              <button onClick={onToggleSmartMode}
+                style={{
+                  width:44,height:24,borderRadius:12,border:"none",cursor:"pointer",position:"relative",
+                  background:smartMode?COLORS.brandBlue:"#d1d5db",transition:"background 0.2s"
+                }}>
+                <span style={{
+                  position:"absolute",top:2,left:smartMode?22:2,width:20,height:20,
+                  borderRadius:"50%",background:"white",transition:"left 0.2s",
+                  boxShadow:"0 1px 4px rgba(0,0,0,0.2)"
+                }}/>
+              </button>
+            </div>
+            {(phase==="smart_intro"||phase==="smart_confirm_assessment"||phase==="day1_survey")&&(
+              <button onClick={() => {
+                addMsg("user","开始评估");
+                if (ud.name && ud.gender && ud.ageRange) {
+                  setSurveyStep("safety");
+                } else {
+                  setSurveyStep("new_user");
+                }
+              }}
+                style={{
+                  background:COLORS.brandBlue,color:"white",
+                  padding:"5px 12px",borderRadius:20,fontSize:11,fontWeight:600,
+                  border:"none",cursor:"pointer",whiteSpace:"nowrap"
+                }}>
+                开始评估
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -934,15 +967,18 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           const isSkin=feel==="skin";
           const levelUp=strength==="weak";
           const levelDown=isSkin||strength==="strong";
-          const title=levelDown?"当前强度偏强":levelUp?"当前强度偏轻":"当前方案适合你";
-          const body=levelDown
-            ?"为了提高舒适度，下次我会为你降低一级强度。"
-            :levelUp
+          // Q5-based summary: good=方案适合, neutral=偏轻, mild/skin=偏强
+          const q5Good=feel==="good";
+          const q5Light=feel==="neutral";
+          const title=q5Good?"当前方案适合你":q5Light?"当前强度偏轻":"当前强度偏强";
+          const body=q5Good
+            ?"整体感觉良好，未出现明显不适。"
+            :q5Light
             ?"为了获得更好的效果，我会为你提高一级强度。"
-            :"整体感觉良好，未出现明显不适。";
+            :"为了提高舒适度，下次我会为你降低一级强度。";
           return (
             <div className="self-start w-[92%] animate-[fadeUp_0.3s_ease] flex flex-col gap-2">
-              <div className={`rounded-2xl p-4 border-l-4 ${levelDown?"bg-[#fff7ed] border-[#f97316]":levelUp?"bg-[#EFF6FF] border-[#1A7AC7]":"bg-[#EFF6FF] border-[#1A7AC7]"}`}>
+              <div className={`rounded-2xl p-4 border-l-4 ${(!q5Good&&!q5Light)?"bg-[#fff7ed] border-[#f97316]":q5Light?"bg-[#EFF6FF] border-[#1A7AC7]":"bg-[#EFF6FF] border-[#1A7AC7]"}`}>
                 <div className="text-base font-bold mb-1">{title}</div>
                 <div className="text-sm text-[#374151]">{body}</div>
                 <div className="text-sm text-[#374151] mt-1">下次再见！</div>
@@ -954,7 +990,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
               <button onClick={onGoToNextDay} className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-semibold text-base border-0 cursor-pointer active:bg-[#1570B8] transition-all">
                 📅 进入第2天
               </button>
-              <TrainingRecommendCard mainTrigger={ud.mainTrigger ?? ""} />
+              <TrainingRecommendCard stiffness={ud.stiffness ?? null} />
               <button onClick={()=>setTab("discover")} className="w-full py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
                 📖 科普
               </button>
@@ -1012,7 +1048,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
           <DailyOptimizeSummary
             feel={ud.dailyFeel}
             currentDay={currentDay}
-            mainTrigger={ud.mainTrigger}
+            stiffness={ud.stiffness}
             onNext={onGoToNextDay}
             onGoTraining={() => setTab("training")}
             onGoDiscover={() => setTab("discover")}
@@ -1673,6 +1709,8 @@ export default function App() {
               }, 500);
             }
           } else if (surveyStep === "day1_post_use") {
+            const feelLabels: Record<string,string> = {good:"1 — 很好，没有不适",neutral:"2 — 没什么感觉",mild:"3 — 稍为不适应",skin:"4 — 膝盖周围皮肤明显不适"};
+            addMsg("user", feelLabels[data.postUseFeel] ?? data.postUseFeel);
             if (data.postUseFeel === "skin") {
               // Q5=4（皮肤明显不适）→ 跳过Q8，直接降级
               setUserData((prev: UserData) => ({
@@ -1687,23 +1725,6 @@ export default function App() {
               // Q5=1-3 → 继续问Q8强度感受
               setTimeout(() => setSurveyStep("day1_strength"), 300);
             }
-          } else if (surveyStep === "day1_strength") {
-            // Q8强度感受 → 根据结果调整等级
-            const levelDelta = data.dailyFeel === "weak" ? 1 : data.dailyFeel === "strong" ? -1 : 0;
-            setUserData((prev: UserData) => ({
-              ...prev,
-              finalLevel: Math.max(1, Math.min(6, prev.finalLevel + levelDelta)),
-            }));
-            simulateThinking(() => {
-              addMsg("bot", "我已记录你的反馈，现在为你优化下次方案。");
-              setTimeout(() => {
-                setPhase("day1_optimize");
-                // Day 1优化完成后，推荐训练和发现tab
-                setTimeout(() => {
-                  addMsg("bot", "用完之后可以去下方「训练」tab 跟练运动，到「发现」tab 学更多膝盖训练知识！");
-                }, 1000);
-              }, 800);
-            }, 500);
           }
           // Day 7复评流程链式触发
           else if (surveyStep === "day7_trigger") {
