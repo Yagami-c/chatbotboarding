@@ -18,6 +18,8 @@ const G = {
 interface ProfilePageProps {
   userName?: string;
   onLogout?: () => void;
+  userData?: { name: string; gender: string; ageRange: string };
+  onSaveProfile?: (data: { name: string; gender: string; ageRange: string }) => void;
 }
 
 // ── Shared sub-components ──────────────────────────────────────────────────────
@@ -888,20 +890,117 @@ function LogoutDialog({ onConfirm, onCancel }: { onConfirm:()=>void; onCancel:()
 
 // ── Main Profile Page ──────────────────────────────────────────────────────────
 
-type SubView = "main"|"device"|"plan"|"points"|"appearance"|"settings";
+// ── Edit Profile Sub-page ─────────────────────────────────────────────────────
+const AGE_RANGES = ["18-30岁","31-45岁","46-60岁","61-70岁","71岁以上"];
+const GENDERS    = ["男","女","其他"];
 
-export function ProfilePage({ userName="用户", onLogout }: ProfilePageProps) {
+function EditProfilePage({
+  initial, onSave, onBack,
+}: {
+  initial: { name: string; gender: string; ageRange: string };
+  onSave: (d: { name: string; gender: string; ageRange: string }) => void;
+  onBack: () => void;
+}) {
+  const [name,    setName]    = useState(initial.name    || "");
+  const [gender,  setGender]  = useState(initial.gender  || "");
+  const [ageRange,setAgeRange]= useState(initial.ageRange|| "");
+  const [saved,   setSaved]   = useState(false);
+
+  const handleSave = () => {
+    onSave({ name: name.trim() || "用户", gender, ageRange });
+    setSaved(true);
+    setTimeout(() => { setSaved(false); onBack(); }, 800);
+  };
+
+  const chipStyle = (active: boolean, color = G.primary): React.CSSProperties => ({
+    padding: "8px 18px", borderRadius: 20, border: `1.5px solid ${active ? color : G.border}`,
+    background: active ? `${color}18` : "white", color: active ? color : G.text3,
+    fontSize: 14, fontWeight: active ? 600 : 400, cursor: "pointer",
+  });
+
+  return (
+    <div style={{flex:1,display:"flex",flexDirection:"column",background:G.bg}}>
+      <SubHeader title="编辑个人资料" onBack={onBack}/>
+      <div style={{flex:1,overflowY:"auto",padding:"20px 16px 40px"}}>
+
+        {/* 昵称 */}
+        <div style={{background:"white",borderRadius:12,padding:"16px",marginBottom:12,
+          boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}>
+          <div style={{fontSize:13,color:G.text3,marginBottom:8,fontWeight:500}}>昵称</div>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="请输入您的昵称"
+            maxLength={20}
+            style={{width:"100%",padding:"10px 12px",border:`1.5px solid ${G.border}`,
+              borderRadius:10,fontSize:15,color:G.text1,outline:"none",
+              fontFamily:"inherit",boxSizing:"border-box"}}
+          />
+        </div>
+
+        {/* 性别 */}
+        <div style={{background:"white",borderRadius:12,padding:"16px",marginBottom:12,
+          boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}>
+          <div style={{fontSize:13,color:G.text3,marginBottom:10,fontWeight:500}}>性别</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {GENDERS.map(g => (
+              <button key={g} onClick={()=>setGender(g)} style={chipStyle(gender===g)}>{g}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* 年龄段 */}
+        <div style={{background:"white",borderRadius:12,padding:"16px",marginBottom:24,
+          boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}>
+          <div style={{fontSize:13,color:G.text3,marginBottom:10,fontWeight:500}}>年龄段</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {AGE_RANGES.map(a => (
+              <button key={a} onClick={()=>setAgeRange(a)} style={chipStyle(ageRange===a,"#3B82F6")}>{a}</button>
+            ))}
+          </div>
+        </div>
+
+        <button onClick={handleSave} style={{
+          width:"100%",padding:"14px",borderRadius:12,border:"none",cursor:"pointer",
+          background: saved ? "#22C55E" : `linear-gradient(135deg,${G.primary},${G.dark})`,
+          color:"white",fontSize:15,fontWeight:700,
+          boxShadow:`0 4px 14px rgba(26,122,199,0.3)`,transition:"background 0.3s",
+        }}>
+          {saved ? "已保存 ✓" : "保存"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+type SubView = "main"|"device"|"plan"|"points"|"appearance"|"settings"|"edit-profile";
+
+export function ProfilePage({ userName="用户", onLogout, userData, onSaveProfile }: ProfilePageProps) {
   const [sub,setSub]   = useState<SubView>("main");
   const [showLogout,setShowLogout] = useState(false);
 
   const handleLogout = () => { setShowLogout(false); onLogout?.(); };
 
+  const profileInitial = {
+    name:     userData?.name     || userName,
+    gender:   userData?.gender   || "",
+    ageRange: userData?.ageRange || "",
+  };
+
   // Render sub-pages
-  if (sub==="device")     return <DevicePage onBack={()=>setSub("main")}/>;
-  if (sub==="plan")       return <RecordsPage onBack={()=>setSub("main")}/>;
-  if (sub==="points")     return <PointsPage onBack={()=>setSub("main")}/>;
-  if (sub==="appearance") return <AppearancePage onBack={()=>setSub("main")}/>;
-  if (sub==="settings")   return <SettingsPage onBack={()=>setSub("main")} onLogout={()=>setShowLogout(true)}/>;
+  if (sub==="device")       return <DevicePage onBack={()=>setSub("main")}/>;
+  if (sub==="plan")         return <RecordsPage onBack={()=>setSub("main")}/>;
+  if (sub==="points")       return <PointsPage onBack={()=>setSub("main")}/>;
+  if (sub==="appearance")   return <AppearancePage onBack={()=>setSub("main")}/>;
+  if (sub==="settings")     return <SettingsPage onBack={()=>setSub("main")} onLogout={()=>setShowLogout(true)}/>;
+  if (sub==="edit-profile") return (
+    <EditProfilePage
+      initial={profileInitial}
+      onSave={d => { onSaveProfile?.(d); setSub("main"); }}
+      onBack={()=>setSub("main")}
+    />
+  );
 
   return (
     <div style={{flex:1,overflowY:"auto",background:G.bg}}>
@@ -932,7 +1031,7 @@ export function ProfilePage({ userName="用户", onLogout }: ProfilePageProps) {
             <div style={{fontSize:20,fontWeight:600,color:"white"}}>{userName}</div>
             <div style={{fontSize:13,color:"rgba(255,255,255,0.75)",marginTop:3}}>会员 ID: 88472910</div>
           </div>
-          <button style={{
+          <button onClick={()=>setSub("edit-profile")} style={{
             fontSize:13,color:"white",background:"rgba(255,255,255,0.2)",
             border:"none",borderRadius:DESIGN.radius.tag,padding:"6px 14px",cursor:"pointer",
             display:"flex",alignItems:"center",gap:4,minHeight:32,

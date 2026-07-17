@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import gif转身摸臀 from "../../assets/gifs/转身摸臀.gif";
 import gif后踢臀部 from "../../assets/gifs/后踢臀部.gif";
@@ -12,9 +12,12 @@ import gif拉伸大腿后侧 from "../../assets/gifs/拉伸大腿后侧.gif";
 import gif拉伸躯干 from "../../assets/gifs/拉伸躯干.gif";
 
 const ANIM_CSS = `
-@keyframes pulse    { 0%,100%{opacity:0.6} 50%{opacity:1} }
-@keyframes scanDown { 0%{top:0} 100%{top:88%} }
-@keyframes blink    { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes pulse      { 0%,100%{opacity:0.6} 50%{opacity:1} }
+@keyframes scanDown   { 0%{top:0} 100%{top:88%} }
+@keyframes blink      { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes slideUp    { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes fadeIn     { from{opacity:0} to{opacity:1} }
+@keyframes errPill    { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-3px)} 40%,80%{transform:translateX(3px)} }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 `;
@@ -33,210 +36,317 @@ const GIF_MAP: Record<string, string> = {
 };
 
 /* ─── Real-time Assessment ───────────────────────────────────────────────────*/
-const ASSESS_EX = ["深蹲", "直腿抬高", "踝泵运动", "上楼梯"];
-const FEEDBACKS = [
-  "膝盖与脚尖方向一致，保持！👍",
-  "膝盖弯曲角度良好",
-  "注意重心，稍向后坐",
-  "动作标准，下肢力量不错！",
-  "放慢速度，控制动作质量",
+const ASSESS_EXERCISES: { name: string; desc: string; gifKey: string }[] = [
+  { name: "臀部找椅", desc: "双脚与肩同宽，臀部向后轻触椅边后慢慢起身，膝盖不超过脚尖", gifKey: "臀部找椅" },
+  { name: "深蹲",     desc: "双脚与肩同宽，下蹲时膝盖和脚尖方向一致，背部挺直",         gifKey: "螃蟹步" },
+  { name: "提膝碰肘", desc: "左手扶椅，右手搭左肩，吐气收腹提左膝碰右肘，左右交替",       gifKey: "提膝碰肘" },
+  { name: "站立提踵", desc: "双脚与肩同宽，双手扶椅，脚尖踮到最高再缓慢放下",             gifKey: "站立提踵" },
+];
+const ERROR_MSGS = [
+  "膝盖前伸幅度过大",
+  "重心偏左，请调整",
+  "背部弯曲，请挺直",
+  "动作标准！保持",
+  "下蹲深度不足",
 ];
 
-function RealtimeAssessment() {
+/* Entry button in Training tab */
+function RealtimeAssessmentEntry({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button onClick={onOpen} style={{
+      width: "100%", display: "flex", alignItems: "center", gap: 14,
+      background: "linear-gradient(135deg,#0F172A 0%,#1E3A5F 60%,#0F3460 100%)",
+      border: "none", borderRadius: 14, padding: "14px 16px", cursor: "pointer",
+      boxShadow: "0 4px 18px rgba(15,52,96,0.35)", marginBottom: 14,
+    }}>
+      <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+        background: "rgba(74,222,128,0.15)", border: "1.5px solid rgba(74,222,128,0.4)",
+        display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="5" r="2.5" fill="#4ADE80"/>
+          <line x1="12" y1="7.5" x2="12" y2="13" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="12" y1="10" x2="8" y2="13" stroke="#4ADE80" strokeWidth="1.8" strokeLinecap="round"/>
+          <line x1="12" y1="10" x2="16" y2="13" stroke="#4ADE80" strokeWidth="1.8" strokeLinecap="round"/>
+          <line x1="12" y1="13" x2="9" y2="19" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="12" y1="13" x2="15" y2="19" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <div style={{ flex: 1, textAlign: "left" }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: "white", marginBottom: 3 }}>实时动作评估</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>AI 骨架追踪 · 实时纠错 · 标准对比</div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 5,
+        background: "rgba(74,222,128,0.18)", borderRadius: 20, padding: "4px 10px" }}>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ADE80", display: "inline-block",
+          animation: "pulse 1.4s infinite" }}/>
+        <span style={{ fontSize: 11, color: "#4ADE80", fontWeight: 600 }}>开始</span>
+      </div>
+    </button>
+  );
+}
+
+/* Fullscreen overlay page */
+function RealtimeAssessmentPage({ onClose }: { onClose: () => void }) {
+  const [exIdx, setExIdx]   = useState(0);
   const [active, setActive] = useState(false);
-  const [ex, setEx]         = useState(0);
-  const [score, setScore]   = useState(0);
-  const [reps, setReps]     = useState(0);
   const [angle, setAngle]   = useState(90);
-  const [fbIdx, setFbIdx]   = useState(0);
+  const [errIdx, setErrIdx] = useState(0);
+  const [reps, setReps]     = useState(0);
+  const [progress, setProgress] = useState(0);
+  const ivRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startStop = () => {
     if (active) {
-      setActive(false); setScore(0); setReps(0); setAngle(90);
+      if (ivRef.current) clearInterval(ivRef.current);
+      setActive(false); setAngle(90); setReps(0); setProgress(0);
       return;
     }
     setActive(true);
-    // simulate updates via CSS + periodic state changes (no RAF)
     let n = 0;
-    const iv = setInterval(() => {
+    ivRef.current = setInterval(() => {
       n++;
-      setScore(s => Math.min(100, s + Math.floor(Math.random() * 4)));
-      setAngle(Math.floor(65 + Math.abs(Math.sin(n * 0.5)) * 40));
-      if (n % 4 === 0) { setReps(r => r + 1); setFbIdx(i => (i + 1) % FEEDBACKS.length); }
-      if (n > 120) clearInterval(iv);
-    }, 900);
+      setAngle(Math.floor(65 + Math.abs(Math.sin(n * 0.45)) * 42));
+      setProgress(p => Math.min(100, p + 0.7));
+      if (n % 5 === 0) { setReps(r => r + 1); setErrIdx(i => (i + 1) % ERROR_MSGS.length); }
+    }, 700);
   };
 
+  useEffect(() => () => { if (ivRef.current) clearInterval(ivRef.current); }, []);
+
+  const ex = ASSESS_EXERCISES[exIdx];
+  const gifSrc = GIF_MAP[ex.gifKey];
+  const isError = active && errIdx < 3;
+  const skelColor = isError ? "#EF4444" : "#4ADE80";
+
+  // Skeleton points driven by angle
+  const hipY  = 68;
+  const kneeY = hipY + 24 + (active ? angle * 0.13 : 0);
+  const ankleY = kneeY + 36;
+
   return (
-    <div style={{ background: "white", borderRadius: 16, overflow: "hidden",
-      boxShadow: "0 2px 14px rgba(0,0,0,0.09)", border: "1px solid #E0EFE6" }}>
-
-      {/* header */}
-      <div style={{ background: "linear-gradient(135deg,#0F172A,#1E293B,#0F3460)",
-        padding: "13px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", display: "inline-block",
-            background: active ? "#4ADE80" : "#6B7280",
-            animation: active ? "pulse 1.2s infinite" : "none" }}/>
-          <span style={{ fontSize: 14, fontWeight: 700, color: "white" }}>实时动作测评</span>
-          {active && <span style={{ fontSize: 10, color: "#4ADE80",
-            background: "rgba(74,222,128,0.15)", borderRadius: 20, padding: "2px 8px" }}>AI 分析中</span>}
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 200,
+      background: "#0A0F1E",
+      display: "flex", flexDirection: "column",
+      animation: "slideUp 0.28s ease",
+    }}>
+      {/* ── Top bar ── */}
+      <div style={{
+        background: "linear-gradient(180deg,#0F172A 0%,rgba(15,23,42,0.95) 100%)",
+        padding: "44px 16px 12px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button onClick={onClose} style={{
+            background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8,
+            color: "white", fontSize: 18, lineHeight: 1, padding: "4px 10px", cursor: "pointer",
+          }}>←</button>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "white" }}>{ex.name}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ADE80",
+                display: "inline-block", animation: "pulse 1.2s infinite" }}/>
+              <span style={{ fontSize: 11, color: "#4ADE80" }}>实时纠错模式已开启</span>
+            </div>
+          </div>
         </div>
-        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>香港理工大学 · 动作识别</span>
-      </div>
-
-      {/* camera view */}
-      <div style={{ position: "relative", background: "#0D1117", height: 186 }}>
-        {active && <div style={{ position: "absolute", left: 0, right: 0, height: 2, zIndex: 2,
-          background: "linear-gradient(90deg,transparent,#4ADE80,transparent)",
-          animation: "scanDown 2s linear infinite" }}/>}
-
-        <svg width="100%" height="186" viewBox="0 0 360 186" style={{ position: "absolute", inset: 0 }}>
-          {/* grid */}
-          {active && [72,144,216,288].map(x =>
-            <line key={x} x1={x} y1="0" x2={x} y2="186" stroke="rgba(74,222,128,0.07)" strokeWidth="1"/>
-          )}
-          {active && [46,93,140,187].map(y =>
-            <line key={y} x1="0" y1={y} x2="360" y2={y} stroke="rgba(74,222,128,0.07)" strokeWidth="1"/>
-          )}
-          {/* skeleton */}
-          <g opacity={active ? 1 : 0.3}>
-            <line x1="150" y1="22" x2="150" y2="56" stroke="#4ADE80" strokeWidth="2.5" strokeLinecap="round"/>
-            <line x1="150" y1="56" x2="130" y2="74" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="150" y1="56" x2="170" y2="74" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"/>
-            <line x1="150" y1="56" x2="137" y2={80 + (active ? angle * 0.12 : 0)}
-              stroke="#4ADE80" strokeWidth="3" strokeLinecap="round"/>
-            <line x1="150" y1="56" x2="163" y2={80 + (active ? angle * 0.12 : 0)}
-              stroke="#4ADE80" strokeWidth="3" strokeLinecap="round"/>
-            <line x1="137" y1={80 + (active ? angle * 0.12 : 0)} x2="132" y2="118"
-              stroke="#4ADE80" strokeWidth="3" strokeLinecap="round"/>
-            <line x1="163" y1={80 + (active ? angle * 0.12 : 0)} x2="168" y2="118"
-              stroke="#4ADE80" strokeWidth="3" strokeLinecap="round"/>
-            {/* joints */}
-            {[{x:150,y:14,r:8},{x:150,y:56},{x:130,y:74},{x:170,y:74},
-              {x:137,y:80+(active?angle*0.12:0)},{x:163,y:80+(active?angle*0.12:0)},
-              {x:132,y:118},{x:168,y:118}].map(({x,y,r=5},i) =>
-              <circle key={i} cx={x} cy={y} r={r} fill="#1A7AC7" stroke="#4ADE80" strokeWidth="1.5"/>
-            )}
-            {/* knee angle */}
-            {active && <>
-              <path d={`M 124 ${74} A 13 13 0 0 1 ${124+14} ${80+angle*0.12}`}
-                fill="none" stroke="#FCD34D" strokeWidth="2" opacity="0.9"/>
-              <text x="107" y={80+angle*0.12} fontSize="10" fill="#FCD34D" fontWeight="bold">{angle}°</text>
-            </>}
-          </g>
-          {/* corner brackets */}
-          {[[28,20],[282,20],[28,162],[282,162]].map(([x,y],i) => (
-            <g key={i} transform={`translate(${x},${y}) rotate(${[0,90,270,180][i]})`}>
-              <line x1="0" y1="0" x2="16" y2="0" stroke="#1A7AC7" strokeWidth="2.5" strokeLinecap="round"/>
-              <line x1="0" y1="0" x2="0" y2="16" stroke="#1A7AC7" strokeWidth="2.5" strokeLinecap="round"/>
-            </g>
+        {/* Exercise selector chips */}
+        <div style={{ display: "flex", gap: 6, overflowX: "auto" }} className="hide-scrollbar">
+          {ASSESS_EXERCISES.map((e, i) => (
+            <button key={e.name} onClick={() => !active && setExIdx(i)} style={{
+              padding: "5px 12px", borderRadius: 16, border: "none", flexShrink: 0,
+              background: exIdx === i ? "#1A7AC7" : "rgba(255,255,255,0.1)",
+              color: exIdx === i ? "white" : "rgba(255,255,255,0.55)",
+              fontSize: 11, fontWeight: exIdx === i ? 700 : 400, cursor: "pointer",
+              opacity: active && exIdx !== i ? 0.35 : 1,
+            }}>{e.name}</button>
           ))}
-          {/* joint labels */}
-          {active && [["髋关节",150,56],["膝关节",137,80+angle*0.12],["踝关节",132,118]].map(([l,x,y]) => (
-            <g key={String(l)}>
-              <line x1={Number(x)+8} y1={Number(y)} x2={Number(x)+30} y2={Number(y)}
-                stroke="#1A7AC7" strokeWidth="1" opacity="0.6"/>
-              <text x={Number(x)+32} y={Number(y)+4} fontSize="9" fill="#4ADE80">{l}</text>
-            </g>
-          ))}
-        </svg>
-
-        <div style={{ position: "absolute", top: 10, right: 12,
-          background: "rgba(0,0,0,0.55)", borderRadius: 8, padding: "4px 9px",
-          fontSize: 10, color: active ? "#4ADE80" : "#9CA3AF",
-          display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", display: "inline-block",
-            background: active ? "#1A7AC7" : "#6B7280" }}/>
-          {active ? "实时检测" : "待机"}
         </div>
-      </div>
-
-      <div style={{ padding: "14px 16px" }}>
-        {/* exercise tabs */}
-        <div style={{ position: "relative", marginBottom: 12 }}>
-          {/* Gradient indicators for scroll */}
-          <div style={{
-            position: "absolute", left: 0, top: 0, bottom: 0, width: 24,
-            background: "linear-gradient(to right, rgba(255,255,255,0.9), transparent)",
-            pointerEvents: "none", zIndex: 1
-          }} />
-          <div style={{
-            position: "absolute", right: 0, top: 0, bottom: 0, width: 24,
-            background: "linear-gradient(to left, rgba(255,255,255,0.9), transparent)",
-            pointerEvents: "none", zIndex: 1
-          }} />
-
-          <div style={{
-            display: "flex", gap: 6, overflowX: "auto",
-            scrollbarWidth: "none", msOverflowStyle: "none",
-            WebkitOverflowScrolling: "touch",
-            scrollSnapType: "x mandatory"
-          }}
-            className="hide-scrollbar">
-            {ASSESS_EX.map((e, i) => (
-              <button key={e} onClick={() => !active && setEx(i)} style={{
-                padding: "8px 18px", borderRadius: 20, border: "none", flexShrink: 0,
-                cursor: active && ex !== i ? "not-allowed" : "pointer", fontSize: 13,
-                fontWeight: ex === i ? 600 : 400,
-                background: ex === i ? "#1A7AC7" : "#F3F4F6",
-                color: ex === i ? "white" : "#374151",
-                opacity: active && ex !== i ? 0.4 : 1,
-                transition: "all 0.15s",
-                boxShadow: ex === i ? "0 2px 8px rgba(26,122,199,0.3)" : "none",
-                transform: ex === i ? "scale(1.05)" : "scale(1)",
-                scrollSnapAlign: "center"
-              }}>{e}</button>
-            ))}
-          </div>
-
-          {/* Scroll hint */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            gap: 4, marginTop: 6, fontSize: 10, color: "#9CA3AF"
-          }}>
-            <span>←</span>
-            <span>滑动选择动作</span>
-            <span>→</span>
-          </div>
-        </div>
-
-        {/* metrics */}
-        {active && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
-            {[{l:"评分",v:`${score}`,u:"分",c:"#1A7AC7"},{l:"次数",v:`${reps}`,u:"次",c:"#3B82F6"},{l:"角度",v:`${angle}`,u:"°",c:"#F59E0B"}].map(({l,v,u,c}) => (
-              <div key={l} style={{ background: "#F7F8FA", borderRadius: 10, padding: "10px 6px", textAlign: "center" }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: c, lineHeight: 1 }}>
-                  {v}<span style={{ fontSize: 11 }}>{u}</span>
-                </div>
-                <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>{l}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* feedback */}
-        {active && (
-          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 10,
-            padding: "10px 12px", marginBottom: 12, display: "flex", alignItems: "center",
-            gap: 8, fontSize: 13, color: "#065F46" }}>
-            <span style={{ fontSize: 16 }}>🤖</span>
-            <span>{FEEDBACKS[fbIdx]}</span>
-          </div>
-        )}
-
-        <button onClick={startStop} style={{
-          width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: "pointer",
-          fontSize: 15, fontWeight: 700, color: "white", transition: "all 0.2s",
-          background: active ? "linear-gradient(135deg,#EF4444,#DC2626)" : "linear-gradient(135deg,#1A7AC7,#155FA0)",
-          boxShadow: active ? "0 4px 14px rgba(239,68,68,0.35)" : "0 4px 14px rgba(7,193,96,0.35)",
-        }}>
-          {active ? "⏹ 停止测评" : "▶ 开始实时测评"}
+        <button style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8,
+          padding: "6px 8px", cursor: "pointer" }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3" stroke="white" strokeWidth="2"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+              stroke="white" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
         </button>
-        <div style={{ marginTop: 7, fontSize: 11, color: "#9CA3AF", textAlign: "center" }}>
-          AI 动作识别 · 香港理工大学武汉研究院提供支持
+      </div>
+
+      {/* ── Main panels ── */}
+      <div style={{ flex: 1, display: "flex", gap: 0, overflow: "hidden", minHeight: 0 }}>
+
+        {/* LEFT: Live camera / skeleton */}
+        <div style={{ flex: 1, position: "relative", background: "#0D1117", display: "flex", flexDirection: "column" }}>
+          {/* Panel label */}
+          <div style={{ position: "absolute", top: 10, left: 12, zIndex: 10,
+            display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>实时镜像预览</span>
+            <span style={{ fontSize: 9, background: "#EF4444", color: "white", borderRadius: 4,
+              padding: "2px 6px", fontWeight: 700 }}>LIVE CAMERA</span>
+          </div>
+
+          {/* Scan line */}
+          {active && <div style={{ position: "absolute", left: 0, right: 0, height: 2, zIndex: 5,
+            background: `linear-gradient(90deg,transparent,${skelColor},transparent)`,
+            animation: "scanDown 2s linear infinite" }}/>}
+
+          {/* Skeleton SVG */}
+          <svg width="100%" height="100%" viewBox="0 0 200 280"
+            style={{ position: "absolute", inset: 0 }} preserveAspectRatio="xMidYMid meet">
+            {/* grid */}
+            {active && [50,100,150].map(x =>
+              <line key={x} x1={x} y1="0" x2={x} y2="280" stroke="rgba(74,222,128,0.06)" strokeWidth="1"/>)}
+            {active && [70,140,210].map(y =>
+              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="rgba(74,222,128,0.06)" strokeWidth="1"/>)}
+
+            <g opacity={active ? 1 : 0.25}>
+              {/* torso */}
+              <line x1="100" y1="30" x2="100" y2="60" stroke={skelColor} strokeWidth="2.5" strokeLinecap="round"/>
+              {/* shoulders */}
+              <line x1="100" y1="60" x2="76"  y2="80" stroke={skelColor} strokeWidth="2" strokeLinecap="round"/>
+              <line x1="100" y1="60" x2="124" y2="80" stroke={skelColor} strokeWidth="2" strokeLinecap="round"/>
+              {/* hips */}
+              <line x1="100" y1="60" x2="88"  y2={hipY}  stroke={skelColor} strokeWidth="3" strokeLinecap="round"/>
+              <line x1="100" y1="60" x2="112" y2={hipY}  stroke={skelColor} strokeWidth="3" strokeLinecap="round"/>
+              {/* thighs */}
+              <line x1="88"  y1={hipY}  x2="84"  y2={kneeY} stroke={skelColor} strokeWidth="3" strokeLinecap="round"/>
+              <line x1="112" y1={hipY}  x2="116" y2={kneeY} stroke={skelColor} strokeWidth="3" strokeLinecap="round"/>
+              {/* shins */}
+              <line x1="84"  y1={kneeY} x2="82"  y2={ankleY} stroke={skelColor} strokeWidth="3" strokeLinecap="round"/>
+              <line x1="116" y1={kneeY} x2="118" y2={ankleY} stroke={skelColor} strokeWidth="3" strokeLinecap="round"/>
+              {/* joints */}
+              {[
+                {x:100,y:22,r:7},{x:100,y:60,r:5},
+                {x:76,y:80,r:4},{x:124,y:80,r:4},
+                {x:88,y:hipY,r:5},{x:112,y:hipY,r:5},
+                {x:84,y:kneeY,r:5},{x:116,y:kneeY,r:5},
+                {x:82,y:ankleY,r:4},{x:118,y:ankleY,r:4},
+              ].map(({x,y,r},i) =>
+                <circle key={i} cx={x} cy={y} r={r} fill="#1A7AC7" stroke={skelColor} strokeWidth="1.5"/>
+              )}
+              {/* knee angle arc */}
+              {active && <>
+                <path d={`M 76 ${kneeY-8} A 12 12 0 0 1 ${76+12} ${kneeY}`}
+                  fill="none" stroke="#FCD34D" strokeWidth="1.8" opacity="0.85"/>
+                <text x="56" y={kneeY+2} fontSize="9" fill="#FCD34D" fontWeight="bold">{angle}°</text>
+              </>}
+              {/* joint labels */}
+              {active && [
+                ["髋",88,hipY-6],["膝",80,kneeY-6],["踝",78,ankleY-6],
+              ].map(([l,x,y]) => (
+                <text key={String(l)} x={Number(x)-14} y={Number(y)} fontSize="8" fill="rgba(74,222,128,0.7)">{l}</text>
+              ))}
+            </g>
+
+            {/* Corner brackets */}
+            {[[8,8],[172,8],[8,252],[172,252]].map(([x,y],i) => (
+              <g key={i} transform={`translate(${x},${y}) rotate(${[0,90,270,180][i]})`}>
+                <line x1="0" y1="0" x2="14" y2="0" stroke="#1A7AC7" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="0" y1="0" x2="0" y2="14" stroke="#1A7AC7" strokeWidth="2" strokeLinecap="round"/>
+              </g>
+            ))}
+          </svg>
+
+          {/* Error pill */}
+          {active && (
+            <div style={{
+              position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)",
+              background: isError ? "rgba(239,68,68,0.92)" : "rgba(34,197,94,0.92)",
+              borderRadius: 20, padding: "6px 14px", zIndex: 10,
+              display: "flex", alignItems: "center", gap: 6,
+              animation: isError ? "errPill 0.4s ease" : "none",
+              whiteSpace: "nowrap",
+            }}>
+              <span style={{ fontSize: 13 }}>{isError ? "⚠️" : "✅"}</span>
+              <span style={{ fontSize: 12, color: "white", fontWeight: 600 }}>
+                {isError ? `纠错：${ERROR_MSGS[errIdx]}` : "动作标准！保持"}
+              </span>
+            </div>
+          )}
+
+          {/* Bottom badges */}
+          <div style={{ position: "absolute", bottom: 10, left: 12, right: 12,
+            display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5,
+              background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "4px 8px" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ADE80",
+                display: "inline-block", animation: active ? "pulse 1s infinite" : "none" }}/>
+              <span style={{ fontSize: 10, color: "#4ADE80" }}>AI 实时追踪中</span>
+            </div>
+            <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>镜像预览已开启</span>
+          </div>
+        </div>
+
+        {/* RIGHT: Reference GIF */}
+        <div style={{ flex: 1, background: "#111827", display: "flex", flexDirection: "column",
+          borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ padding: "10px 12px 6px", display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>标准动作参考</span>
+          </div>
+
+          {/* GIF area */}
+          <div style={{ flex: 1, position: "relative", overflow: "hidden", minHeight: 0 }}>
+            {gifSrc ? (
+              <img src={gifSrc} alt={ex.name} style={{
+                width: "100%", height: "100%", objectFit: "contain",
+                display: "block", background: "#0D1117",
+              }}/>
+            ) : (
+              <div style={{ width: "100%", height: "100%", background: "#0D1117",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "rgba(255,255,255,0.2)", fontSize: 12 }}>暂无演示</div>
+            )}
+            {/* Subtitle overlay */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0,
+              background: "linear-gradient(transparent, rgba(0,0,0,0.82))",
+              padding: "20px 10px 8px",
+            }}>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.85)", lineHeight: 1.5, textAlign: "center" }}>
+                {ex.desc}
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar + controls */}
+          <div style={{ padding: "8px 12px 10px", background: "#0F172A",
+            borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ height: 3, background: "rgba(255,255,255,0.1)", borderRadius: 2, marginBottom: 8, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${progress}%`, background: "#1A7AC7",
+                borderRadius: 2, transition: "width 0.5s" }}/>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+              <button onClick={() => { setProgress(0); setReps(0); }} style={{
+                background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8,
+                padding: "6px 10px", cursor: "pointer", color: "white", fontSize: 14,
+              }}>↺</button>
+              <button onClick={startStop} style={{
+                background: active ? "#EF4444" : "#1A7AC7", border: "none", borderRadius: 20,
+                padding: "8px 22px", cursor: "pointer", color: "white", fontSize: 13, fontWeight: 700,
+              }}>{active ? "暂停" : "开始"}</button>
+              <div style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8,
+                padding: "6px 10px", color: "rgba(255,255,255,0.5)", fontSize: 11, textAlign: "center" }}>
+                {reps}次
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* ── Floating thumbnail (top-right) ── */}
+      {active && gifSrc && (
+        <div style={{
+          position: "absolute", top: 108, right: 8, width: 64, height: 64,
+          borderRadius: 10, overflow: "hidden", border: "1.5px solid rgba(74,222,128,0.5)",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.5)", zIndex: 50,
+        }}>
+          <img src={gifSrc} alt="示范" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0,
+            background: "rgba(0,0,0,0.6)", fontSize: 8, color: "white",
+            textAlign: "center", padding: "2px 0" }}>示范</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -329,6 +439,7 @@ const SECTIONS = [
 /* ─── Main page ──────────────────────────────────────────────────────────────*/
 export function TrainingPage() {
   const [open, setOpen] = useState(new Set(["w"]));
+  const [showAssess, setShowAssess] = useState(false);
   const toggle = (id: string) => setOpen(p => {
     const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n;
   });
@@ -336,6 +447,8 @@ export function TrainingPage() {
   return (
     <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden", background:"#F7F8FA" }}>
       <style>{ANIM_CSS}</style>
+
+      {showAssess && <RealtimeAssessmentPage onClose={() => setShowAssess(false)}/>}
 
       {/* header */}
       <div style={{ background:"white", borderBottom:"1px solid #F0F0F0",
@@ -358,8 +471,8 @@ export function TrainingPage() {
           ))}
         </div>
 
-        {/* real-time assessment */}
-        <div style={{ marginBottom:14 }}><RealtimeAssessment/></div>
+        {/* real-time assessment entry */}
+        <RealtimeAssessmentEntry onOpen={() => setShowAssess(true)}/>
 
         {/* exercise sections */}
         {SECTIONS.map(sec => {

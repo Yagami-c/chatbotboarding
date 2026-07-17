@@ -1,10 +1,119 @@
-import React, { useState, useEffect, useRef } from "react";
-import { AppScreen, Tab, UserData, Msg, Task, Phase, SurveyStep, HwState, DeviceState, LEVEL_PARAMS, LEVELS, getLevelName, formatTime, LEVEL_DESCS } from "./types";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { AppScreen, Tab, UserData, Msg, Task, Phase, SurveyStep, HwState, DeviceState, BluetoothConnectState, PermissionStatus, BluetoothDevice, LEVEL_PARAMS, LEVELS, getLevelName, formatTime, LEVEL_DESCS } from "./types";
+
+// ── Toast notification system ──────────────────────────────────────────────────
+type ToastType = "info" | "success" | "warning" | "error";
+interface Toast { id: number; message: string; type: ToastType; icon: string }
+let _toastId = 0;
+
+function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+  return (
+    <div style={{ position: "absolute", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 9999, display: "flex", flexDirection: "column", gap: 8, width: "calc(100% - 32px)", maxWidth: 360, pointerEvents: "none" }}>
+      {toasts.map(t => (
+        <div key={t.id} onClick={() => onRemove(t.id)}
+          style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "11px 14px", borderRadius: 12,
+            background: t.type === "success" ? "#ecfdf5" : t.type === "error" ? "#fef2f2" : t.type === "warning" ? "#fffbeb" : "#eff6ff",
+            border: `1px solid ${t.type === "success" ? "#86efac" : t.type === "error" ? "#fca5a5" : t.type === "warning" ? "#fcd34d" : "#93c5fd"}`,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+            fontSize: 13, fontWeight: 500,
+            color: t.type === "success" ? "#15803d" : t.type === "error" ? "#dc2626" : t.type === "warning" ? "#92400e" : "#1e40af",
+            animation: "fadeUp 0.25s ease",
+            pointerEvents: "auto", cursor: "pointer",
+          }}>
+          <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
+          <span style={{ flex: 1 }}>{t.message}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function useToast() {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const show = useCallback((message: string, type: ToastType = "info", duration = 3000) => {
+    const icons: Record<ToastType, string> = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
+    const id = ++_toastId;
+    setToasts(prev => [...prev, { id, message, type, icon: icons[type] }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
+  }, []);
+  const remove = useCallback((id: number) => setToasts(prev => prev.filter(t => t.id !== id)), []);
+  return { toasts, show, remove };
+}
 import { FloatBall, BtnRow, Pill, FormCard, FormGroup, StyledInput, SubmitBtn, ResultCard, InfoBox, ThinkingDots, Stars, BottomNav } from "./components/shared";
 import { WeChatLogin } from "./components/WeChatLogin";
 import { Onboarding } from "./components/Onboarding";
 import { askDeepSeek, ChatMessage } from "./deepseek";
 import { HomePage } from "./components/HomePage";
+import { BluetoothConfigWizard } from "./components/BluetoothConfigWizard";
+import { PermissionRequest } from "./components/PermissionRequest";
+
+const STORAGE_USER_KEY = "chatbotboarding_userData";
+const STORAGE_SMART_MODE_KEY = "chatbotboarding_smartMode";
+const STORAGE_BLUETOOTH_KEY = "chatbotboarding_bluetooth";
+const STORAGE_PERMISSION_KEY = "chatbotboarding_permissions";
+
+function loadBluetoothConfig(): { connectedDevice?: BluetoothDevice; pairedDevices?: BluetoothDevice[] } {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(STORAGE_BLUETOOTH_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadPermissionStatus(): PermissionStatus {
+  if (typeof window === "undefined") return { bluetooth: "not_checked", location: "not_checked" };
+  try {
+    const raw = window.localStorage.getItem(STORAGE_PERMISSION_KEY);
+    return raw ? JSON.parse(raw) : { bluetooth: "not_checked", location: "not_checked" };
+  } catch {
+    return { bluetooth: "not_checked", location: "not_checked" };
+  }
+}
+
+const DEFAULT_USER_DATA: UserData = {
+  name: "", gender: "", ageRange: "", duration: "",
+  safety: [], stiffness: null, baseLevel: 2,
+  triggers: [], mainTrigger: "",
+  painLevel: 0, finalLevel: 2,
+  firstTime: true,
+  dailyRecords: {},
+  pressure: 0, workSec: 0, restSec: 0, cycles: 0,
+  dailyFeel: "",
+  postUseFeel: "",
+  earlyStopReason: "",
+  postTrainingPain: 0,
+  postTrainingStrength: 0,
+  day7Trigger: "", day7Pain: 0, day7Feel: "",
+  lastTrainingDate: "",
+  trainingDates: [],
+  sessionsToday: 0,
+};
+
+function loadUserData(): UserData {
+  if (typeof window === "undefined") return DEFAULT_USER_DATA;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_USER_KEY);
+    if (!raw) return DEFAULT_USER_DATA;
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_USER_DATA, ...parsed };
+  } catch {
+    return DEFAULT_USER_DATA;
+  }
+}
+
+function loadSmartMode(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_SMART_MODE_KEY);
+    return raw ? JSON.parse(raw) : false;
+  } catch {
+    return false;
+  }
+}
 import { ManualAssessment } from "./components/ManualAssessment";
 import { QuickTraining } from "./components/QuickTraining";
 import { Day7Intro } from "./components/Day7Intro";
@@ -35,16 +144,16 @@ const EXERCISE_GIF: Record<string, string> = {
 const LEVEL_NAMES: Record<number,string> = {1:"L1（低）",2:"L2（中低）",3:"L3（中）",4:"L4（中高）",5:"L5（高）",6:"L6（最高）"};
 
 const DAY1_TASKS: Task[] = [
-  {title:"小瑞了解你",desc:"基本信息"},{title:"推荐方案",desc:"生成初始强度"},
-  {title:"陪你用",desc:"设备控制"},{title:"记录变化",desc:"使用反馈"},{title:"持续优化",desc:"调整下次强度"},
+  {title:"👋 认识你",desc:"了解基本情况"},{title:"🎯 生成方案",desc:"推荐适合强度"},
+  {title:"💪 开始体验",desc:"陪你用一遍"},{title:"📝 记录感受",desc:"反馈今天怎样"},{title:"🔄 下次调参",desc:"根据反馈优化"},
 ];
 const DAILY_TASKS: Task[] = [
-  {title:"小瑞了解你",desc:"今日感觉"},{title:"推荐方案",desc:"基于反馈调整"},
-  {title:"陪你用",desc:"设备控制"},{title:"记录变化",desc:"完成情况"},{title:"持续优化",desc:"调整下次"},
+  {title:"👋 晨间聊天",desc:"今天怎么样"},{title:"🎯 生成方案",desc:"根据反馈调整"}, 
+  {title:"💪 开始体验",desc:"陪你用一遍"},{title:"📝 记录成果",desc:"完成度如何"},{title:"🔄 持续优化",desc:"下次更好用"},
 ];
 const DAY7_TASKS: Task[] = [
-  {title:"阶段回顾",desc:"动作 & 不适"},{title:"阶段总结",desc:"与开始时对比"},
-  {title:"下阶段方案",desc:"优化推荐"},
+  {title:"📊 阶段回顾",desc:"7天变化总结"},{title:"🎯 效果对比",desc:"与开始时对比"},
+  {title:"🚀 下阶段方案",desc:"继续进阶"},
 ];
 
 // ── Task breakdown ─────────────────────────────────────────────────────────────
@@ -94,154 +203,202 @@ function TaskBreakdown({tasks,current,deviceRunning}: {tasks:Task[];current:numb
 
 // ── Survey forms ───────────────────────────────────────────────────────────────
 
-function NewUserSurvey({onDone,prefill}:{onDone:(n:string,g:string,a:string,d:string)=>void;prefill?:{name?:string;gender?:string;ageRange?:string}}) {
+function NewUserSurvey({onDone,onSkip,prefill}:{onDone:(n:string,g:string,a:string,d:string)=>void;onSkip?:()=>void;prefill?:{name?:string;gender?:string;ageRange?:string}}) {
   const [name,setName]=useState(prefill?.name||"");const [g,setG]=useState(prefill?.gender||"");const [a,setA]=useState(prefill?.ageRange||"");const [d,setD]=useState("");
+  const filledCount = [name.trim(), g, a, d].filter(Boolean).length;
   return (
     <div>
-      <FormGroup label="叫你什么好？"><StyledInput value={name} onChange={e=>setName(e.target.value)} placeholder="输入昵称"/></FormGroup>
+      {(prefill?.name||prefill?.gender||prefill?.ageRange) && (
+        <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-3 mb-4 text-sm text-[#1e40af] flex items-start gap-2">
+          <span className="text-lg">✓</span>
+          <div>
+            <div className="font-medium">系统已为你恢复之前的信息</div>
+            <div className="text-xs text-[#1856bf] mt-1">保留了你上次输入的资料，可以直接继续或修改</div>
+          </div>
+        </div>
+      )}
+      <FormGroup label="昵称是什么？"><StyledInput value={name} onChange={e=>setName(e.target.value)} placeholder="比如：小王、康康"/></FormGroup>
       <FormGroup label="性别"><BtnRow><Pill label="👨 男" primary={g==="男"} onClick={()=>setG("男")}/><Pill label="👩 女" primary={g==="女"} onClick={()=>setG("女")}/></BtnRow></FormGroup>
-      <FormGroup label="年龄"><BtnRow>{["40岁以下","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
-      <FormGroup label="膝盖不舒服多久了？"><BtnRow>{["不到3个月","3个月以上","没有特别不适"].map(v=><Pill key={v} label={v} primary={d===v} onClick={()=>setD(v)}/>)}</BtnRow></FormGroup>
-      <SubmitBtn label="确定" onClick={()=>{if(!name.trim()){alert("请先输入昵称");return;}if(!g){alert("请选择性别");return;}if(!a){alert("请选择年龄");return;}if(!d){alert("请选择不适时长");return;}onDone(name.trim(),g,a,d);}}/>
+      <FormGroup label="年龄段"><BtnRow>{["40岁以下","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
+      <FormGroup label="膝盖最近怎样？"><BtnRow>{["刚开始不舒服","已有一段时间了","基本没问题"].map(v=><Pill key={v} label={v} primary={d===v} onClick={()=>setD(v)}/>)}</BtnRow></FormGroup>
+      <div className="mb-3 text-xs text-[#6b7280]">
+        完成进度：{filledCount} / 4
+      </div>
+      <div className="space-y-2">
+        <SubmitBtn label={filledCount === 4 ? "全部完成 →" : "继续"} onClick={()=>{if(!name.trim()){alert("请先起个昵称");return;}if(!g){alert("请选择性别");return;}if(!a){alert("请选择年龄段");return;}if(!d){alert("请选择膝盖状况");return;}onDone(name.trim(),g,a,d);}}/>
+        {onSkip && (
+          <button type="button" onClick={onSkip} className="w-full py-3 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-sm font-medium text-[#4b5563] hover:bg-[#f0f4f8] transition-colors">
+            ⏸️ 先不填，继续体验
+          </button>
+        )}
+      </div>
     </div>
   );
 }
-function ReturnerSurvey({onDone}:{onDone:(g:string,a:string)=>void}) {
+function ReturnerSurvey({onDone,onSkip}:{onDone:(g:string,a:string)=>void;onSkip?:()=>void}) {
   const [g,setG]=useState("");const [a,setA]=useState("");
   return (
     <div>
+      <div className="bg-[#f0fdf4] border border-[#86efac] rounded-xl p-3 mb-4 text-sm flex items-start gap-2">
+        <span className="text-lg">👋</span>
+        <div>
+          <div className="font-medium text-[#15803d]">欢迎回来！</div>
+          <div className="text-xs text-[#166534] mt-1">快速确认一下基本信息，我们继续坚持康养</div>
+        </div>
+      </div>
       <FormGroup label="性别"><BtnRow><Pill label="👨 男" primary={g==="男"} onClick={()=>setG("男")}/><Pill label="👩 女" primary={g==="女"} onClick={()=>setG("女")}/></BtnRow></FormGroup>
-      <FormGroup label="年龄"><BtnRow>{["40岁以下","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
-      <SubmitBtn label="确定" onClick={()=>{if(!g||!a){alert("请完整填写");return;}onDone(g,a);}}/>
+      <FormGroup label="年龄段"><BtnRow>{["40岁以下","40-60岁","60岁以上"].map(v=><Pill key={v} label={v} primary={a===v} onClick={()=>setA(v)}/>)}</BtnRow></FormGroup>
+      <div className="space-y-2">
+        <SubmitBtn label={g && a ? "开始今日康养 →" : "继续"} onClick={()=>{if(!g||!a){alert("请完整填写哦");return;}onDone(g,a);}}/>
+        {onSkip && (
+          <button type="button" onClick={onSkip} className="w-full py-3 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-sm font-medium text-[#4b5563] hover:bg-[#f0f4f8] transition-colors">
+            ⏸️ 先体验，之后再改
+          </button>
+        )}
+      </div>
     </div>
   );
 }
+function BigOption({label,selected,onClick,multi}:{label:string;selected:boolean;onClick:()=>void;multi?:boolean}) {
+  return (
+    <button onClick={onClick} style={{
+      width:"100%",padding:"16px 18px",marginBottom:10,borderRadius:14,
+      border:`2px solid ${selected?"#1A7AC7":"#e8e8e8"}`,
+      background:selected?"#EFF6FF":"#fafafa",
+      textAlign:"left",cursor:"pointer",fontFamily:"inherit",
+      fontSize:15,fontWeight:selected?600:400,color:selected?"#1A7AC7":"#2d3748",
+      display:"flex",alignItems:"center",gap:12,
+      transition:"all 0.15s ease",
+      boxShadow:selected?"0 0 0 3px rgba(26,122,199,0.12)":"none",
+    }}>
+      <span style={{
+        width:22,height:22,borderRadius:multi?6:"50%",flexShrink:0,
+        border:`2px solid ${selected?"#1A7AC7":"#d0d0d0"}`,
+        background:selected?"#1A7AC7":"transparent",
+        display:"flex",alignItems:"center",justifyContent:"center",
+      }}>
+        {selected&&<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>}
+      </span>
+      {label}
+    </button>
+  );
+}
+
 function SafetySurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
   const [local,setLocal]=useState<Record<string,boolean>>({});
+  const items=[{v:"受伤",l:"最近2周内膝盖有明显受伤"},{v:"肿胀",l:"膝盖明显肿胀或发热"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生建议暂时不用这类设备"},{v:"显著受损",l:"最近有受伤，还有轻微肿胀"},{v:"无",l:"✅ 以上都没有，可以正常使用"}];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">请问目前是否有以下情况？（可多选）</p>
-      <FormCard>
-        {[{v:"受伤",l:"最近2周内有明显膝盖受伤"},{v:"肿胀",l:"膝盖明显肿胀/发烫"},{v:"伤口",l:"膝盖周围有伤口或皮肤问题"},{v:"医生建议",l:"医生叮嘱暂不适合使用此类设备"},{v:"显著受损",l:"2-4周前有过膝关节受伤，目前仍有轻微肿胀"},{v:"无",l:"以上都没有"}].map(({v,l})=>(
-          <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))}/>{l}
-          </label>
-        ))}
-      </FormCard>
-      <SubmitBtn label="确定" onClick={()=>{const vals=Object.entries(local).filter(([,v])=>v).map(([k])=>k);if(!vals.length){alert("请至少选择一项");return;}onSubmit(vals);}}/>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>确认一下，你现在是否有以下情况？</p>
+      {items.map(({v,l})=>(
+        <BigOption key={v} label={l} selected={!!local[v]} multi onClick={()=>setLocal(p=>({...p,[v]:!p[v]}))}/>
+      ))}
+      <SubmitBtn label="确定，可以开始" onClick={()=>{const vals=Object.entries(local).filter(([,v])=>v).map(([k])=>k);if(!vals.length){alert("请至少选择一项");return;}onSubmit(vals);}}/>
     </div>
   );
 }
 function TriggerSurvey({onSubmit}:{onSubmit:(v:string[])=>void}) {
   const [local,setLocal]=useState("");
-  const items=["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","其他","没有"];
+  const items=["下蹲","上/下楼梯","久坐后站起来","长时间走路","跑步/运动","其他","基本没有"];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-2">选一个最困扰你的</p>
-      <FormCard>
-        {items.map(v=>(
-          <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="radio" name="trigger_q" checked={local===v} onChange={()=>setLocal(v)}/>{v}
-          </label>
-        ))}
-      </FormCard>
-      <SubmitBtn label="确定" onClick={()=>{if(!local){alert("请选择一项");return;}onSubmit([local]);}}/>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>最容易让膝盖不舒服的动作是？</p>
+      {items.map(v=>(
+        <BigOption key={v} label={v} selected={local===v} onClick={()=>{setLocal(v);}}/>
+      ))}
+      <SubmitBtn label="就是这个" onClick={()=>{if(!local){alert("请选择一个动作");return;}onSubmit([local]);}}/>
     </div>
   );
 }
 function PainSurvey({trigger,onSubmit}:{trigger:string;onSubmit:(v:number)=>void}) {
   const [val,setVal]=useState<number|null>(null);
-  const opts=["0 — 无不适","1 — 轻微不适（不影响完成）","2 — 中等不适（明显不舒服）","3 — 较重不适（需减慢速度）","4 — 非常不适（难以完成）"];
+  const opts=["没感觉 — 完全不影响","轻微 — 有点点不舒服","中等 — 明显不适","较重 — 需要慢一点","很重 — 几乎无法完成"];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">触发动作：{trigger}，不适程度是？</p>
-      <FormCard>
-        {opts.map((l,i)=>(
-          <label key={i} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="radio" name="pain_q" checked={val===i} onChange={()=>setVal(i)}/>{l}
-          </label>
-        ))}
-      </FormCard>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>做「{trigger}」时，不舒服程度怎样？</p>
+      {opts.map((l,i)=>(
+        <BigOption key={i} label={l} selected={val===i} onClick={()=>setVal(i)}/>
+      ))}
       <SubmitBtn label="确定" onClick={()=>{if(val===null){alert("请选择不适程度");return;}onSubmit(val);}}/>
     </div>
   );
 }
 function PostUseSurvey({onDone}:{onDone:(feel:string)=>void}) {
   const [val,setVal]=useState("");
-  const opts=[{v:"good",l:"1 — 很好，没有不适"},{v:"neutral",l:"2 — 没什么感觉"},{v:"mild",l:"3 — 稍为不适应"},{v:"skin",l:"4 — 膝盖周围皮肤明显不适"}];
+  const opts=[{v:"good",l:"👍 很棒，完全没不适"},{v:"neutral",l:"😐 还好，没什么感觉"},{v:"mild",l:"🤔 有点不舒服"},{v:"skin",l:"⚠️ 膝盖周围皮肤不适"}];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">今天整体感觉如何？</p>
-      <FormCard>
-        {opts.map(({v,l})=>(
-          <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="radio" name="post_use" checked={val===v} onChange={()=>setVal(v)}/>{l}
-          </label>
-        ))}
-      </FormCard>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>这次使用后，你感觉怎样？</p>
+      {opts.map(({v,l})=>(
+        <BigOption key={v} label={l} selected={val===v} onClick={()=>setVal(v)}/>
+      ))}
       <SubmitBtn label="确定" onClick={()=>{if(!val){alert("请选择");return;}onDone(val);}}/>
     </div>
   );
 }
 function StrengthSurvey({onDone}:{onDone:(strength:string)=>void}) {
   const [val,setVal]=useState("");
+  const opts=[{v:"weak",l:"偏轻 — 我还能承受更强"},{v:"ok",l:"刚刚好 — 正合适"},{v:"strong",l:"有点强 — 需要降低"}];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">当前模式强度感觉如何？</p>
-      <BtnRow>
-        <Pill label="偏轻" primary={val==="weak"} onClick={()=>setVal("weak")}/>
-        <Pill label="合适" primary={val==="ok"} onClick={()=>setVal("ok")}/>
-        <Pill label="偏强" primary={val==="strong"} onClick={()=>setVal("strong")}/>
-      </BtnRow>
-      <SubmitBtn label="确定" onClick={()=>{if(!val){alert("请选择");return;}onDone(val);}}/>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>这个强度对你来说怎样？</p>
+      {opts.map(({v,l})=>(
+        <BigOption key={v} label={l} selected={val===v} onClick={()=>setVal(v)}/>
+      ))}
+      <div style={{marginTop:12,padding:"10px 14px",background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:12,fontSize:12,color:"#92400e"}}>
+        💡 你的反馈很重要，小瑞会自动调整下次强度
+      </div>
+      <div style={{marginTop:12}}>
+        <SubmitBtn label={val ? "记住我的感受" : "继续"} onClick={()=>{if(!val){alert("请选择");return;}onDone(val);}}/>
+      </div>
     </div>
   );
 }
 function DailyReasonSurvey({onDone}:{onDone:(r:string)=>void}) {
   const [reason,setReason]=useState("");
-  const opts=[{v:"forgot",l:"忘记了"},{v:"no_time",l:"没有时间"},{v:"no_effect",l:"效果不明显"},{v:"discomfort",l:"使用不舒服"},{v:"other",l:"其他"}];
+  const opts=[{v:"forgot",l:"😅 忘记了"},{v:"no_time",l:"⏰ 没有时间"},{v:"no_effect",l:"🤷 效果不明显"},{v:"discomfort",l:"😞 用着不舒服"},{v:"other",l:"📝 其他原因"}];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">今天养护未完成，主要原因是？</p>
-      <FormCard>
-        {opts.map(({v,l})=>(
-          <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="radio" name="daily_reason" checked={reason===v} onChange={()=>setReason(v)}/>{l}
-          </label>
-        ))}
-      </FormCard>
-      <SubmitBtn label="确定" onClick={()=>{if(!reason){alert("请选择");return;}onDone(reason);}}/>
+      <div className="bg-[#fee2e2] border border-[#fca5a5] rounded-xl p-3 mb-4 text-sm flex items-start gap-2">
+        <span className="text-lg">⚠️</span>
+        <div>
+          <div className="font-medium text-[#991b1b]">坚持才见效果哦</div>
+          <div className="text-xs text-[#7f1d1d] mt-1">告诉我原因，我们一起来解决</div>
+        </div>
+      </div>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>今天没完成，主要是因为？</p>
+      {opts.map(({v,l})=>(
+        <BigOption key={v} label={l} selected={reason===v} onClick={()=>setReason(v)}/>
+      ))}
+      <SubmitBtn label="记录下来" onClick={()=>{if(!reason){alert("请选择原因");return;}onDone(reason);}}/>
     </div>
   );
 }
 function Day7TriggerSurvey({mainTrigger,onDone}:{mainTrigger:string;onDone:(same:boolean)=>void}) {
   return (
     <div>
-      <div className="bg-[#f0f9ff] rounded-xl p-3 mb-4 text-sm">
-        <div className="text-[#0369a1] font-medium mb-1">📍 7天前记录</div>
-        <div className="text-[#1a202c]">最困扰的动作：<strong>{mainTrigger}</strong></div>
+      <div className="bg-[#ecfdf5] rounded-xl p-3 mb-4 text-sm border border-[#86efac] flex items-start gap-2">
+        <span className="text-lg">📍</span>
+        <div>
+          <div className="text-[#15803d] font-medium">7天前你说的是</div>
+          <div className="text-[#166534] mt-1">最容易不舒服的动作：<strong>{mainTrigger}</strong></div>
+        </div>
       </div>
-      <p className="text-sm text-[#4a5568] mb-3">现在最容易让你膝盖不舒服的动作<br/>还是「{mainTrigger}」吗？</p>
-      <BtnRow>
-        <Pill label="✅ 还是这个" primary onClick={()=>onDone(true)}/>
-        <Pill label="🔄 换了" onClick={()=>onDone(false)}/>
-      </BtnRow>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>现在还是「{mainTrigger}」最困扰你吗？</p>
+      <BigOption label="✅ 还是这个" selected={false} onClick={()=>onDone(true)}/>
+      <BigOption label="🔄 已经改善了" selected={false} onClick={()=>onDone(false)}/>
     </div>
   );
 }
 function Day7NewTriggerSurvey({onDone}:{onDone:(trigger:string)=>void}) {
   const [val,setVal]=useState("");
-  const items=["下蹲","上楼梯/斜坡","下楼梯/斜坡","久坐后站起来","长时间走路","跑步/运动","没有明显诱因"];
+  const items=["下蹲","上/下楼梯","久坐后站起来","长时间走路","跑步/运动","其他","基本没有诱因"];
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">今天最容易让膝盖不舒服的动作是？</p>
-      <FormCard>
-        {items.map(v=>(
-          <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="radio" name="day7_trigger" checked={val===v} onChange={()=>setVal(v)}/>{v}
-          </label>
-        ))}
-      </FormCard>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>现在最容易让膝盖不舒服的是？</p>
+      {items.map(v=>(
+        <BigOption key={v} label={v} selected={val===v} onClick={()=>setVal(v)}/>
+      ))}
       <SubmitBtn label="确定" onClick={()=>{if(!val){alert("请选择");return;}onDone(val);}}/>
     </div>
   );
@@ -250,26 +407,27 @@ function Day7FeelSurvey({onDone}:{onDone:(feel:string)=>void}) {
   const [val,setVal]=useState("");
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">这7天整体感觉如何？</p>
-      <FormCard>
-        {[{v:"better",l:"改善了"},{v:"same",l:"差不多"},{v:"worse",l:"变差了"}].map(({v,l})=>(
-          <label key={v} className="flex items-center gap-2 py-1.5 cursor-pointer text-sm text-[#2d3748]">
-            <input type="radio" name="day7_feel" checked={val===v} onChange={()=>setVal(v)}/>{l}
-          </label>
-        ))}
-      </FormCard>
-      <SubmitBtn label="确定" onClick={()=>{if(!val){alert("请选择");return;}onDone(val);}}/>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>这7天来，你的膝盖整体怎样了？</p>
+      {[{v:"better",l:"🎉 明显改善了"},{v:"same",l:"😐 差不多"},{v:"worse",l:"📉 感觉变差了"}].map(({v,l})=>(
+        <BigOption key={v} label={l} selected={val===v} onClick={()=>setVal(v)}/>
+      ))}
+      <SubmitBtn label="记录成果" onClick={()=>{if(!val){alert("请选择");return;}onDone(val);}}/>
     </div>
   );
 }
 function Day7SkinSurvey({onDone}:{onDone:(hasSkin:boolean)=>void}) {
   return (
     <div>
-      <p className="text-sm text-[#4a5568] mb-3">是否出现膝盖周围皮肤明显不适？</p>
-      <BtnRow>
-        <Pill label="是，皮肤有不适" onClick={()=>onDone(true)}/>
-        <Pill label="否" primary onClick={()=>onDone(false)}/>
-      </BtnRow>
+      <div className="bg-[#fef3c7] border border-[#fcd34d] rounded-xl p-3 mb-4 text-sm flex items-start gap-2">
+        <span className="text-lg">🔍</span>
+        <div>
+          <div className="font-medium text-[#92400e]">最后一个问题</div>
+          <div className="text-xs text-[#b45309] mt-1">帮助我们确保你的使用体验很好</div>
+        </div>
+      </div>
+      <p style={{fontSize:15,color:"#4a5568",marginBottom:16,fontWeight:500}}>膝盖周围的皮肤有明显不适吗？</p>
+      <BigOption label="是的，有不适" selected={false} onClick={()=>onDone(true)}/>
+      <BigOption label="✅ 没有，很好" selected={false} onClick={()=>onDone(false)}/>
     </div>
   );
 }
@@ -278,25 +436,25 @@ function Day7SkinSurvey({onDone}:{onDone:(hasSkin:boolean)=>void}) {
 
 function StopReasonModal({open,onClose}:{open:boolean;onClose:(reasons:string[])=>void}) {
   const [local,setLocal]=useState<Record<string,boolean>>({});
-  const OPTS=["忘记了","没时间","效果不明显","使用不舒服","其他"];
+  const OPTS=[{v:"忘记了",l:"😅 忘记了"},{v:"没时间",l:"⏰ 没有时间"},{v:"效果不明显",l:"🤷 还看不出效果"},{v:"使用不舒服",l:"😞 使用不舒服"},{v:"其他",l:"📝 其他原因"}];
   if(!open) return null;
   return (
     <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
       <div className="bg-white w-full rounded-t-3xl p-6">
-        <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 使用已结束</div>
-        <p className="text-sm text-[#4a5568] mb-4">今天没完成，啥原因？（可多选）</p>
-        {OPTS.map(r=>(
-          <label key={r} className="flex items-center gap-2 py-2 cursor-pointer text-sm text-[#2d3748]">
-            <input type="checkbox" checked={!!local[r]} onChange={e=>setLocal(p=>({...p,[r]:e.target.checked}))} className="accent-[#1A7AC7]"/>
-            {r}
+        <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 这次就到这儿了</div>
+        <p className="text-sm text-[#4a5568] mb-4">告诉我为什么没完成吧（可多选）</p>
+        {OPTS.map(({v,l})=>(
+          <label key={v} className="flex items-center gap-3 py-2 cursor-pointer text-sm text-[#2d3748] hover:bg-[#f8fafc] px-2 rounded transition-colors">
+            <input type="checkbox" checked={!!local[v]} onChange={e=>setLocal(p=>({...p,[v]:e.target.checked}))} className="accent-[#1A7AC7] w-4 h-4"/>
+            {l}
           </label>
         ))}
-        <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-xl p-3 my-3 text-sm text-[#1E3A5F]">
-          坚持才有效果，明天继续哦～
+        <div className="bg-[#f0fdf4] border border-[#86efac] rounded-xl p-3 my-3 text-sm text-[#15803d]">
+          💪 康养就是坚持，明天继续哦～
         </div>
         <button onClick={()=>{onClose(Object.entries(local).filter(([,v])=>v).map(([k])=>k));setLocal({});}}
           className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
-          确定
+          记录原因，下次改进
         </button>
       </div>
     </div>
@@ -305,42 +463,49 @@ function StopReasonModal({open,onClose}:{open:boolean;onClose:(reasons:string[])
 
 // ── Survey Modal ──────────────────────────────────────────────────────────────
 
+const SURVEY_TITLES: Record<string, string> = {
+  new_user:"👋 认识你一下", returner:"👋 欢迎回来", safety:"⚠️ 安全检查",
+  triggers:"🤔 最困扰你的", pain:"📊 不舒服程度", day1_post_use:"😊 使用感受",
+  day1_strength:"💪 强度反馈", daily_reason:"🤔 没完成原因",
+  day7_trigger:"📍 触发动作", day7_new_trigger:"🔄 换个动作", day7_pain:"📊 现在程度",
+  day7_feel:"🎯 7天成果", day7_skin:"🔍 皮肤状况",
+};
+
 function SurveyModal({open,onClose,step,userData,onSubmit}:{
   open:boolean;onClose:()=>void;step:SurveyStep;userData:UserData;onSubmit:(data:Partial<UserData>)=>void;
 }) {
   if(!open||!step) return null;
+  const title = SURVEY_TITLES[step] ?? "📋 问卷";
   return (
-    <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
-      <div className="bg-white w-full rounded-t-3xl p-5 max-h-[85%] overflow-y-auto">
-        <div className="text-lg font-bold text-[#1a202c] mb-4">
-        {step==="new_user"?"初次见面"
-          :step==="returner"?"欢迎回来"
-          :step==="safety"?"使用前确认"
-          :step==="triggers"?"最近哪个动作不舒服"
-          :step==="pain"?"有多不舒服"
-          :step==="day1_post_use"?"今天感觉怎样"
-          :step==="day1_strength"?"强度合适吗"
-          :step==="daily_reason"?"今天没完成"
-          :step==="day7_trigger"?"动作有变化吗"
-          :step==="day7_new_trigger"?"换了哪个动作"
-          :step==="day7_pain"?"有多不舒服"
-          :step==="day7_feel"?"这7天感觉怎样"
-          :step==="day7_skin"?"皮肤还好吗"
-          :"问卷"}
+    <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
+      {/* bottom sheet */}
+      <div style={{background:"#fff",width:"100%",borderRadius:"24px 24px 0 0",maxHeight:"80%",display:"flex",flexDirection:"column",
+        boxShadow:"0 -4px 32px rgba(0,0,0,0.18)"}}>
+        {/* drag handle */}
+        <div style={{display:"flex",justifyContent:"center",padding:"12px 0 0"}}>
+          <div style={{width:36,height:4,borderRadius:2,background:"#e0e0e0"}}/>
         </div>
-        {step==="new_user"&&<NewUserSurvey prefill={{name:userData.name,gender:userData.gender,ageRange:userData.ageRange}} onDone={(n,g,a,d)=>{onSubmit({name:n,gender:g,ageRange:a,duration:d,firstTime:true});onClose();}}/>}
-        {step==="returner"&&<ReturnerSurvey onDone={(g,a)=>{onSubmit({gender:g,ageRange:a,firstTime:false});onClose();}}/>}
-        {step==="safety"&&<SafetySurvey onSubmit={v=>{onSubmit({safety:v});onClose();}}/>}
-        {step==="triggers"&&<TriggerSurvey onSubmit={v=>{onSubmit({triggers:v});onClose();}}/>}
-        {step==="pain"&&<PainSurvey trigger={userData.mainTrigger||"触发动作"} onSubmit={v=>{onSubmit({painLevel:v});onClose();}}/>}
-        {step==="day1_post_use"&&<PostUseSurvey onDone={f=>{onSubmit({postUseFeel:f});onClose();}}/>}
-        {step==="day1_strength"&&<StrengthSurvey onDone={s=>{onSubmit({dailyFeel:s});onClose();}}/>}
-        {step==="daily_reason"&&<DailyReasonSurvey onDone={r=>{onSubmit({dailyFeel:r});onClose();}}/>}
-        {step==="day7_trigger"&&<Day7TriggerSurvey mainTrigger={userData.mainTrigger} onDone={same=>{onSubmit({day7Trigger:same?userData.mainTrigger:""});onClose();}}/>}
-        {step==="day7_new_trigger"&&<Day7NewTriggerSurvey onDone={t=>{onSubmit({day7Trigger:t});onClose();}}/>}
-        {step==="day7_pain"&&<PainSurvey trigger={userData.day7Trigger||userData.mainTrigger||"触发动作"} onSubmit={v=>{onSubmit({day7Pain:v});onClose();}}/>}
-        {step==="day7_feel"&&<Day7FeelSurvey onDone={f=>{onSubmit({day7Feel:f});onClose();}}/>}
-        {step==="day7_skin"&&<Day7SkinSurvey onDone={hasSkin=>{onSubmit({dailyFeel:hasSkin?"skin":"no_skin"});onClose();}}/>}
+        {/* header */}
+        <div style={{padding:"12px 20px 10px",borderBottom:"1px solid #f0f0f0",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
+          <div style={{fontSize:18,fontWeight:700,color:"#1a202c"}}>{title}</div>
+          <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"none",background:"#f2f2f2",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#666",lineHeight:1}}>×</button>
+        </div>
+        {/* scrollable content */}
+        <div style={{overflowY:"auto",padding:"16px 20px 32px",flex:1}}>
+          {step==="new_user"&&<NewUserSurvey prefill={{name:userData.name,gender:userData.gender,ageRange:userData.ageRange}} onDone={(n,g,a,d)=>{onSubmit({name:n,gender:g,ageRange:a,duration:d,firstTime:true});onClose();}} onSkip={onClose}/>}
+          {step==="returner"&&<ReturnerSurvey onDone={(g,a)=>{onSubmit({gender:g,ageRange:a,firstTime:false});onClose();}} onSkip={onClose}/>}
+          {step==="safety"&&<SafetySurvey onSubmit={v=>{onSubmit({safety:v});onClose();}}/>}
+          {step==="triggers"&&<TriggerSurvey onSubmit={v=>{onSubmit({triggers:v});onClose();}}/>}
+          {step==="pain"&&<PainSurvey trigger={userData.mainTrigger||"触发动作"} onSubmit={v=>{onSubmit({painLevel:v});onClose();}}/>}
+          {step==="day1_post_use"&&<PostUseSurvey onDone={f=>{onSubmit({postUseFeel:f});onClose();}}/>}
+          {step==="day1_strength"&&<StrengthSurvey onDone={s=>{onSubmit({dailyFeel:s});onClose();}}/>}
+          {step==="daily_reason"&&<DailyReasonSurvey onDone={r=>{onSubmit({dailyFeel:r});onClose();}}/>}
+          {step==="day7_trigger"&&<Day7TriggerSurvey mainTrigger={userData.mainTrigger} onDone={same=>{onSubmit({day7Trigger:same?userData.mainTrigger:""});onClose();}}/>}
+          {step==="day7_new_trigger"&&<Day7NewTriggerSurvey onDone={t=>{onSubmit({day7Trigger:t});onClose();}}/>}
+          {step==="day7_pain"&&<PainSurvey trigger={userData.day7Trigger||userData.mainTrigger||"触发动作"} onSubmit={v=>{onSubmit({day7Pain:v});onClose();}}/>}
+          {step==="day7_feel"&&<Day7FeelSurvey onDone={f=>{onSubmit({day7Feel:f});onClose();}}/>}
+          {step==="day7_skin"&&<Day7SkinSurvey onDone={hasSkin=>{onSubmit({dailyFeel:hasSkin?"skin":"no_skin"});onClose();}}/>}
+        </div>
       </div>
     </div>
   );
@@ -371,6 +536,61 @@ const TRIGGER_TRAINING: Record<string, { label: string; exercises: string[] }> =
 };
 const DEFAULT_TRAINING = { label: "综合训练", exercises: ["转身摸臀", "臀部找椅", "拉伸臀部"] };
 
+function GifPlayerModal({ name, onClose }: { name: string; onClose: () => void }) {
+  const ex = ALL_EXERCISES[name];
+  const gif = EXERCISE_GIF[name];
+  const [paused, setPaused] = useState(false);
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "absolute", inset: 0, zIndex: 900,
+        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        borderRadius: 28,
+      }}>
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: "72%", maxWidth: 320,
+          background: "#fff", borderRadius: 20,
+          overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.25)",
+        }}>
+        <div style={{ position: "relative", background: "#000", minHeight: 180 }}>
+          {gif && !paused && (
+            <img src={gif} alt={name} style={{ width: "100%", display: "block", maxHeight: 240, objectFit: "cover" }} />
+          )}
+          {paused && (
+            <div style={{ width: "100%", height: 180, background: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontSize: 13, opacity: 0.6 }}>已暂停</span>
+            </div>
+          )}
+          <button
+            onClick={() => setPaused(p => !p)}
+            style={{
+              position: "absolute", bottom: 8, right: 8,
+              background: "rgba(0,0,0,0.55)", border: "none", borderRadius: 20,
+              color: "#fff", fontSize: 12, padding: "4px 12px", cursor: "pointer",
+            }}>
+            {paused ? "▶ 继续" : "⏸ 暂停"}
+          </button>
+        </div>
+        <div style={{ padding: "12px 14px 14px" }}>
+          <div style={{ fontWeight: 700, fontSize: 15, color: "#1a202c", marginBottom: 4 }}>{name}</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 6 }}>{ex?.sets}</div>
+          <div style={{ fontSize: 12, color: "#4B5563", lineHeight: 1.6 }}>{ex?.desc}</div>
+          <div style={{ marginTop: 12, textAlign: "center" }}>
+            <button onClick={onClose}
+              style={{ fontSize: 12, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer" }}>
+              点击空白处关闭
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TrainingRecommendCard({ stiffness }: { stiffness: number | null }) {
   const [exercises] = useState<string[]>(() => {
     const stretches = ["拉伸臀部", "拉伸大腿后侧", "拉伸躯干"];
@@ -389,51 +609,44 @@ function TrainingRecommendCard({ stiffness }: { stiffness: number | null }) {
     return pairs[Math.floor(Math.random() * pairs.length)];
   });
   const label = (stiffness === 1 || stiffness === 2) ? "拉伸放松" : "强化训练";
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [playerName, setPlayerName] = useState<string | null>(null);
   return (
-    <div className="rounded-2xl bg-white border border-[#BFDBFE] overflow-hidden">
-      <div className="px-4 py-2.5 bg-[#EFF6FF]">
-        <div className="text-sm font-bold text-[#1A7AC7]">🏃 今日训练推荐</div>
-        <div className="text-xs text-[#6B7280] mt-0.5">{label}</div>
-      </div>
-      <div className="divide-y divide-[#EFF6FF]">
-        {exercises.map((name, i) => {
-          const ex = ALL_EXERCISES[name];
-          const open = expanded === name;
-          return (
-            <div key={name} onClick={() => setExpanded(open ? null : name)}
-              className="px-4 py-3 cursor-pointer active:bg-[#F8FAFC] transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+    <>
+      {playerName && <GifPlayerModal name={playerName} onClose={() => setPlayerName(null)} />}
+      <div className="rounded-2xl bg-white border border-[#BFDBFE] overflow-hidden">
+        <div className="px-4 py-2.5 bg-[#EFF6FF]">
+          <div className="text-sm font-bold text-[#1A7AC7]">🏃 今日训练推荐</div>
+          <div className="text-xs text-[#6B7280] mt-0.5">{label}</div>
+        </div>
+        <div className="divide-y divide-[#EFF6FF]">
+          {exercises.map((name, i) => {
+            const ex = ALL_EXERCISES[name];
+            return (
+              <div key={name} className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="w-5 h-5 rounded-full bg-[#DBEAFE] text-[#1E40AF] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                     {i + 1}
                   </span>
-                  <div>
-                    <div className="text-sm font-semibold text-[#1a202c]">{name}</div>
+                  <div className="min-w-0">
+                    <button
+                      onClick={() => setPlayerName(name)}
+                      className="text-sm font-semibold text-[#1A7AC7] underline underline-offset-2 cursor-pointer bg-transparent border-none p-0 text-left">
+                      {name}
+                    </button>
                     <div className="text-xs text-[#9CA3AF]">{ex?.sets}</div>
                   </div>
                 </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  style={{ transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "none", flexShrink: 0 }}>
-                  <path d="M6 9l6 6 6-6" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <button
+                  onClick={() => setPlayerName(name)}
+                  className="text-xs text-[#1A7AC7] bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg px-2.5 py-1 cursor-pointer flex-shrink-0">
+                  ▶ 演示
+                </button>
               </div>
-              {open && (
-                <div className="mt-2 rounded-xl overflow-hidden bg-[#F0F9FF]">
-                  {EXERCISE_GIF[name] && (
-                    <img src={EXERCISE_GIF[name]} alt={name}
-                      className="w-full object-cover" style={{ maxHeight: 200 }} />
-                  )}
-                  <div className="px-3 py-2 text-xs text-[#4B5563] leading-relaxed">
-                    {ex?.desc}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -1165,26 +1378,29 @@ export default function App() {
   const [thinking, setThinking] = useState(false);
   const [taskIdx, setTaskIdx] = useState(0);
   const [showStopModal, setShowStopModal] = useState(false);
-  const [smartMode, setSmartMode] = useState(false);
+  const [smartMode, setSmartMode] = useState<boolean>(loadSmartMode());
 
-  const [userData, setUserData] = useState<UserData>({
-    name: "", gender: "", ageRange: "", duration: "",
-    safety: [], stiffness: null, baseLevel: 2,
-    triggers: [], mainTrigger: "",
-    painLevel: 0, finalLevel: 2,
-    firstTime: true,
-    dailyRecords: {},
-    pressure: 0, workSec: 0, restSec: 0, cycles: 0,
-    dailyFeel: "",
-    postUseFeel: "",
-    earlyStopReason: "",
-    postTrainingPain: 0,
-    postTrainingStrength: 0,
-    day7Trigger: "", day7Pain: 0, day7Feel: "",
-    lastTrainingDate: "",
-    trainingDates: [],
-    sessionsToday: 0,
-  });
+  const [userData, setUserData] = useState<UserData>(() => loadUserData());
+
+  // Toast 通知
+  const [toasts, setToasts] = useState<{id:number;msg:string;type:"info"|"success"|"error"|"warn"}[]>([]);
+  const toastIdRef = useRef(0);
+  const showToast = (msg: string, type: "info"|"success"|"error"|"warn" = "info") => {
+    const id = ++toastIdRef.current;
+    setToasts(prev => [...prev, {id, msg, type}]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+  };
+  const dismissToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
+
+  // 蓝牙和权限状态
+  const [bluetoothConnectState, setBluetoothConnectState] = useState<BluetoothConnectState>("not_configured");
+  const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>(loadPermissionStatus());
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const MAX_RECONNECT_ATTEMPTS = 3;
+  const RECONNECT_DELAYS = [1000, 3000, 5000]; // ms
+  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+  const [pendingPermissionType, setPendingPermissionType] = useState<"bluetooth" | "location" | "both" | null>(null);
+  const [scannedDevices, setScannedDevices] = useState<BluetoothDevice[]>([]);
 
   const [deviceState, setDeviceState] = useState<DeviceState>("disconnected");
   const [hwState, setHwState] = useState<HwState>("idle");
@@ -1193,6 +1409,88 @@ export default function App() {
   const [hwTotalCycles, setHwTotalCycles] = useState(5);
   const [hwRemaining, setHwRemaining] = useState(0);
   const [hwTotal, setHwTotal] = useState(0);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(userData));
+    } catch {
+      // ignore storage failures
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_SMART_MODE_KEY, JSON.stringify(smartMode));
+    } catch {
+      // ignore storage failures
+    }
+  }, [smartMode]);
+
+  // 持久化蓝牙和权限状态
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_BLUETOOTH_KEY, JSON.stringify({
+        connectedDevice: userData.connectedDevice,
+        pairedDevices: userData.pairedDevices
+      }));
+      window.localStorage.setItem(STORAGE_PERMISSION_KEY, JSON.stringify(permissionStatus));
+    } catch {
+      // ignore storage failures
+    }
+  }, [userData.connectedDevice, userData.pairedDevices, permissionStatus]);
+
+  // 蓝牙状态变化 → Toast 通知
+  useEffect(() => {
+    const msgs: Record<BluetoothConnectState, {text:string;type:"success"|"error"|"info"|"warning"}|null> = {
+      not_configured: null,
+      permission_needed: {text:"需要蓝牙权限才能连接设备",type:"warning"},
+      checking_permission: {text:"正在检查蓝牙权限…",type:"info"},
+      permission_denied: {text:"蓝牙权限被拒绝，请在系统设置中开启",type:"error"},
+      scanning: {text:"正在扫描附近设备…",type:"info"},
+      pairing: {text:"正在配对设备…",type:"info"},
+      connecting: {text:"正在连接设备…",type:"info"},
+      verifying: {text:"正在验证设备…",type:"info"},
+      connected: {text:"✓ 设备已连接",type:"success"},
+      disconnected: {text:"设备已断开连接",type:"warning"},
+      connection_failed: {text:"连接失败，请重试",type:"error"},
+      pairing_failed: {text:"配对失败，请靠近设备后重试",type:"error"},
+      timeout: {text:"连接超时，请重试",type:"error"},
+      permission_revoked: {text:"蓝牙权限已撤销，设备已断开",type:"error"},
+    };
+    const m = msgs[bluetoothConnectState];
+    if (m) showToast(m.text, m.type);
+  }, [bluetoothConnectState]);
+
+  // 自动重连机制 - 设备运行中断连
+  useEffect(() => {
+    if (deviceState === "disconnected" && hwState === "running" && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+      const delay = RECONNECT_DELAYS[Math.min(reconnectAttempts, RECONNECT_DELAYS.length - 1)];
+      const timer = setTimeout(() => {
+        setBluetoothConnectState("connecting");
+        setReconnectAttempts(prev => prev + 1);
+        // 模拟重连成功（实际应调用蓝牙API）
+        setTimeout(() => {
+          setDeviceState("idle");
+          setBluetoothConnectState("connected");
+        }, 800);
+      }, delay);
+      return () => clearTimeout(timer);
+    } else if (deviceState === "disconnected" && hwState === "running" && reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      // 多次重连失败，显示错误
+      setHwState("idle");
+      setUserData(prev => ({ ...prev, lastErrorMessage: "设备连接已中断，已尝试3次重连仍未成功。请检查设备或重新配置。" }));
+    }
+  }, [deviceState, hwState, reconnectAttempts]);
+
+  // 权限变更检测 - 如果权限被撤销
+  useEffect(() => {
+    if (permissionStatus.bluetooth === "denied" && deviceState !== "disconnected") {
+      setDeviceState("disconnected");
+      setHwState("idle");
+      setBluetoothConnectState("permission_revoked");
+      setUserData(prev => ({ ...prev, lastErrorMessage: "蓝牙权限已被撤销，设备已断开连接。" }));
+    }
+  }, [permissionStatus.bluetooth]);
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const msgId = useRef(0);
@@ -1204,7 +1502,7 @@ export default function App() {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
-  }, [msgs, thinking]);
+  }, [msgs, thinking, phase]);
 
   // 监听设备训练完成
   useEffect(() => {
@@ -1372,7 +1670,58 @@ export default function App() {
     setHwTotal(0);
   };
 
+  // 蓝牙配置相关处理
+  const handleRequestPermission = async (type: "bluetooth" | "location"): Promise<boolean> => {
+    // 模拟权限申请（实际应调用系统API）
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setPermissionStatus(prev => ({
+          ...prev,
+          [type === "bluetooth" ? "bluetooth" : "location"]: "granted"
+        }));
+        resolve(true);
+      }, 1500);
+    });
+  };
+
+  const handleScanDevices = () => {
+    setBluetoothConnectState("scanning");
+    // 模拟扫描设备
+    setTimeout(() => {
+      setScannedDevices([
+        { name: "膝盖训练器 Pro", address: "00:1A:7D:DA:71:13", rssi: -45, paired: false, connected: false },
+        { name: "腿部设备", address: "00:1A:7D:DA:71:14", rssi: -65, paired: true, connected: false },
+        { name: "膝盖护理器", address: "00:1A:7D:DA:71:15", rssi: -72, paired: false, connected: false },
+      ]);
+    }, 2000);
+  };
+
+  const handlePairDevice = (device: BluetoothDevice) => {
+    setBluetoothConnectState("pairing");
+    // 模拟配对过程
+    setTimeout(() => {
+      setBluetoothConnectState("verifying");
+      setTimeout(() => {
+        setBluetoothConnectState("connected");
+        setDeviceState("idle");
+        setUserData(prev => ({
+          ...prev,
+          connectedDevice: { ...device, paired: true, connected: true, pairedAt: Date.now() },
+          pairedDevices: [...(prev.pairedDevices || []), device]
+        }));
+        setReconnectAttempts(0);
+      }, 1500);
+    }, 2000);
+  };
+
+  const handleCancelBluetoothConfig = () => {
+    setBluetoothConnectState("not_configured");
+    setScannedDevices([]);
+    setScreen("home");
+  };
+
   const tasks = currentDay === 1 ? DAY1_TASKS : currentDay === 7 ? DAY7_TASKS : DAILY_TASKS;
+  const showOnboardingBanner = userData.firstTime || !userData.name || !userData.gender || !userData.ageRange;
 
   return (
     <div style={{
@@ -1383,6 +1732,24 @@ export default function App() {
       position: "relative",
       overflow: "hidden",
     }}>
+      <div style={{ position: "absolute", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 9999, display: "flex", flexDirection: "column", gap: 8, width: "calc(100% - 32px)", maxWidth: 360, pointerEvents: "none" }}>
+        {toasts.map(t => (
+          <div key={t.id} onClick={() => dismissToast(t.id)}
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "11px 14px", borderRadius: 12,
+              background: t.type === "success" ? "#ecfdf5" : t.type === "error" ? "#fef2f2" : t.type === "warn" ? "#fffbeb" : "#eff6ff",
+              border: `1px solid ${t.type === "success" ? "#86efac" : t.type === "error" ? "#fca5a5" : t.type === "warn" ? "#fcd34d" : "#93c5fd"}`,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+              fontSize: 13, fontWeight: 500,
+              color: t.type === "success" ? "#15803d" : t.type === "error" ? "#dc2626" : t.type === "warn" ? "#92400e" : "#1e40af",
+              pointerEvents: "auto", cursor: "pointer",
+            }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>{t.type === "success" ? "✅" : t.type === "error" ? "❌" : t.type === "warn" ? "⚠️" : "ℹ️"}</span>
+            <span style={{ flex: 1 }}>{t.msg}</span>
+          </div>
+        ))}
+      </div>
       {screen === "wechat-login" && (
         <WeChatLogin
           onLogin={(name) => {
@@ -1415,6 +1782,52 @@ export default function App() {
         setTab("home");
       }} />}
 
+      {screen === "bluetooth-config" && (
+        <div style={{ padding: "20px", background: "#f5f5f5", height: "100vh", overflow: "auto" }}>
+          <div style={{ marginBottom: 20 }}>
+            <button
+              onClick={handleCancelBluetoothConfig}
+              style={{
+                padding: "8px 16px",
+                background: "#f0f0f0",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: "bold"
+              }}
+            >
+              ← 返回
+            </button>
+          </div>
+          <BluetoothConfigWizard
+            state={bluetoothConnectState}
+            permissions={permissionStatus}
+            pairedDevices={userData.pairedDevices || []}
+            connectedDevice={userData.connectedDevice}
+            scannedDevices={scannedDevices}
+            onPermissionRequest={(type) => {
+              setPendingPermissionType(type);
+              setShowPermissionDialog(true);
+            }}
+            onScan={handleScanDevices}
+            onPair={handlePairDevice}
+            onConnect={handlePairDevice}
+            onCancel={handleCancelBluetoothConfig}
+          />
+        </div>
+      )}
+
+      <PermissionRequest
+        show={showPermissionDialog}
+        type={pendingPermissionType || "bluetooth"}
+        onRequest={handleRequestPermission}
+        onCancel={() => {
+          setShowPermissionDialog(false);
+          setPendingPermissionType(null);
+        }}
+      />
+
       {screen === "home" && (
         <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", position: "relative" }}>
           {tab === "home" && <HomePage
@@ -1422,8 +1835,12 @@ export default function App() {
             streak={0}
             weekDone={currentDay - 1}
             weekTotal={7}
-            showOnboardingBanner={false}
-            onShowOnboarding={() => setScreen("onboarding")}
+            showOnboardingBanner={showOnboardingBanner}
+            onShowOnboarding={() => setTab("profile")}
+            onConfigureBluetoothClick={() => {
+              setScreen("bluetooth-config");
+              setBluetoothConnectState("permission_needed");
+            }}
             onAssessmentDone={(result) => {
               // Convert stiffness string to numeric representation if needed
               const stiffnessMap: Record<string, number> = {
@@ -1458,6 +1875,7 @@ export default function App() {
             onTogglePause={handleTogglePause} onStop={handleStop} onReset={handleReset}
             userGender={userData.gender}
             userAgeRange={userData.ageRange}
+            stiffness={typeof userData.stiffness === 'number' ? userData.stiffness : null}
           />}
           {tab === "training" && <TrainingPage />}
           {tab === "assistant" && (
@@ -1632,7 +2050,12 @@ export default function App() {
             />
           )}
           {tab === "discover" && <DiscoverPage />}
-          {tab === "profile" && <ProfilePage userName={userData?.name||"用户"} onLogout={()=>setScreen("wechat-login")}/>}
+          {tab === "profile" && <ProfilePage
+            userName={userData?.name||"用户"}
+            onLogout={()=>setScreen("wechat-login")}
+            userData={{ name: userData?.name||"", gender: userData?.gender||"", ageRange: userData?.ageRange||"" }}
+            onSaveProfile={(d) => setUserData(p => ({ ...p, name: d.name, gender: d.gender, ageRange: d.ageRange }))}
+          />}
 
           <FloatBall
             deviceState={deviceState}
@@ -1712,7 +2135,6 @@ export default function App() {
             const feelLabels: Record<string,string> = {good:"1 — 很好，没有不适",neutral:"2 — 没什么感觉",mild:"3 — 稍为不适应",skin:"4 — 膝盖周围皮肤明显不适"};
             addMsg("user", feelLabels[data.postUseFeel] ?? data.postUseFeel);
             if (data.postUseFeel === "skin") {
-              // Q5=4（皮肤明显不适）→ 跳过Q8，直接降级
               setUserData((prev: UserData) => ({
                 ...prev,
                 finalLevel: Math.max(1, prev.finalLevel - 1),
@@ -1722,8 +2144,34 @@ export default function App() {
                 setTimeout(() => setPhase("day1_optimize"), 800);
               }, 500);
             } else {
-              // Q5=1-3 → 继续问Q8强度感受
               setTimeout(() => setSurveyStep("day1_strength"), 300);
+            }
+          } else if (surveyStep === "day1_strength") {
+            const strengthLabels: Record<string,string> = {weak:"偏轻 — 我还能承受更强",ok:"刚刚好 — 正合适",strong:"有点强 — 需要降低"};
+            addMsg("user", strengthLabels[data.dailyFeel] ?? data.dailyFeel);
+            if (data.dailyFeel === "strong") {
+              setUserData((prev: UserData) => ({
+                ...prev,
+                finalLevel: Math.max(1, prev.finalLevel - 1),
+              }));
+              simulateThinking(() => {
+                addMsg("bot", "好的，已为你降低下次训练强度，循序渐进更安全。");
+                setTimeout(() => setPhase("day1_optimize"), 800);
+              }, 500);
+            } else if (data.dailyFeel === "weak") {
+              setUserData((prev: UserData) => ({
+                ...prev,
+                finalLevel: Math.min(6, prev.finalLevel + 1),
+              }));
+              simulateThinking(() => {
+                addMsg("bot", "好的，已为你提高下次训练强度，继续加油！");
+                setTimeout(() => setPhase("day1_optimize"), 800);
+              }, 500);
+            } else {
+              simulateThinking(() => {
+                addMsg("bot", "强度刚刚好，下次保持这个方案继续！");
+                setTimeout(() => setPhase("day1_optimize"), 800);
+              }, 500);
             }
           }
           // Day 7复评流程链式触发
