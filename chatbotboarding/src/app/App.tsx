@@ -1371,6 +1371,7 @@ function AssistantPage({msgs,phase,tasks,taskIdx,currentDay,ud,thinking,messages
 export default function App() {
   const [screen, setScreen] = useState<AppScreen>("wechat-login");
   const [tab, setTab] = useState<Tab>("home");
+  const [openProfileEdit, setOpenProfileEdit] = useState(false);
   const [currentDay, setCurrentDay] = useState(1);
   const [phase, setPhase] = useState<Phase>("smart_intro");
   const [surveyStep, setSurveyStep] = useState<SurveyStep>(null);
@@ -1836,7 +1837,7 @@ export default function App() {
             weekDone={currentDay - 1}
             weekTotal={7}
             showOnboardingBanner={showOnboardingBanner}
-            onShowOnboarding={() => setTab("profile")}
+            onShowOnboarding={() => { setTab("profile"); setOpenProfileEdit(true); }}
             onConfigureBluetoothClick={() => {
               setScreen("bluetooth-config");
               setBluetoothConnectState("permission_needed");
@@ -2055,6 +2056,8 @@ export default function App() {
             onLogout={()=>setScreen("wechat-login")}
             userData={{ name: userData?.name||"", gender: userData?.gender||"", ageRange: userData?.ageRange||"" }}
             onSaveProfile={(d) => setUserData(p => ({ ...p, name: d.name, gender: d.gender, ageRange: d.ageRange }))}
+            initialSubView={openProfileEdit ? "edit-profile" : undefined}
+            onSubViewEntered={() => setOpenProfileEdit(false)}
           />}
 
           <FloatBall

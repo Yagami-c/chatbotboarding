@@ -20,6 +20,8 @@ interface ProfilePageProps {
   onLogout?: () => void;
   userData?: { name: string; gender: string; ageRange: string };
   onSaveProfile?: (data: { name: string; gender: string; ageRange: string }) => void;
+  initialSubView?: "edit-profile";
+  onSubViewEntered?: () => void;
 }
 
 // ── Shared sub-components ──────────────────────────────────────────────────────
@@ -976,11 +978,15 @@ function EditProfilePage({
 // ── Main ──────────────────────────────────────────────────────────────────────
 type SubView = "main"|"device"|"plan"|"points"|"appearance"|"settings"|"edit-profile";
 
-export function ProfilePage({ userName="用户", onLogout, userData, onSaveProfile }: ProfilePageProps) {
-  const [sub,setSub]   = useState<SubView>("main");
+export function ProfilePage({ userName="用户", onLogout, userData, onSaveProfile, initialSubView, onSubViewEntered }: ProfilePageProps) {
+  const [sub,setSub]   = useState<SubView>(initialSubView || "main");
   const [showLogout,setShowLogout] = useState(false);
 
   const handleLogout = () => { setShowLogout(false); onLogout?.(); };
+
+  useEffect(() => {
+    if (initialSubView) { setSub(initialSubView); onSubViewEntered?.(); }
+  }, [initialSubView]);
 
   const profileInitial = {
     name:     userData?.name     || userName,
