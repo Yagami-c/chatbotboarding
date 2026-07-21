@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { LEVEL_PARAMS, LEVELS, LEVEL_DESCS, getLevelName, formatTime } from "../types";
+import { TrainingRecommendCard } from "./shared";
 
 interface QuickTrainingProps {
   onBack: () => void;
@@ -350,14 +351,15 @@ export function QuickTraining({ onBack }: QuickTrainingProps) {
           {deviceState==="stopped" && (
             <>
               <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-3.5 text-sm text-[#1E3A5F]">
-                <div className="font-semibold mb-1">🎉 使用完成！</div>
-                <div className="text-xs">可到「训练」tab 跟练配套运动，或去「发现」tab 了解科普知识。</div>
+                <div className="font-semibold mb-1">{completedRef.current ? "🎉 使用完成！" : "⏹ 已结束"}</div>
+                <div className="text-xs">完成后可跟练下方推荐动作，效果更佳。</div>
               </div>
+              <TrainingRecommendCard />
               <div className="flex gap-2">
-                <button onClick={() => { onBack(); /* TODO: switch to training tab */ }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
+                <button onClick={onBack} className="flex-1 py-3 rounded-full bg-[#F0F9FF] text-[#1A7AC7] font-semibold text-sm border border-[#BAE6FD] cursor-pointer active:bg-[#E0F2FE] transition-all">
                   🏃 训练
                 </button>
-                <button onClick={() => { onBack(); /* TODO: switch to discover tab */ }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                <button onClick={onBack} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
                   📖 科普
                 </button>
               </div>

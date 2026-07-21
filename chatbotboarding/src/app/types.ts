@@ -4,11 +4,55 @@ export type AppScreen =
   | "onboarding"
   | "home"
   | "manual-assessment"
-  | "quick-training";
+  | "quick-training"
+  | "bluetooth-config";
 
 export type Role = "bot" | "user";
 export interface Msg { id: number; role: Role; html: string; editPhase?: Phase }
 export interface Task { title: string; desc: string }
+
+// 蓝牙连接状态
+export type BluetoothConnectState = 
+  // 初始状态
+  | "not_configured"       // 从未配置过
+  | "permission_needed"    // 需要申请权限
+  
+  // 配置过程中的状态
+  | "checking_permission"  // 检查权限中
+  | "permission_denied"    // 权限被拒绝
+  | "scanning"            // 正在扫描设备
+  | "pairing"             // 正在配对
+  | "connecting"          // 正在连接
+  | "verifying"           // 正在验证设备
+  
+  // 终态
+  | "connected"           // 已连接
+  | "disconnected"        // 已断开
+  | "connection_failed"   // 连接失败（需要重试）
+  | "pairing_failed"      // 配对失败
+  | "timeout"             // 超时
+  | "permission_revoked"; // 权限被撤销
+
+// 权限状态
+export interface PermissionStatus {
+  bluetooth: "granted" | "denied" | "not_checked";
+  location: "granted" | "denied" | "not_checked";
+  bluetoothScan?: "granted" | "denied" | "not_checked";
+  bluetoothConnect?: "granted" | "denied" | "not_checked";
+}
+
+// 蓝牙设备配置
+export interface BluetoothDevice {
+  name: string;
+  address: string;  // MAC地址或UUID
+  model?: string;
+  paired: boolean;
+  connected: boolean;
+  pairedAt?: number; // 时间戳
+  lastConnectedAt?: number;
+  rssi?: number; // 信号强度
+  battery?: number; // 电池百分比
+}
 
 export interface UserData {
   name: string; gender: string; ageRange: string; duration: string;
@@ -24,6 +68,11 @@ export interface UserData {
   postTrainingPain: number;
   postTrainingStrength: number;
   day7Trigger: string; day7Pain: number; day7Feel: string;
+  
+  // 蓝牙设备相关
+  connectedDevice?: BluetoothDevice;
+  pairedDevices?: BluetoothDevice[];
+  lastErrorMessage?: string;
 }
 
 export type HwState = "idle" | "running" | "paused" | "stopped";

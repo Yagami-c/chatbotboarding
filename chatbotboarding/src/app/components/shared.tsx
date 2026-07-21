@@ -1,5 +1,16 @@
 import { LEVEL_PARAMS, getLevelName, formatTime, DeviceState, LEVELS, LEVEL_DESCS, Tab } from "../types";
 import { useState, useRef } from "react";
+import React from "react";
+import gif转身摸臀 from "../../assets/gifs/转身摸臀.gif";
+import gif后踢臀部 from "../../assets/gifs/后踢臀部.gif";
+import gif提膝碰肘 from "../../assets/gifs/提膝碰肘.gif";
+import gif螃蟹步   from "../../assets/gifs/螃蟹步.gif";
+import gif臀部找椅 from "../../assets/gifs/臀部找椅.gif";
+import gif站立提踵 from "../../assets/gifs/站立提踵.gif";
+import gif快步走   from "../../assets/gifs/快步走.gif";
+import gif拉伸臀部 from "../../assets/gifs/拉伸臀部.gif";
+import gif拉伸大腿后侧 from "../../assets/gifs/拉伸大腿后侧.gif";
+import gif拉伸躯干 from "../../assets/gifs/拉伸躯干.gif";
 
 // ── WeChat Mini Program design tokens ─────────────────────────────────────────
 const WX = {
@@ -756,6 +767,142 @@ export function SurveyModal({open,title,onClose,children}:{
         )}
         <div style={{padding:"16px 16px 0"}}>
           {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Training recommendation ────────────────────────────────────────────────────
+
+export const ALL_EXERCISES: Record<string, { sets: string; desc: string }> = {
+  "转身摸臀":    { sets:"左右各 10 次",          desc:"双脚与肩同宽，上身挺直，向后转身用手摸对侧臀部，左右交替。" },
+  "后踢臀部":    { sets:"左右各 10 次",          desc:"双脚与肩同宽，双手叉腰，脚跟向后踢臀部，左右交替。" },
+  "提膝碰肘":    { sets:"左右各 8 次 × 3 循环", desc:"吐气收腹提膝碰对侧肘，保持身体面向正前方，做完一侧再换边。" },
+  "螃蟹步":      { sets:"左右各 4 步 × 2 组",   desc:"微蹲保持姿势，横向移步，左右各走 4 步为一组。" },
+  "臀部找椅":    { sets:"8 次 × 3 循环",         desc:"站在椅前，臀部向后轻触椅缘后缓慢起身，膝盖不超过脚尖。" },
+  "站立提踵":    { sets:"8 次 × 3 循环",         desc:"双手扶椅，脚尖踮到最高再缓慢放下。" },
+  "快步走":      { sets:"快走 100 步",            desc:"以最自然的状态快速走 100 步，步伐轻盈。" },
+  "拉伸臀部":    { sets:"左右各 20 秒 × 2 组",   desc:"坐位，脚踝搭在对侧大腿上，上身挺直前倾，感受臀部拉紧。" },
+  "拉伸大腿后侧":{ sets:"左右各 20 秒 × 2 组",   desc:"坐位，伸直腿勾脚尖，上身挺直前倾，感受大腿后侧拉紧。" },
+  "拉伸躯干":    { sets:"左右各 20 秒 × 2 组",   desc:"坐位，身体向一侧转到最大范围，感受躯干拉紧，保持 20 秒。" },
+};
+
+const EXERCISE_GIF: Record<string, string> = {
+  "转身摸臀": gif转身摸臀, "后踢臀部": gif后踢臀部, "提膝碰肘": gif提膝碰肘,
+  "螃蟹步": gif螃蟹步, "臀部找椅": gif臀部找椅, "站立提踵": gif站立提踵,
+  "快步走": gif快步走, "拉伸臀部": gif拉伸臀部, "拉伸大腿后侧": gif拉伸大腿后侧,
+  "拉伸躯干": gif拉伸躯干,
+};
+
+export function GifPlayerModal({ name, onClose }: { name: string; onClose: () => void }) {
+  const ex = ALL_EXERCISES[name];
+  const gif = EXERCISE_GIF[name];
+  const [paused, setPaused] = useState(false);
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "absolute", inset: 0, zIndex: 900,
+        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        borderRadius: 28,
+      }}>
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: "72%", maxWidth: 320,
+          background: "#fff", borderRadius: 20,
+          overflow: "hidden", boxShadow: "0 8px 40px rgba(0,0,0,0.25)",
+        }}>
+        <div style={{ position: "relative", background: "#000", minHeight: 180 }}>
+          {gif && !paused && (
+            <img src={gif} alt={name} style={{ width: "100%", display: "block", maxHeight: 240, objectFit: "cover" }} />
+          )}
+          {paused && (
+            <div style={{ width: "100%", height: 180, background: "#111", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontSize: 13, opacity: 0.6 }}>已暂停</span>
+            </div>
+          )}
+          <button
+            onClick={() => setPaused(p => !p)}
+            style={{
+              position: "absolute", bottom: 8, right: 8,
+              background: "rgba(0,0,0,0.55)", border: "none", borderRadius: 20,
+              color: "#fff", fontSize: 12, padding: "4px 12px", cursor: "pointer",
+            }}>
+            {paused ? "▶ 继续" : "⏸ 暂停"}
+          </button>
+        </div>
+        <div style={{ padding: "12px 14px 14px" }}>
+          <div style={{ fontWeight: 700, fontSize: 15, color: "#1a202c", marginBottom: 4 }}>{name}</div>
+          <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 6 }}>{ex?.sets}</div>
+          <div style={{ fontSize: 12, color: "#4B5563", lineHeight: 1.6 }}>{ex?.desc}</div>
+          <div style={{ marginTop: 12, textAlign: "center" }}>
+            <button onClick={onClose}
+              style={{ fontSize: 12, color: "#9CA3AF", background: "none", border: "none", cursor: "pointer" }}>
+              点击空白处关闭
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function TrainingRecommendCard({ stiffness }: { stiffness?: number | null }) {
+  const [exercises] = useState<string[]>(() => {
+    const stretches = ["拉伸臀部", "拉伸大腿后侧", "拉伸躯干"];
+    const randStretch = () => stretches[Math.floor(Math.random() * stretches.length)];
+    if (stiffness === 1 || stiffness === 2) {
+      const groups = [["快步走", randStretch()], ["转身摸臀", randStretch()]];
+      return groups[Math.floor(Math.random() * groups.length)];
+    }
+    const pairs = [
+      ["后踢臀部", "拉伸大腿后侧"],
+      ["臀部找椅", "拉伸臀部"],
+      ["站立提踵", "拉伸大腿后侧"],
+      ["螃蟹步", "拉伸臀部"],
+      ["提膝碰肘", "拉伸躯干"],
+    ];
+    return pairs[Math.floor(Math.random() * pairs.length)];
+  });
+  const label = (stiffness === 1 || stiffness === 2) ? "拉伸放松" : "强化训练";
+  const [playerName, setPlayerName] = useState<string | null>(null);
+  return (
+    <>
+      {playerName && <GifPlayerModal name={playerName} onClose={() => setPlayerName(null)} />}
+      <div className="rounded-2xl bg-white border border-[#BFDBFE] overflow-hidden">
+        <div className="px-4 py-2.5 bg-[#EFF6FF]">
+          <div className="text-sm font-bold text-[#1A7AC7]">🏃 今日训练推荐</div>
+          <div className="text-xs text-[#6B7280] mt-0.5">{label}</div>
+        </div>
+        <div className="divide-y divide-[#EFF6FF]">
+          {exercises.map((name, i) => {
+            const ex = ALL_EXERCISES[name];
+            return (
+              <div key={name} className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="w-5 h-5 rounded-full bg-[#DBEAFE] text-[#1E40AF] text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <button
+                      onClick={() => setPlayerName(name)}
+                      className="text-sm font-semibold text-[#1A7AC7] underline underline-offset-2 cursor-pointer bg-transparent border-none p-0 text-left">
+                      {name}
+                    </button>
+                    <div className="text-xs text-[#9CA3AF]">{ex?.sets}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPlayerName(name)}
+                  className="text-xs text-[#1A7AC7] bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg px-2.5 py-1 cursor-pointer flex-shrink-0">
+                  ▶ 演示
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </>

@@ -64,17 +64,17 @@ function Step1({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
         {/* Content fills remaining top-half */}
         <div style={{ flex: 1, padding: "14px 20px 0", overflow: "hidden" }}>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 6, lineHeight: 1.3 }}>
-            欢迎来到您的专属膝盖管家
+            欢迎来到光年瑞康
           </h1>
           <p style={{ fontSize: 13, color: COLORS.neutralGray, lineHeight: 1.5, marginBottom: 12 }}>
-            科学评估、智能训练、专家陪伴&nbsp;&nbsp;每天几分钟，让膝盖越来越好
+            科学评估、个性训练、AI陪伴&nbsp;&nbsp;每天几分钟，让膝关节越来越好
           </p>
 
           <div style={{ display: "flex", gap: 8 }}>
             {[
-              { icon: "🧠", title: "动态 AI 引擎", desc: "实时分析·持续优化" },
-              { icon: "📈", title: "量化康养进度", desc: "数据可视·清晰追踪" },
-              { icon: "⚡", title: "每日智能调参", desc: "强度自适应·精准加载" },
+              { icon: "🧠", title: "AI智能引擎", desc: "实时分析·个性优化" },
+              { icon: "📈", title: "进度量化", desc: "数据可视·追踪清晰" },
+              { icon: "⚡", title: "自适应强度", desc: "每日调参·精准加载" },
             ].map(({ icon, title, desc }) => (
               <div key={title} style={{
                 flex: 1,
@@ -130,10 +130,10 @@ function Step2({
   onSkip: () => void;
 }) {
   const features = [
-    { title: "每日评估", desc: "追踪你的膝盖状态变化" },
-    { title: "训练提醒", desc: "按时推送，不落一次" },
-    { title: "强度优化", desc: "实时调整训练方案" },
-    { title: "科普推送", desc: "专家知识随时获取" },
+    { title: "每日了解", desc: "追踪膝盖每天的变化" },
+    { title: "智能提醒", desc: "该康养时主动提醒" },
+    { title: "实时调参", desc: "根据你的反馈调强度" },
+    { title: "知识推送", desc: "康养知识每天学一点" },
   ];
 
   return (
@@ -158,10 +158,10 @@ function Step2({
           </svg>
         </div>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, textAlign: "center", marginBottom: 6 }}>
-          开启智能模式
+          开启AI陪伴模式
         </h2>
         <p style={{ fontSize: 14, color: COLORS.neutralGray, textAlign: "center", lineHeight: 1.6 }}>
-          让小瑞全程陪伴你的康养之旅
+          小瑞会全程了解你的康养需求
         </p>
       </div>
 
@@ -206,10 +206,10 @@ function Step2({
         }}>
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.deepNavy }}>
-              智能模式
+               智能陪伴
             </div>
             <div style={{ fontSize: 12, color: COLORS.neutralGray, marginTop: 2 }}>
-              {smartMode ? "小瑞将全程主动引导你" : "开启后小瑞将主动引导你"}
+               {smartMode ? "小瑞会主动为你推荐和调参" : "开启后小瑞会为你推荐"}
             </div>
           </div>
           <button onClick={() => setSmartMode(!smartMode)} style={{
@@ -238,7 +238,7 @@ function Step2({
           border: "none", cursor: "pointer",
           boxShadow: DESIGN.shadow.button,
         }}>
-          开启智能模式
+         开启AI陪伴 →
         </button>
         <button onClick={onSkip} style={{
           width: "100%", marginTop: 10, padding: "12px", background: "none",
@@ -261,6 +261,30 @@ function Step3({
   onQuick: () => void;
   onSkip: () => void;
 }) {
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
+
+  const shareTable = async () => {
+    const content = `康养分享表
+姓名：________
+性别：________
+年龄：________
+膝盖主要不适动作：________
+预计训练目标：恢复灵活/减轻疼痛
+推荐开始方式：先做评估 / 直接训练
+备注：请大家帮我参考建议。`;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(content);
+        setCopyStatus("copied");
+      } else {
+        throw new Error("Clipboard unavailable");
+      }
+    } catch (error) {
+      window.prompt("请复制以下内容并粘贴到群聊：", content);
+      setCopyStatus("failed");
+    }
+  };
+
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white" }}>
       {/* Header */}
@@ -275,9 +299,9 @@ function Step3({
             <path d="M8 16l6 6 10-10" stroke={COLORS.brandBlue} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 6 }}>准备好了吗？</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.deepNavy, marginBottom: 6 }}>准备开始了吗？</h2>
         <p style={{ fontSize: 14, color: COLORS.neutralGray, lineHeight: 1.6 }}>
-          选择你想要的开始方式
+          选择适合你的方式开始使用
         </p>
       </div>
 
@@ -300,8 +324,8 @@ function Step3({
                 display: "flex", alignItems: "center", justifyContent: "center"
               }}>
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <rect x="3" y="3" width="12" height="12" rx="2" stroke="white" strokeWidth="2"/>
-                  <path d="M6 9h6M9 6v6" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="9" cy="5" r="2" stroke="white" strokeWidth="1.5"/>
+                  <path d="M5 11c0-2 2-3 4-3s4 1 4 3v4H5v-4z" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </div>
               <div>
@@ -311,7 +335,7 @@ function Step3({
               </div>
             </div>
             <div style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", lineHeight: 1.5 }}>
-              7 个问题 · 约 2 分钟<br/>获取你的专属 PAD 训练方案
+              7个问题 · 2分钟左右<br/>获得你的个性化训练方案
             </div>
           </div>
         </button>
@@ -330,14 +354,14 @@ function Step3({
               flexShrink: 0
             }}>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M6 3l9 6-9 6V3z" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 9l3 3 9-9" stroke={COLORS.brandBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.deepNavy, marginBottom: 6 }}>直接开启设备</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.deepNavy, marginBottom: 6 }}>直接开始使用</div>
               <div style={{ fontSize: 13, color: COLORS.neutralGray, lineHeight: 1.5 }}>
-                跳过评估，立刻体验训练<br/>
-                完成评估后可获得个性化方案
+                跳过评估，立即开始体验<br/>
+                完成评估后可以获得更个性化的方案
               </div>
             </div>
           </div>
@@ -349,17 +373,34 @@ function Step3({
           borderRadius: DESIGN.radius.card, padding: "14px 16px",
           fontSize: 13, color: COLORS.deepNavy, lineHeight: 1.5,
         }}>
-          <div style={{ fontWeight: 600, marginBottom: 4, color: COLORS.brandBlue }}>推荐先评估</div>
-          <div>效果提升 40%。评估结果将永久保存，随时可查。</div>
+          <div style={{ fontWeight: 600, marginBottom: 4, color: COLORS.brandBlue }}>💡 为什么先评估</div>
+          <div>精准了解你的膝关节状况，后续强度调参能提升40%的效果</div>
         </div>
       </div>
 
-      <div style={{ padding: "16px 20px 36px" }}>
+      <div style={{ padding: "16px 20px 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+        <button onClick={shareTable} style={{
+          width: "100%", background: COLORS.brandBlue, borderRadius: DESIGN.radius.button,
+          color: "white", fontWeight: 600, fontSize: 15, border: "none", cursor: "pointer",
+          padding: "12px 0",
+        }}>
+          📤 分享康养表格到群
+        </button>
+        {copyStatus === "copied" && (
+          <div style={{ color: COLORS.successGreen, fontSize: 13, textAlign: "center" }}>
+            ✓ 已复制到剪贴板，可以粘贴到群聊了
+          </div>
+        )}
+        {copyStatus === "failed" && (
+          <div style={{ color: COLORS.riskRed, fontSize: 13, textAlign: "center" }}>
+            未能自动复制，请手动复制文本到群聊
+          </div>
+        )}
         <button onClick={onSkip} style={{
           width: "100%", background: "none", border: "none",
           color: COLORS.neutralGray, fontSize: 14, cursor: "pointer", padding: "8px", fontWeight: 500,
         }}>
-          跳过，稍后再说
+          ⏭️ 暂不分享，继续
         </button>
         <div style={{ marginTop: 12 }}><ProgressDots current={2} total={3}/></div>
       </div>

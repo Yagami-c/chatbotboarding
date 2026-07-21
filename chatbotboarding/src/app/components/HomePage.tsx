@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LEVEL_PARAMS, LEVELS, LEVEL_DESCS, getLevelName, formatTime, DeviceState } from "../types";
 import { NotificationsPage } from "./NotificationsPage";
 import { ManualAssessment, AssessmentResult as ManualAssessmentResult } from "./ManualAssessment";
 import { COLORS, DESIGN } from "../design-system";
+import { TrainingRecommendCard } from "./shared";
 
 export interface AssessmentResult {
   name: string; gender: string; ageRange: string;
@@ -18,11 +19,13 @@ interface HomePageProps {
   onAssessmentDone: (r: AssessmentResult) => void;
   onDeviceStart: (level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => void;
   onDeviceMinimize: () => void;
+  onConfigureBluetoothClick?: () => void;
   deviceState: DeviceState;
   hwLevel: number; hwRemaining: number; hwTotal: number;
   hwCycle: number; hwTotalCycles: number;
   onTogglePause: () => void; onStop: () => void; onReset: () => void;
   userGender?: string; userAgeRange?: string;
+  stiffness?: number | null;
 }
 
 function getGreeting() {
@@ -92,12 +95,15 @@ function FlowHeader({ step, total, title, onBack, backDisabled }: {
 
 // ── Device Flow ────────────────────────────────────────────────────────────────
 
-function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles, onTogglePause, onStop, onReset, presetLevel }: {
+const STOP_REASONS_HOME = ["忘记了","没时间","效果不明显","使用不舒服","其他"];
+
+function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles, onTogglePause, onStop, onReset, presetLevel, stiffness }: {
   onStart: (level: number, custom?: {pressure:number;work:number;rest:number;cycles:number}) => void; onMinimize: () => void; onCancel: () => void;
   deviceState: DeviceState; hwLevel: number; hwRemaining: number; hwTotal: number;
   hwCycle: number; hwTotalCycles: number;
   onTogglePause: () => void; onStop: () => void; onReset: () => void;
   presetLevel?: number | null;
+  stiffness?: number | null;
 }) {
   const [step, setStep] = useState(0);
   const [level, setLevel] = useState(presetLevel || 2);
@@ -106,6 +112,9 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
   const [customWork, setCustomWork] = useState(30);
   const [customRest, setCustomRest] = useState(10);
   const [customCycles, setCustomCycles] = useState(5);
+  const [showStopModal, setShowStopModal] = useState(false);
+  const [stopReasons, setStopReasons] = useState<Record<string,boolean>>({});
+  const [earlyStopped, setEarlyStopped] = useState(false);
   const prm = customMode
     ? { pressure: customPressure, work: customWork, rest: customRest, cycles: customCycles }
     : LEVEL_PARAMS[level - 1] || LEVEL_PARAMS[1];
@@ -116,6 +125,15 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
   const TITLES = ["选择强度", "穿戴准备", "使用中"];
   const running = deviceState === "running" || deviceState === "paused";
   const done = deviceState === "stopped";
+
+  const prevDeviceStateRef = useRef<DeviceState>("idle");
+  useEffect(() => {
+    if (deviceState === "stopped" && prevDeviceStateRef.current === "running") {
+      const isCompleted = hwRemaining === 0 && hwTotal > 0;
+      if (!isCompleted) { setEarlyStopped(true); setShowStopModal(true); }
+    }
+    prevDeviceStateRef.current = deviceState;
+  }, [deviceState, hwRemaining, hwTotal]);
 
   const handleBack = () => {
     if (step === 0) onCancel();
@@ -285,15 +303,18 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           )}
           {done && (
             <>
-              <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-3.5 text-sm text-[#1E3A5F]">
-                <div className="font-semibold mb-1">使用完成！</div>
-                <div className="text-xs">可到「训练」tab 跟练配套运动，或去「发现」tab 了解科普知识。</div>
-              </div>
+              {!earlyStopped && (
+                <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-2xl p-3.5 text-sm text-[#1E3A5F]">
+                  <div className="font-semibold mb-1">🎉 使用完成！</div>
+                  <div className="text-xs">很棒！坚持是最好的康复方式。</div>
+                </div>
+              )}
+              <TrainingRecommendCard stiffness={stiffness} />
               <div className="flex gap-2">
-                <button onClick={() => { onCancel(); /* TODO: switch to training tab */ }} style={{ minHeight: 44, borderColor: '#BAE6FD', color: COLORS.brandBlue }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] font-semibold text-sm border cursor-pointer active:bg-[#E0F2FE] transition-all">
+                <button onClick={onCancel} style={{ minHeight: 44, borderColor: '#BAE6FD', color: COLORS.brandBlue }} className="flex-1 py-3 rounded-full bg-[#F0F9FF] font-semibold text-sm border cursor-pointer active:bg-[#E0F2FE] transition-all">
                   训练
                 </button>
-                <button onClick={() => { onCancel(); /* TODO: switch to discover tab */ }} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
+                <button onClick={onCancel} style={{ minHeight: 44 }} className="flex-1 py-3 rounded-full bg-[#F0FDF4] text-[#16A34A] font-semibold text-sm border border-[#BBF7D0] cursor-pointer active:bg-[#DCFCE7] transition-all">
                   科普
                 </button>
               </div>
@@ -304,6 +325,30 @@ function DeviceFlow({ onStart, onMinimize, onCancel, deviceState, hwLevel, hwRem
           )}
         </>}
       </div>
+
+      {showStopModal && (
+        <div style={{position:"absolute",inset:0,zIndex:800,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end",borderRadius:28}}>
+          <div className="bg-white w-full rounded-t-3xl p-6">
+            <div className="text-lg font-bold text-[#1a202c] mb-1">⏹ 设备已提前结束</div>
+            <p className="text-sm text-[#4a5568] mb-4">今天没有完成预定使用，主要原因是什么？（可多选）</p>
+            {STOP_REASONS_HOME.map(r=>(
+              <label key={r} className="flex items-center gap-2 py-2 cursor-pointer text-sm text-[#2d3748]">
+                <input type="checkbox" checked={!!stopReasons[r]}
+                  onChange={e=>setStopReasons(p=>({...p,[r]:e.target.checked}))}
+                  className="accent-[#1A7AC7]"/>
+                {r}
+              </label>
+            ))}
+            <div className="bg-[#EFF6FF] border border-[#93C5FD] rounded-xl p-3 my-3 text-sm text-[#1E3A5F]">
+              💪 坚持就是赢！明天继续，你可以的～
+            </div>
+            <button onClick={() => { setShowStopModal(false); setStopReasons({}); }}
+              className="w-full py-3 rounded-full bg-[#1A7AC7] text-white font-bold text-sm border-0 cursor-pointer">
+              确定
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -659,7 +704,7 @@ export function HomePage({
   onAssessmentDone, onDeviceStart, onDeviceMinimize,
   deviceState, hwLevel, hwRemaining, hwTotal, hwCycle, hwTotalCycles,
   onTogglePause, onStop, onReset,
-  userGender, userAgeRange,
+  userGender, userAgeRange, stiffness,
 }: HomePageProps) {
   const [subView, setSubView] = useState<"main"|"assessment"|"device"|"notifications">("main");
   const [presetLevel, setPresetLevel] = useState<number|null>(null);
@@ -690,7 +735,7 @@ export function HomePage({
       deviceState={deviceState} hwLevel={hwLevel} hwRemaining={hwRemaining}
       hwTotal={hwTotal} hwCycle={hwCycle} hwTotalCycles={hwTotalCycles}
       onTogglePause={onTogglePause} onStop={onStop} onReset={onReset}
-      presetLevel={presetLevel}
+      presetLevel={presetLevel} stiffness={stiffness}
     />;
   }
 
